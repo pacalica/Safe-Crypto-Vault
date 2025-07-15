@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Settings – Safe Crypto Vault</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" href="icons/icon-192.png" />
+</head>
+<body class="main-body" style="background-image: url('images/robot-bg.jpg');">
+
+  <div class="sidebar">
+    <h2>🛡️ Vault</h2>
+    <ul>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="open-deposit.html">Open deposit</a></li>
+      <li><a href="withdraw.html">Withdraw</a></li>
+      <li><a href="history.html">History</a></li>
+      <li><a href="team.html">My team</a></li>
+      <li><a href="settings.html" class="active">Settings</a></li>
+      <li><a href="security.html">Security</a></li>
+      <li><a href="admin.html">Admin</a></li>
+      <li><a href="login.html" onclick="logout()">Exit</a></li>
+    </ul>
+  </div>
+
+  <div class="main-content">
+    <h1>Referral Link</h1>
+
+    <div class="card">
+      <p>Your referral link:</p>
+      <input type="text" id="refLink" readonly />
+      <button onclick="copyReferral()">Copy Link</button>
+      <p id="copyMsg" style="color: lime;"></p>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const user = JSON.parse(localStorage.getItem("vault_user"));
+      if (!user || !user.wallet) {
+        document.getElementById("refLink").value = "Please connect wallet first.";
+        return;
+      }
+      const refLink = `${window.location.origin}/?ref=${user.wallet}`;
+      document.getElementById("refLink").value = refLink;
+    });
+
+    function copyReferral() {
+      const refInput = document.getElementById("refLink");
+      refInput.select();
+      refInput.setSelectionRange(0, 99999);
+      document.execCommand("copy");
+      document.getElementById("copyMsg").innerText = "Referral link copied!";
+    }
+
+    function logout() {
+      localStorage.clear();
+    }
+  </script>
+</body>
+</html>
