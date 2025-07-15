@@ -3,96 +3,130 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin – Safe Crypto Vault</title>
-  <link rel="stylesheet" href="css/styles.css" />
-  <link rel="icon" href="icons/icon-192.png" />
+  <title>Admin Panel - Safe Crypto Vault</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #000;
+      color: #fff;
+      padding: 20px;
+    }
+    h1 {
+      color: cyan;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #444;
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #111;
+    }
+    .btn {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      color: #fff;
+    }
+    .pending { background-color: dodgerblue; }
+    .completed { background-color: green; }
+    .rejected { background-color: crimson; }
+    .copy-btn {
+      background: #555;
+      padding: 4px 8px;
+      border: none;
+      color: white;
+      cursor: pointer;
+      margin-left: 5px;
+    }
+    #exportBtn {
+      background: orange;
+      margin-top: 15px;
+    }
+  </style>
 </head>
-<body class="main-body" style="background-image: url('images/robot-bg.jpg');">
+<body>
+  <h1>Admin Panel - Withdraw Requests</h1>
+  <table id="withdrawTable">
+    <thead>
+      <tr>
+        <th>User</th>
+        <th>Email</th>
+        <th>Amount</th>
+        <th>Wallet</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
-  <div class="sidebar">
-    <h2>🛡️ Vault</h2>
-    <ul>
-      <li><a href="dashboard.html">Dashboard</a></li>
-      <li><a href="open-deposit.html">Open deposit</a></li>
-      <li><a href="withdraw.html">Withdraw</a></li>
-      <li><a href="history.html">History</a></li>
-      <li><a href="team.html">My team</a></li>
-      <li><a href="settings.html">Settings</a></li>
-      <li><a href="security.html">Security</a></li>
-      <li><a href="admin.html" class="active">Admin</a></li>
-      <li><a href="login.html" onclick="logout()">Exit</a></li>
-    </ul>
-  </div>
-
-  <div class="main-content">
-    <h1>Admin Panel</h1>
-
-    <div class="card">
-      <h3>All Deposits</h3>
-      <div id="depositsList"></div>
-    </div>
-
-    <div class="card">
-      <h3>Withdraw Requests</h3>
-      <div id="withdrawList"></div>
-    </div>
-
-    <div class="card">
-      <h3>Referral Stats</h3>
-      <div id="refStats"></div>
-    </div>
-  </div>
+  <button id="exportBtn" class="btn">⬇️ Export CSV</button>
 
   <script>
-    // Only allow if wallet is admin
-    const ADMIN_WALLET = "0x124377FCe14439248a4959ce528314aA3A897321"; // Your address
+    const tableBody = document.querySelector('#withdrawTable tbody');
+    let withdrawals = JSON.parse(localStorage.getItem('withdrawals')) || [];
 
-    const user = JSON.parse(localStorage.getItem("vault_user") || "{}");
-    if (!user.wallet || user.wallet.toLowerCase() !== ADMIN_WALLET.toLowerCase()) {
-      alert("Access denied. Admins only.");
-      location.href = "dashboard.html";
+    function renderTable() {
+      tableBody.innerHTML = '';
+      withdrawals.forEach((entry, index) => {
+        const row = document.createElement('tr');
+
+        row.innerHTML = `
+          <td>${entry.username}</td>
+          <td>${entry.email}</td>
+          <td>${entry.amount} USDT</td>
+          <td>
+            ${entry.wallet || '-'}
+            <button class="copy-btn" onclick="copyToClipboard('${entry.wallet}')">📋</button>
+          </td>
+          <td><strong>${entry.status}</strong></td>
+          <td>
+            <button class="btn pending" onclick="updateStatus(${index}, 'Pending')">Pending</button>
+            <button class="btn completed" onclick="updateStatus(${index}, 'Completed')">Completed</button>
+            <button class="btn rejected" onclick="updateStatus(${index}, 'Rejected')">Rejected</button>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
     }
 
-    const deposits = JSON.parse(localStorage.getItem("vault_deposits") || "[]");
-    const withdrawals = JSON.parse(localStorage.getItem("vault_withdrawals") || "[]");
-
-    const allUsers = new Map();
-    deposits.forEach(d => {
-      if (!allUsers.has(d.wallet)) {
-        allUsers.set(d.wallet, { total: 0, count: 0 });
-      }
-      allUsers.get(d.wallet).total += parseFloat(d.amount);
-      allUsers.get(d.wallet).count++;
-    });
-
-    document.getElementById("depositsList").innerHTML = deposits.length === 0
-      ? "<p>No deposits found.</p>"
-      : deposits.map(d => `
-          <div class="entry">
-            <strong>${d.wallet}</strong> – ${d.amount} USDT (${d.plan} plan) <br>
-            Date: ${new Date(d.timestamp).toLocaleString()}
-          </div>
-        `).join("");
-
-    document.getElementById("withdrawList").innerHTML = withdrawals.length === 0
-      ? "<p>No withdraw requests.</p>"
-      : withdrawals.map(w => `
-          <div class="entry">
-            <strong>${w.wallet}</strong> – ${w.amount} USDT <br>
-            Status: <b>${w.status}</b> <br>
-            Date: ${new Date(w.timestamp).toLocaleString()}
-          </div>
-        `).join("");
-
-    document.getElementById("refStats").innerHTML = [...allUsers.entries()].map(([wallet, info]) => `
-      <div class="entry">
-        ${wallet} – ${info.total.toFixed(2)} USDT in ${info.count} deposits
-      </div>
-    `).join("");
-
-    function logout() {
-      localStorage.clear();
+    function updateStatus(index, status) {
+      withdrawals[index].status = status;
+      localStorage.setItem('withdrawals', JSON.stringify(withdrawals));
+      renderTable();
     }
+
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Wallet address copied!");
+      });
+    }
+
+    function exportToCSV() {
+      let csvContent = "data:text/csv;charset=utf-8,Username,Email,Amount,Wallet,Status\n";
+      withdrawals.forEach(entry => {
+        csvContent += `${entry.username},${entry.email},${entry.amount},${entry.wallet || '-'},${entry.status}\n`;
+      });
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "withdrawals.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    document.getElementById('exportBtn').addEventListener('click', exportToCSV);
+
+    renderTable();
   </script>
 </body>
 </html>
