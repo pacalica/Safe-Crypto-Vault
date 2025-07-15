@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Open Deposit – Safe Crypto Vault</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" href="icons/icon-192.png" />
+</head>
+<body class="main-body" style="background-image: url('images/robot-bg.jpg');">
+
+  <div class="sidebar">
+    <h2>🛡️ Vault</h2>
+    <ul>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="open-deposit.html" class="active">Open deposit</a></li>
+      <li><a href="withdraw.html">Withdraw</a></li>
+      <li><a href="history.html">History</a></li>
+      <li><a href="team.html">My team</a></li>
+      <li><a href="settings.html">Settings</a></li>
+      <li><a href="security.html">Security</a></li>
+      <li><a href="admin.html">Admin</a></li>
+      <li><a href="login.html" onclick="logout()">Exit</a></li>
+    </ul>
+  </div>
+
+  <div class="main-content">
+    <h1>Make a Deposit</h1>
+
+    <div class="card">
+      <h3>Send BNB (BEP20) to:</h3>
+      <input type="text" id="depositAddress" value="0x124377FCe14439248a4959ce528314aA3A897321" readonly />
+      <button onclick="copyAddress()">Copy Address</button>
+      <div class="qr">
+        <img src="images/qr.png" alt="QR Code" width="160" />
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Enter the amount you sent:</h3>
+      <input type="number" id="amountSent" placeholder="Amount in BNB" />
+      <button onclick="confirmDeposit()">I've sent deposit</button>
+    </div>
+  </div>
+
+  <script src="js/deposit.js"></script>
+</body>
+</html>
