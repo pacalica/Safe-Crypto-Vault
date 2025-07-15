@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>History – Safe Crypto Vault</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" href="icons/icon-192.png" />
+</head>
+<body class="main-body" style="background-image: url('images/robot-bg.jpg');">
+
+  <div class="sidebar">
+    <h2>🛡️ Vault</h2>
+    <ul>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="open-deposit.html">Open deposit</a></li>
+      <li><a href="withdraw.html">Withdraw</a></li>
+      <li><a href="history.html" class="active">History</a></li>
+      <li><a href="team.html">My team</a></li>
+      <li><a href="settings.html">Settings</a></li>
+      <li><a href="security.html">Security</a></li>
+      <li><a href="admin.html">Admin</a></li>
+      <li><a href="login.html" onclick="logout()">Exit</a></li>
+    </ul>
+  </div>
+
+  <div class="main-content">
+    <h1>Transaction History</h1>
+
+    <table class="card">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Amount (BNB)</th>
+          <th>Date</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="historyTable">
+        <!-- Entries will be added dynamically -->
+      </tbody>
+    </table>
+  </div>
+
+  <script src="js/history.js"></script>
+</body>
+</html>
