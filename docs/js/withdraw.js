@@ -1,45 +1,57 @@
-document.addEventListener("DOMContentLoaded", function () {
-  const history = JSON.parse(localStorage.getItem("vault_history") || "[]");
+// withdraw.js
 
-  const hasPending = history.some(tx => tx.type === "withdraw" && tx.status === "pending");
+document.addEventListener("DOMContentLoaded", () => {
+  const emailSpan = document.getElementById("email");
+  const usernameSpan = document.getElementById("username");
+  const form = document.getElementById("withdraw-form");
+  const messageBox = document.getElementById("message");
 
-  if (hasPending) {
-    document.getElementById("withdrawForm").classList.add("hidden");
-    document.getElementById("pendingMessage").classList.remove("hidden");
-  }
-});
+  // Afișare user info
+  const email = localStorage.getItem("email") || "-";
+  const username = localStorage.getItem("username") || "-";
+  emailSpan.innerText = email;
+  usernameSpan.innerText = username;
 
-function submitWithdraw() {
-  const amount = parseFloat(document.getElementById("withdrawAmount").value);
+  // Verificare dacă există o cerere pending
+  const existingRequest = JSON.parse(localStorage.getItem("withdrawRequest"));
 
-  if (isNaN(amount) || amount <= 0) {
-    alert("Please enter a valid amount.");
+  if (existingRequest && existingRequest.status === "pending") {
+    messageBox.innerText = "❌ Denied. You have a withdrawal request in pending.";
+    form.style.display = "none";
     return;
   }
 
-  const history = JSON.parse(localStorage.getItem("vault_history") || "[]");
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
 
-  // Verificăm dacă există deja o cerere pending
-  const hasPending = history.some(tx => tx.type === "withdraw" && tx.status === "pending");
-  if (hasPending) {
-    alert("You already have a pending withdrawal request.");
-    return;
-  }
+    const amount = parseFloat(document.getElementById("amount").value);
+    const wallet = document.getElementById("wallet").value;
+    const plan = document.getElementById("plan").value;
 
-  // Salvăm cererea în istoric
-  history.push({
-    type: "withdraw",
-    amount: amount,
-    date: new Date().toISOString(),
-    status: "pending"
+    if (!amount || !wallet) {
+      messageBox.innerText = "❗Please fill in all fields.";
+      return;
+    }
+
+    const request = {
+      email,
+      username,
+      amount,
+      wallet,
+      plan,
+      date: new Date().toLocaleString(),
+      status: "pending",
+    };
+
+    // Salvare în withdrawRequest
+    localStorage.setItem("withdrawRequest", JSON.stringify(request));
+
+    // Salvare în istoric
+    const history = JSON.parse(localStorage.getItem("withdrawHistory")) || [];
+    history.push(request);
+    localStorage.setItem("withdrawHistory", JSON.stringify(history));
+
+    messageBox.innerText = "✅ Withdrawal request submitted.";
+    form.style.display = "none";
   });
-
-  localStorage.setItem("vault_history", JSON.stringify(history));
-
-  alert("Withdrawal request submitted!");
-  window.location.href = "history.html";
-}
-
-function logout() {
-  localStorage.clear();
-}
+});
