@@ -3,45 +3,110 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>History – Safe Crypto Vault</title>
-  <link rel="stylesheet" href="css/styles.css" />
-  <link rel="icon" href="icons/icon-192.png" />
+  <title>History - Safe Crypto Vault</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    .history-table th,
+    .history-table td {
+      border: 1px solid cyan;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .history-table th {
+      background: #111;
+      color: cyan;
+    }
+
+    .status {
+      font-weight: bold;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    .pending {
+      color: orange;
+    }
+
+    .successful {
+      color: lime;
+    }
+
+    .rejected {
+      color: red;
+    }
+
+    .no-data {
+      margin-top: 20px;
+      background: #111;
+      padding: 15px;
+      border-left: 4px solid cyan;
+    }
+  </style>
 </head>
-<body class="main-body" style="background-image: url('images/robot-bg.jpg');">
+<body>
+  <div class="main-container">
+    <div class="sidebar">
+      <h2>Vault Menu</h2>
+      <ul>
+        <li onclick="goTo('dashboard.html')">Dashboard</li>
+        <li onclick="goTo('deposit.html')">Open Deposit</li>
+        <li onclick="goTo('withdraw.html')">Withdraw</li>
+        <li onclick="goTo('history.html')">History</li>
+        <li onclick="goTo('team.html')">My Team</li>
+        <li onclick="goTo('affiliate.html')">Affiliate Link</li>
+        <li onclick="goTo('settings.html')">Settings</li>
+        <li onclick="goTo('security.html')">Security</li>
+        <li onclick="logout()">Exit</li>
+      </ul>
+    </div>
 
-  <div class="sidebar">
-    <h2>🛡️ Vault</h2>
-    <ul>
-      <li><a href="dashboard.html">Dashboard</a></li>
-      <li><a href="open-deposit.html">Open deposit</a></li>
-      <li><a href="withdraw.html">Withdraw</a></li>
-      <li><a href="history.html" class="active">History</a></li>
-      <li><a href="team.html">My team</a></li>
-      <li><a href="settings.html">Settings</a></li>
-      <li><a href="security.html">Security</a></li>
-      <li><a href="admin.html">Admin</a></li>
-      <li><a href="login.html" onclick="logout()">Exit</a></li>
-    </ul>
+    <div class="content">
+      <h1>Withdraw History</h1>
+
+      <div id="historyContainer"></div>
+    </div>
   </div>
 
-  <div class="main-content">
-    <h1>Transaction History</h1>
+  <script src="js/script.js"></script>
+  <script>
+    const historyContainer = document.getElementById('historyContainer');
+    const history = JSON.parse(localStorage.getItem('withdrawHistory') || '[]');
 
-    <table class="card">
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Amount (BNB)</th>
-          <th>Date</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody id="historyTable">
-        <!-- Entries will be added dynamically -->
-      </tbody>
-    </table>
-  </div>
+    if (history.length === 0) {
+      historyContainer.innerHTML = `<div class="no-data">You have no withdrawal history.</div>`;
+    } else {
+      let html = `
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Amount (USDT)</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
 
-  <script src="js/history.js"></script>
+      history.reverse().forEach(item => {
+        html += `
+          <tr>
+            <td>${item.date}</td>
+            <td>${item.amount}</td>
+            <td><span class="status ${item.status}">${item.status}</span></td>
+          </tr>
+        `;
+      });
+
+      html += '</tbody></table>';
+      historyContainer.innerHTML = html;
+    }
+  </script>
 </body>
 </html>
