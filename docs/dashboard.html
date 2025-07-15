@@ -3,130 +3,122 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#00ffff" />
   <title>Safe Crypto Vault - Dashboard</title>
-  <link rel="stylesheet" href="css/styles.css" />
-  <link rel="manifest" href="manifest.json" />
-  <link rel="icon" type="image/png" href="icons/icon-192.png"/>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
+      padding: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: url('img/robot-cyberpunk-bg.jpg') no-repeat center center fixed;
-      background-size: cover;
-      color: #fff;
+      background: linear-gradient(to bottom right, #0ff, #8000ff);
+      color: white;
       display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      overflow-x: hidden;
     }
-    .sidebar {
-      width: 240px;
-      background: rgba(0, 0, 0, 0.85);
-      padding: 30px 20px;
-      height: 100vh;
-      position: fixed;
-      top: 0;
-      left: 0;
-      box-shadow: 2px 0 10px #00ffff55;
-    }
-    .sidebar h2 {
-      color: #00ffff;
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    .sidebar a {
-      display: block;
-      color: #fff;
-      padding: 10px 0;
-      text-decoration: none;
-      transition: 0.3s;
-    }
-    .sidebar a:hover {
-      color: #00ffff;
-    }
-    .content {
-      margin-left: 260px;
-      padding: 40px;
-      flex: 1;
-    }
-    .dashboard-box {
-      background: rgba(0, 0, 0, 0.7);
-      border: 1px solid #00ffff55;
-      border-radius: 16px;
-      padding: 30px;
-      max-width: 800px;
-      margin: auto;
-      box-shadow: 0 0 20px #00ffff88;
-    }
-    .dashboard-box h1 {
-      color: #00ffff;
-      margin-bottom: 20px;
-    }
-    .dashboard-box p {
-      margin: 10px 0;
-      font-size: 18px;
-    }
-    .referral {
-      background: #111;
-      padding: 15px;
-      border-radius: 10px;
-      word-break: break-all;
+
+    .container {
+      width: 100%;
+      max-width: 420px;
+      padding: 20px;
       margin-top: 20px;
+      background-color: rgba(0, 0, 0, 0.65);
+      border-radius: 15px;
+      box-shadow: 0 0 10px cyan;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.6rem;
+      margin-bottom: 1rem;
+    }
+
+    .stat {
+      background: rgba(255, 255, 255, 0.1);
+      margin: 10px 0;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .label {
+      font-weight: bold;
+    }
+
+    @media (max-height: 600px) {
+      .container {
+        margin-top: 10px;
+        padding: 15px;
+      }
+
+      h1 {
+        font-size: 1.3rem;
+      }
+
+      .stat {
+        font-size: 0.95rem;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="sidebar">
-    <h2>Vault Menu</h2>
-    <a href="dashboard.html">Dashboard</a>
-    <a href="deposit.html">Open Deposit</a>
-    <a href="withdraw.html">Withdraw</a>
-    <a href="history.html">History</a>
-    <a href="team.html">My Team</a>
-    <a href="#" onclick="copyReferral()">Affiliate Link</a>
-    <a href="settings.html">Settings</a>
-    <a href="security.html">Security</a>
-    <a href="#" onclick="logout()">Exit</a>
-  </div>
+  <div class="container">
+    <h1>Dashboard</h1>
 
-  <div class="content">
-    <div class="dashboard-box">
-      <h1>Welcome to Safe Crypto Vault</h1>
-      <p><strong>User:</strong> <span id="username"></span></p>
-      <p><strong>Email:</strong> <span id="email"></span></p>
-      <p><strong>Total Deposited:</strong> <span id="totalDeposited">0 USDT</span></p>
+    <div class="stat">
+      <span class="label">Total Invested:</span>
+      <span id="totalInvested">0 USDT</span>
+    </div>
 
-      <div class="referral">
-        <strong>Your referral link:</strong><br>
-        <code id="referralLink"></code>
-      </div>
+    <div class="stat">
+      <span class="label">Active Deposits:</span>
+      <span id="activeDeposits">0</span>
+    </div>
+
+    <div class="stat">
+      <span class="label">Referral Earnings:</span>
+      <span id="refEarnings">0 USDT</span>
+    </div>
+
+    <div class="stat">
+      <span class="label">Last Deposit:</span>
+      <span id="lastDeposit">N/A</span>
     </div>
   </div>
 
   <script>
-    const email = localStorage.getItem("vaultEmail") || "-";
-    const username = localStorage.getItem("vaultUsername") || "-";
-    const referral = localStorage.getItem("referral") || "";
-    const wallet = localStorage.getItem("wallet") || "";
-    const total = localStorage.getItem("totalDeposited") || "0";
+    function loadDashboard() {
+      const deposits = JSON.parse(localStorage.getItem("deposits") || "[]");
+      let total = 0;
+      let last = "N/A";
 
-    document.getElementById("username").textContent = username;
-    document.getElementById("email").textContent = email;
-    document.getElementById("totalDeposited").textContent = `${total} USDT`;
+      if (deposits.length > 0) {
+        deposits.forEach(d => {
+          total += d.amount;
+        });
 
-    const baseUrl = window.location.origin + window.location.pathname.replace("dashboard.html", "index.html");
-    const referralLink = `${baseUrl}?ref=${wallet}`;
-    document.getElementById("referralLink").textContent = referralLink;
+        last = new Date(deposits[deposits.length - 1].timestamp).toLocaleString();
+      }
 
-    function copyReferral() {
-      navigator.clipboard.writeText(referralLink)
-        .then(() => alert("Referral link copied!"))
-        .catch(err => console.error("Copy failed:", err));
+      document.getElementById("totalInvested").textContent = `${total} USDT`;
+      document.getElementById("activeDeposits").textContent = deposits.length;
+      document.getElementById("lastDeposit").textContent = last;
+
+      const ref1 = parseFloat(localStorage.getItem("ref1Earnings") || "0");
+      const ref2 = parseFloat(localStorage.getItem("ref2Earnings") || "0");
+      const totalRef = (ref1 + ref2).toFixed(2);
+      document.getElementById("refEarnings").textContent = `${totalRef} USDT`;
     }
 
-    function logout() {
-      localStorage.removeItem("vaultEmail");
-      localStorage.removeItem("vaultUsername");
-      window.location.href = "index.html";
-    }
+    loadDashboard();
   </script>
 </body>
 </html>
