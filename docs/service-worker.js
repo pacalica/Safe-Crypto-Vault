@@ -1,56 +1,62 @@
-const CACHE_NAME = 'safe-crypto-vault-v1';
-const ASSETS_TO_CACHE = [
-  'index.html',
-  'dashboard.html',
-  'deposit.html',
-  'withdraw.html',
-  'history.html',
-  'team.html',
-  'settings.html',
-  'security.html',
-  'admin.html',
-  'css/styles.css',
-  'js/script.js',
-  'manifest.json',
-  'icons/icon-192.png',
-  'icons/icon-512.png',
-  'images/robot-bg.jpg'
+const CACHE_NAME = 'safe-crypto-vault-cache-v1';
+const urlsToCache = [
+  '/',
+  '/index.html',
+  '/dashboard.html',
+  '/deposit.html',
+  '/withdraw.html',
+  '/history.html',
+  '/team.html',
+  '/affiliate.html',
+  '/settings.html',
+  '/security.html',
+  '/admin.html',
+  '/style.css',
+  '/script.js',
+  '/deposit.js',
+  '/withdraw.js',
+  '/history.js',
+  '/team.js',
+  '/admin.js',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png',
+  '/manifest.json'
 ];
 
-// Install service worker
+// Instalare: cache inițial
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        console.log('[ServiceWorker] Caching app shell');
+        return cache.addAll(urlsToCache);
+      })
   );
   self.skipWaiting();
 });
 
-// Activate and clean old caches
+// Activare: curățare cache vechi
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(keys =>
+    caches.keys().then(cacheNames =>
       Promise.all(
-        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
+        cacheNames.map(name => {
+          if (name !== CACHE_NAME) {
+            console.log('[ServiceWorker] Removing old cache:', name);
+            return caches.delete(name);
+          }
+        })
       )
     )
   );
   self.clients.claim();
 });
 
-// Fetch assets from cache or network
+// Fetch: servește din cache când e offline
 self.addEventListener('fetch', event => {
-  if (event.request.method !== 'GET') return;
-
   event.respondWith(
-    caches.match(event.request).then(cachedRes => {
-      return (
-        cachedRes ||
-        fetch(event.request).catch(() =>
-          caches.match('index.html') // fallback
-        )
-      );
-    })
+    caches.match(event.request).then(response =>
+      response || fetch(event.request)
+    )
   );
 });
