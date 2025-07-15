@@ -3,45 +3,109 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>My Team – Safe Crypto Vault</title>
-  <link rel="stylesheet" href="css/styles.css" />
-  <link rel="icon" href="icons/icon-192.png" />
+  <title>My Team - Safe Crypto Vault</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .team-section {
+      margin-top: 20px;
+      background: #111;
+      padding: 20px;
+      border-left: 4px solid cyan;
+    }
+
+    .team-section h3 {
+      margin-top: 0;
+      color: cyan;
+    }
+
+    .team-list {
+      margin-top: 10px;
+      padding-left: 20px;
+    }
+
+    .team-list li {
+      margin: 6px 0;
+    }
+
+    .no-members {
+      color: gray;
+      font-style: italic;
+    }
+
+    .amount {
+      color: lime;
+      font-weight: bold;
+    }
+  </style>
 </head>
-<body class="main-body" style="background-image: url('images/robot-bg.jpg');">
-
-  <div class="sidebar">
-    <h2>🛡️ Vault</h2>
-    <ul>
-      <li><a href="dashboard.html">Dashboard</a></li>
-      <li><a href="open-deposit.html">Open deposit</a></li>
-      <li><a href="withdraw.html">Withdraw</a></li>
-      <li><a href="history.html">History</a></li>
-      <li><a href="team.html" class="active">My team</a></li>
-      <li><a href="settings.html">Settings</a></li>
-      <li><a href="security.html">Security</a></li>
-      <li><a href="admin.html">Admin</a></li>
-      <li><a href="login.html" onclick="logout()">Exit</a></li>
-    </ul>
-  </div>
-
-  <div class="main-content">
-    <h1>My Team</h1>
-
-    <div class="card">
-      <h3>Referral Earnings</h3>
-      <p>Level 1 earnings: <strong id="level1Earnings">0</strong> BNB</p>
-      <p>Level 2 earnings: <strong id="level2Earnings">0</strong> BNB</p>
-      <p>Total referrals: <strong id="refCount">0</strong></p>
-    </div>
-
-    <div class="card">
-      <h3>My Referrals</h3>
-      <ul id="refList">
-        <!-- referral list will be inserted here -->
+<body>
+  <div class="main-container">
+    <div class="sidebar">
+      <h2>Vault Menu</h2>
+      <ul>
+        <li onclick="goTo('dashboard.html')">Dashboard</li>
+        <li onclick="goTo('deposit.html')">Open Deposit</li>
+        <li onclick="goTo('withdraw.html')">Withdraw</li>
+        <li onclick="goTo('history.html')">History</li>
+        <li onclick="goTo('team.html')">My Team</li>
+        <li onclick="goTo('affiliate.html')">Affiliate Link</li>
+        <li onclick="goTo('settings.html')">Settings</li>
+        <li onclick="goTo('security.html')">Security</li>
+        <li onclick="logout()">Exit</li>
       </ul>
     </div>
+
+    <div class="content">
+      <h1>My Team</h1>
+
+      <div class="team-section">
+        <h3>Level 1 Referrals</h3>
+        <ul class="team-list" id="level1List"></ul>
+        <div>Total earned: <span class="amount" id="level1Total">0</span> USDT</div>
+      </div>
+
+      <div class="team-section">
+        <h3>Level 2 Referrals</h3>
+        <ul class="team-list" id="level2List"></ul>
+        <div>Total earned: <span class="amount" id="level2Total">0</span> USDT</div>
+      </div>
+    </div>
   </div>
 
-  <script src="js/team.js"></script>
+  <script src="js/script.js"></script>
+  <script>
+    // Simulare afișare echipă din localStorage (poate fi extins ulterior)
+    const level1 = JSON.parse(localStorage.getItem('referrals_level1') || '[]');
+    const level2 = JSON.parse(localStorage.getItem('referrals_level2') || '[]');
+
+    const level1List = document.getElementById('level1List');
+    const level2List = document.getElementById('level2List');
+
+    let level1Total = 0;
+    let level2Total = 0;
+
+    if (level1.length === 0) {
+      level1List.innerHTML = '<li class="no-members">No level 1 referrals yet.</li>';
+    } else {
+      level1.forEach(r => {
+        const earned = parseFloat(r.amount) * 0.02;
+        level1Total += earned;
+        level1List.innerHTML += `<li>${r.wallet} → deposit: ${r.amount} USDT → earned: <span class="amount">${earned.toFixed(2)}</span> USDT</li>`;
+      });
+    }
+
+    if (level2.length === 0) {
+      level2List.innerHTML = '<li class="no-members">No level 2 referrals yet.</li>';
+    } else {
+      level2.forEach(r => {
+        const earned = parseFloat(r.amount) * 0.01;
+        level2Total += earned;
+        level2List.innerHTML += `<li>${r.wallet} → deposit: ${r.amount} USDT → earned: <span class="amount">${earned.toFixed(2)}</span> USDT</li>`;
+      });
+    }
+
+    document.getElementById('level1Total').innerText = level1Total.toFixed(2);
+    document.getElementById('level2Total').innerText = level2Total.toFixed(2);
+  </script>
 </body>
 </html>
