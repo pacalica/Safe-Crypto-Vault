@@ -2,95 +2,117 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="theme-color" content="#00ffff"/>
-  <title>Safe Crypto Vault - Login</title>
-  <link rel="stylesheet" href="css/styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Safe Crypto Vault</title>
+  <meta name="theme-color" content="#00ffff" />
   <link rel="manifest" href="manifest.json" />
-  <link rel="icon" type="image/png" href="icons/icon-192.png"/>
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="style.css" />
+
   <style>
     body {
-      background: linear-gradient(135deg, #000000 0%, #0f0f3e 50%, #000000 100%);
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0f0f0f, #000000);
+      color: #00ffff;
       display: flex;
       align-items: center;
       justify-content: center;
       height: 100vh;
       overflow: hidden;
     }
-    .login-container {
-      background: rgba(0, 0, 0, 0.85);
-      padding: 40px;
-      border-radius: 16px;
-      box-shadow: 0 0 25px #00ffff;
-      max-width: 400px;
-      width: 90%;
+
+    .login-box {
+      background: rgba(0, 0, 0, 0.8);
+      border: 1px solid #00ffff;
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 0 20px #00ffff99;
       text-align: center;
+      width: 90%;
+      max-width: 400px;
     }
-    .login-container h1 {
-      color: #00ffff;
-      margin-bottom: 25px;
+
+    .login-box h1 {
+      margin-bottom: 1rem;
+      font-size: 1.8rem;
+      color: #ffffff;
     }
-    .login-container input {
-      background: #111;
-      border: none;
-      padding: 12px;
-      margin: 10px 0;
+
+    .login-box input {
       width: 100%;
-      color: #fff;
+      padding: 10px;
+      margin: 0.5rem 0;
+      border: none;
       border-radius: 8px;
+      background: #101010;
+      color: #00ffff;
+      font-size: 1rem;
     }
-    .login-container button {
-      background: #00ffff;
+
+    .login-box button {
+      background-color: #00ffff;
       color: #000;
+      padding: 10px 20px;
+      margin-top: 1rem;
       border: none;
-      padding: 12px;
-      margin-top: 15px;
-      width: 100%;
+      border-radius: 8px;
       font-weight: bold;
       cursor: pointer;
-      border-radius: 8px;
       transition: background 0.3s;
     }
-    .login-container button:hover {
-      background: #00cccc;
+
+    .login-box button:hover {
+      background-color: #00cccc;
+    }
+
+    .tagline {
+      color: #888;
+      margin-bottom: 2rem;
+      font-size: 0.9rem;
     }
   </style>
 </head>
 <body>
-  <div class="login-container">
+  <div class="login-box">
     <h1>Safe Crypto Vault</h1>
+    <div class="tagline">Earn securely with crypto deposits.</div>
     <input type="email" id="email" placeholder="Email" required />
     <input type="text" id="username" placeholder="Username" required />
     <button onclick="login()">Login</button>
   </div>
 
   <script>
-    // Auto-login if credentials exist
-    const savedEmail = localStorage.getItem("vaultEmail");
-    const savedUsername = localStorage.getItem("vaultUsername");
-
-    if (savedEmail && savedUsername) {
-      window.location.href = "dashboard.html";
-    }
+    // Auto-login
+    window.addEventListener('DOMContentLoaded', () => {
+      const email = localStorage.getItem('email');
+      const username = localStorage.getItem('username');
+      if (email && username) {
+        window.location.href = 'dashboard.html';
+      }
+    });
 
     function login() {
-      const email = document.getElementById("email").value.trim();
-      const username = document.getElementById("username").value.trim();
+      const email = document.getElementById('email').value.trim();
+      const username = document.getElementById('username').value.trim();
 
-      if (email && username) {
-        localStorage.setItem("vaultEmail", email);
-        localStorage.setItem("vaultUsername", username);
-        window.location.href = "dashboard.html";
-      } else {
-        alert("Please fill in both fields.");
+      if (!email || !username) {
+        alert('Please enter email and username.');
+        return;
       }
+
+      localStorage.setItem('email', email);
+      localStorage.setItem('username', username);
+      window.location.href = 'dashboard.html';
     }
 
-    // Register service worker
+    // Service Worker registration
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(() => console.log("Service Worker registered"))
-        .catch(error => console.error("Service Worker error:", error));
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js')
+          .then(reg => console.log('✅ Service Worker registered:', reg.scope))
+          .catch(err => console.error('❌ Service Worker error:', err));
+      });
     }
   </script>
 </body>
