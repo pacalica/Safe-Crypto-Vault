@@ -46,6 +46,10 @@
       cursor: pointer;
     }
 
+    .sidebar ul li:hover {
+      color: violet;
+    }
+
     .content {
       flex-grow: 1;
       padding: 20px;
@@ -69,13 +73,13 @@
       background: #111;
       padding: 10px;
       border-left: 3px solid cyan;
-      word-break: break-all;
+      word-break: break-word;
     }
 
-    /* 🔁 Responsive design */
     @media (max-width: 768px) {
       .main-container {
         flex-direction: column;
+        height: auto;
       }
 
       .sidebar {
@@ -93,17 +97,18 @@
     <div class="sidebar">
       <h2>Vault Menu</h2>
       <ul>
-        <li>Dashboard</li>
-        <li>Open Deposit</li>
-        <li>Withdraw</li>
-        <li>History</li>
-        <li>My Team</li>
-        <li>Affiliate Link</li>
-        <li>Settings</li>
-        <li>Security</li>
-        <li>Exit</li>
+        <li onclick="goTo('dashboard.html')">Dashboard</li>
+        <li onclick="goTo('deposit.html')">Open Deposit</li>
+        <li onclick="goTo('withdraw.html')">Withdraw</li>
+        <li onclick="goTo('history.html')">History</li>
+        <li onclick="goTo('team.html')">My Team</li>
+        <li onclick="goTo('affiliate.html')">Affiliate Link</li>
+        <li onclick="goTo('settings.html')">Settings</li>
+        <li onclick="goTo('security.html')">Security</li>
+        <li onclick="logout()">Exit</li>
       </ul>
     </div>
+
     <div class="content">
       <div class="header">Safe Crypto Vault</div>
       <div class="info">User: <span id="username">-</span></div>
@@ -112,17 +117,11 @@
 
       <div class="referral-box">
         Your referral link: <br />
-        <span id="referral">https://pacalica.github.io?ref=wallet</span>
+        <span id="referral">https://pacalica.github.io/Safe-Crypto-Vault/?ref=wallet</span>
       </div>
     </div>
   </div>
 
-  <script>
-    // Afișare din localStorage
-    document.getElementById('username').innerText = localStorage.getItem('username') || '-';
-    document.getElementById('email').innerText = localStorage.getItem('email') || '-';
-    const wallet = localStorage.getItem('wallet') || 'wallet';
-    document.getElementById('referral').innerText = `https://pacalica.github.io?ref=${wallet}`;
-  </script>
+  <script src="js/script.js"></script>
 </body>
 </html>
