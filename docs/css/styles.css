@@ -1,0 +1,129 @@
+/* styles.css – Safe Crypto Vault */
+body, html {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: #fff;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.main-body {
+  display: flex;
+  height: 100vh;
+}
+
+.sidebar {
+  width: 220px;
+  background: #0a0a0a;
+  padding: 20px;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.8);
+}
+
+.sidebar h2 {
+  color: #00ffff;
+  margin-bottom: 20px;
+  font-weight: bold;
+  font-size: 1.5em;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar ul li {
+  margin-bottom: 12px;
+}
+
+.sidebar ul li a {
+  color: #ccc;
+  text-decoration: none;
+  transition: 0.3s;
+  display: block;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.sidebar ul li a:hover,
+.sidebar ul li a.active {
+  background-color: #00ffff;
+  color: #000;
+  font-weight: bold;
+}
+
+.main-content {
+  flex: 1;
+  padding: 40px;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.65);
+}
+
+h1, h2, h3 {
+  color: #00ffff;
+}
+
+.card {
+  background: #111;
+  padding: 20px;
+  margin-bottom: 30px;
+  border-radius: 16px;
+  box-shadow: 0 0 15px rgba(0,255,255,0.2);
+}
+
+input, select, button {
+  padding: 12px;
+  margin-top: 10px;
+  margin-bottom: 15px;
+  width: 100%;
+  max-width: 400px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1em;
+  box-sizing: border-box;
+}
+
+input, select {
+  background: #222;
+  color: #fff;
+}
+
+button {
+  background: #00ffff;
+  color: #000;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #00cccc;
+}
+
+.entry {
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #444;
+}
+
+a {
+  color: #00ffff;
+}
+
+@media (max-width: 768px) {
+  .main-body {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    text-align: center;
+  }
+
+  .main-content {
+    padding: 20px;
+  }
+}
