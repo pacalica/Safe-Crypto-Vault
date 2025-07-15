@@ -2,43 +2,131 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard – Safe Crypto Vault</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#00ffff" />
+  <title>Safe Crypto Vault - Dashboard</title>
   <link rel="stylesheet" href="css/styles.css" />
-  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/png" href="icons/icon-192.png"/>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: url('img/robot-cyberpunk-bg.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+      display: flex;
+    }
+    .sidebar {
+      width: 240px;
+      background: rgba(0, 0, 0, 0.85);
+      padding: 30px 20px;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      box-shadow: 2px 0 10px #00ffff55;
+    }
+    .sidebar h2 {
+      color: #00ffff;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .sidebar a {
+      display: block;
+      color: #fff;
+      padding: 10px 0;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+    .sidebar a:hover {
+      color: #00ffff;
+    }
+    .content {
+      margin-left: 260px;
+      padding: 40px;
+      flex: 1;
+    }
+    .dashboard-box {
+      background: rgba(0, 0, 0, 0.7);
+      border: 1px solid #00ffff55;
+      border-radius: 16px;
+      padding: 30px;
+      max-width: 800px;
+      margin: auto;
+      box-shadow: 0 0 20px #00ffff88;
+    }
+    .dashboard-box h1 {
+      color: #00ffff;
+      margin-bottom: 20px;
+    }
+    .dashboard-box p {
+      margin: 10px 0;
+      font-size: 18px;
+    }
+    .referral {
+      background: #111;
+      padding: 15px;
+      border-radius: 10px;
+      word-break: break-all;
+      margin-top: 20px;
+    }
+  </style>
 </head>
-<body class="main-body" style="background-image: url('images/robot-bg.jpg');">
-
+<body>
   <div class="sidebar">
-    <h2>🛡️ Vault</h2>
-    <ul>
-      <li><a href="dashboard.html" class="active">Dashboard</a></li>
-      <li><a href="open-deposit.html">Open deposit</a></li>
-      <li><a href="withdraw.html">Withdraw</a></li>
-      <li><a href="history.html">History</a></li>
-      <li><a href="team.html">My team</a></li>
-      <li><a href="settings.html">Settings</a></li>
-      <li><a href="security.html">Security</a></li>
-      <li><a href="admin.html">Admin</a></li>
-      <li><a href="login.html" onclick="logout()">Exit</a></li>
-    </ul>
+    <h2>Vault Menu</h2>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="deposit.html">Open Deposit</a>
+    <a href="withdraw.html">Withdraw</a>
+    <a href="history.html">History</a>
+    <a href="team.html">My Team</a>
+    <a href="#" onclick="copyReferral()">Affiliate Link</a>
+    <a href="settings.html">Settings</a>
+    <a href="security.html">Security</a>
+    <a href="#" onclick="logout()">Exit</a>
   </div>
 
-  <div class="main-content">
-    <h1>Welcome back, <span id="userName"></span> 👋</h1>
+  <div class="content">
+    <div class="dashboard-box">
+      <h1>Welcome to Safe Crypto Vault</h1>
+      <p><strong>User:</strong> <span id="username"></span></p>
+      <p><strong>Email:</strong> <span id="email"></span></p>
+      <p><strong>Total Deposited:</strong> <span id="totalDeposited">0 USDT</span></p>
 
-    <div class="card">
-      <h3>Total Deposited</h3>
-      <p><span id="totalDeposited">0</span> BNB</p>
-    </div>
-
-    <div class="card">
-      <h3>Your Referral Link</h3>
-      <input type="text" id="refLink" readonly />
-      <button onclick="copyRef()">Copy</button>
+      <div class="referral">
+        <strong>Your referral link:</strong><br>
+        <code id="referralLink"></code>
+      </div>
     </div>
   </div>
 
-  <script src="js/dashboard.js"></script>
+  <script>
+    const email = localStorage.getItem("vaultEmail") || "-";
+    const username = localStorage.getItem("vaultUsername") || "-";
+    const referral = localStorage.getItem("referral") || "";
+    const wallet = localStorage.getItem("wallet") || "";
+    const total = localStorage.getItem("totalDeposited") || "0";
+
+    document.getElementById("username").textContent = username;
+    document.getElementById("email").textContent = email;
+    document.getElementById("totalDeposited").textContent = `${total} USDT`;
+
+    const baseUrl = window.location.origin + window.location.pathname.replace("dashboard.html", "index.html");
+    const referralLink = `${baseUrl}?ref=${wallet}`;
+    document.getElementById("referralLink").textContent = referralLink;
+
+    function copyReferral() {
+      navigator.clipboard.writeText(referralLink)
+        .then(() => alert("Referral link copied!"))
+        .catch(err => console.error("Copy failed:", err));
+    }
+
+    function logout() {
+      localStorage.removeItem("vaultEmail");
+      localStorage.removeItem("vaultUsername");
+      window.location.href = "index.html";
+    }
+  </script>
 </body>
 </html>
