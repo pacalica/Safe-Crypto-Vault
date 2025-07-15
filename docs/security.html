@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Security – Safe Crypto Vault</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" href="icons/icon-192.png" />
+</head>
+<body class="main-body" style="background-image: url('images/robot-bg.jpg');">
+
+  <div class="sidebar">
+    <h2>🛡️ Vault</h2>
+    <ul>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="open-deposit.html">Open deposit</a></li>
+      <li><a href="withdraw.html">Withdraw</a></li>
+      <li><a href="history.html">History</a></li>
+      <li><a href="team.html">My team</a></li>
+      <li><a href="settings.html">Settings</a></li>
+      <li><a href="security.html" class="active">Security</a></li>
+      <li><a href="admin.html">Admin</a></li>
+      <li><a href="login.html" onclick="logout()">Exit</a></li>
+    </ul>
+  </div>
+
+  <div class="main-content">
+    <h1>Security Settings</h1>
+
+    <div class="card">
+      <h3>Update Email</h3>
+      <input type="email" id="newEmail" placeholder="Enter new email" />
+      <button onclick="updateEmail()">Update Email</button>
+      <p id="emailMsg" style="color: lime;"></p>
+    </div>
+
+    <div class="card">
+      <h3>Update Password</h3>
+      <input type="password" id="newPassword" placeholder="Enter new password" />
+      <button onclick="updatePassword()">Update Password</button>
+      <p id="passMsg" style="color: lime;"></p>
+    </div>
+
+    <div class="card">
+      <h3>Clear All Local Data</h3>
+      <button style="background-color: red;" onclick="clearData()">⚠️ Clear and Logout</button>
+    </div>
+  </div>
+
+  <script>
+    function updateEmail() {
+      const newEmail = document.getElementById("newEmail").value.trim();
+      if (!newEmail) return;
+
+      let user = JSON.parse(localStorage.getItem("vault_user"));
+      if (!user) user = {};
+      user.email = newEmail;
+      localStorage.setItem("vault_user", JSON.stringify(user));
+      document.getElementById("emailMsg").innerText = "Email updated!";
+    }
+
+    function updatePassword() {
+      const newPass = document.getElementById("newPassword").value.trim();
+      if (!newPass) return;
+
+      let user = JSON.parse(localStorage.getItem("vault_user"));
+      if (!user) user = {};
+      user.password = newPass;
+      localStorage.setItem("vault_user", JSON.stringify(user));
+      document.getElementById("passMsg").innerText = "Password updated!";
+    }
+
+    function clearData() {
+      localStorage.clear();
+      window.location.href = "login.html";
+    }
+
+    function logout() {
+      localStorage.clear();
+    }
+ 
