@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Safe Crypto Vault</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <meta name="theme-color" content="#0ff">
+</head>
+<body class="landing-body">
+  <div class="landing-container">
+    <h1>🛡️ Safe Crypto Vault</h1>
+    <p>Secure your BNB with trust. Earn interest, build referrals, and withdraw safely.</p>
+    <a href="login.html" class="enter-button">🔐 Enter the Vault</a>
+  </div>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js');
+    }
+  </script>
+</body>
+</html>
