@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Withdraw – Safe Crypto Vault</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" href="icons/icon-192.png" />
+</head>
+<body class="main-body" style="background-image: url('images/robot-bg.jpg');">
+
+  <div class="sidebar">
+    <h2>🛡️ Vault</h2>
+    <ul>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="open-deposit.html">Open deposit</a></li>
+      <li><a href="withdraw.html" class="active">Withdraw</a></li>
+      <li><a href="history.html">History</a></li>
+      <li><a href="team.html">My team</a></li>
+      <li><a href="settings.html">Settings</a></li>
+      <li><a href="security.html">Security</a></li>
+      <li><a href="admin.html">Admin</a></li>
+      <li><a href="login.html" onclick="logout()">Exit</a></li>
+    </ul>
+  </div>
+
+  <div class="main-content">
+    <h1>Withdraw Funds</h1>
+
+    <div class="card">
+      <h3>Withdraw Request</h3>
+      <p>You can withdraw once a week. A 5% fee applies.</p>
+
+      <input type="number" id="withdrawAmount" placeholder="Amount in BNB" />
+      <button onclick="requestWithdraw()">Request Withdrawal</button>
+
+      <p id="withdrawStatus" style="margin-top: 10px;"></p>
+    </div>
+  </div>
+
+  <script src="js/withdraw.js"></script>
+</body>
+</html>
