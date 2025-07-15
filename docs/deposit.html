@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Safe Crypto Vault - Deposit</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to bottom right, #0ff, #8000ff);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 420px;
+      padding: 20px;
+      margin-top: 20px;
+      background-color: rgba(0, 0, 0, 0.6);
+      border-radius: 15px;
+      box-shadow: 0 0 10px cyan;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 1.5rem;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(90deg, #00ffff, #8000ff);
+      color: white;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 0 10px #0ff;
+      transition: transform 0.2s;
+    }
+
+    button:hover {
+      transform: scale(1.03);
+    }
+
+    .qr-section {
+      text-align: center;
+      margin-top: 1.5rem;
+    }
+
+    .qr-section img {
+      max-width: 100%;
+      height: auto;
+      border: 4px solid #0ff;
+      border-radius: 12px;
+    }
+
+    .wallet-address {
+      word-break: break-all;
+      font-size: 0.95rem;
+      margin-top: 1rem;
+      text-align: center;
+      background-color: rgba(255,255,255,0.1);
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    @media (max-height: 600px) {
+      .container {
+        margin-top: 10px;
+        padding: 15px;
+      }
+
+      h1 {
+        font-size: 1.2rem;
+      }
+
+      button {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Deposit USDT</h1>
+
+    <label for="amount">Amount (USDT):</label>
+    <input type="number" id="amount" placeholder="Enter amount" min="1" />
+
+    <label for="plan">Select Plan:</label>
+    <select id="plan">
+      <option value="1">Plan 1: 0–1999 USDT – 3.5%</option>
+      <option value="2">Plan 2: 2000–5000 USDT – 5.5%</option>
+      <option value="3">Plan 3: 5000–10000 USDT – 7.5%</option>
+    </select>
+
+    <div class="qr-section">
+      <p>Send to wallet:</p>
+      <img src="https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=0x124377FCe14439248a4959ce528314aA3A897321" alt="QR Code">
+      <div class="wallet-address">
+        0x124377FCe14439248a4959ce528314aA3A897321
+      </div>
+    </div>
+
+    <button onclick="confirmDeposit()">I've sent deposit</button>
+  </div>
+
+  <script>
+    function confirmDeposit() {
+      const amount = document.getElementById("amount").value;
+      const plan = document.getElementById("plan").value;
+
+      if (!amount || amount <= 0) {
+        alert("Please enter a valid amount.");
+        return;
+      }
+
+      // Salvează local retragerea pentru history
+      const depositData = {
+        amount: parseFloat(amount),
+        plan,
+        timestamp: new Date().toISOString(),
+        status: "pending"
+      };
+
+      let deposits = JSON.parse(localStorage.getItem("deposits") || "[]");
+      deposits.push(depositData);
+      localStorage.setItem("deposits", JSON.stringify(deposits));
+
+      alert("Deposit submitted! Await admin confirmation.");
+      document.getElementById("amount").value = "";
+    }
+  </script>
+</body>
+</html>
