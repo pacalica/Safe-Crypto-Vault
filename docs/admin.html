@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Panel – Safe Crypto Vault</title>
+  <title>Admin – Safe Crypto Vault</title>
   <link rel="stylesheet" href="css/styles.css" />
   <link rel="icon" href="icons/icon-192.png" />
 </head>
@@ -28,4 +28,71 @@
     <h1>Admin Panel</h1>
 
     <div class="card">
-      <h2>All Deposits</h2>
+      <h3>All Deposits</h3>
+      <div id="depositsList"></div>
+    </div>
+
+    <div class="card">
+      <h3>Withdraw Requests</h3>
+      <div id="withdrawList"></div>
+    </div>
+
+    <div class="card">
+      <h3>Referral Stats</h3>
+      <div id="refStats"></div>
+    </div>
+  </div>
+
+  <script>
+    // Only allow if wallet is admin
+    const ADMIN_WALLET = "0x124377FCe14439248a4959ce528314aA3A897321"; // Your address
+
+    const user = JSON.parse(localStorage.getItem("vault_user") || "{}");
+    if (!user.wallet || user.wallet.toLowerCase() !== ADMIN_WALLET.toLowerCase()) {
+      alert("Access denied. Admins only.");
+      location.href = "dashboard.html";
+    }
+
+    const deposits = JSON.parse(localStorage.getItem("vault_deposits") || "[]");
+    const withdrawals = JSON.parse(localStorage.getItem("vault_withdrawals") || "[]");
+
+    const allUsers = new Map();
+    deposits.forEach(d => {
+      if (!allUsers.has(d.wallet)) {
+        allUsers.set(d.wallet, { total: 0, count: 0 });
+      }
+      allUsers.get(d.wallet).total += parseFloat(d.amount);
+      allUsers.get(d.wallet).count++;
+    });
+
+    document.getElementById("depositsList").innerHTML = deposits.length === 0
+      ? "<p>No deposits found.</p>"
+      : deposits.map(d => `
+          <div class="entry">
+            <strong>${d.wallet}</strong> – ${d.amount} USDT (${d.plan} plan) <br>
+            Date: ${new Date(d.timestamp).toLocaleString()}
+          </div>
+        `).join("");
+
+    document.getElementById("withdrawList").innerHTML = withdrawals.length === 0
+      ? "<p>No withdraw requests.</p>"
+      : withdrawals.map(w => `
+          <div class="entry">
+            <strong>${w.wallet}</strong> – ${w.amount} USDT <br>
+            Status: <b>${w.status}</b> <br>
+            Date: ${new Date(w.timestamp).toLocaleString()}
+          </div>
+        `).join("");
+
+    document.getElementById("refStats").innerHTML = [...allUsers.entries()].map(([wallet, info]) => `
+      <div class="entry">
+        ${wallet} – ${info.total.toFixed(2)} USDT in ${info.count} deposits
+      </div>
+    `).join("");
+
+    function logout() {
+      localStorage.clear();
+    }
+  </script>
+</body>
+</html>
