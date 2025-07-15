@@ -1,129 +1,127 @@
-/* styles.css – Safe Crypto Vault */
-body, html {
+/* Reset de bază */
+* {
   margin: 0;
   padding: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  color: #fff;
-  height: 100vh;
-  overflow: hidden;
-}
-
-.main-body {
-  display: flex;
-  height: 100vh;
-}
-
-.sidebar {
-  width: 220px;
-  background: #0a0a0a;
-  padding: 20px;
-  box-shadow: 2px 0 10px rgba(0,0,0,0.8);
-}
-
-.sidebar h2 {
-  color: #00ffff;
-  margin-bottom: 20px;
-  font-weight: bold;
-  font-size: 1.5em;
-}
-
-.sidebar ul {
-  list-style: none;
-  padding: 0;
-}
-
-.sidebar ul li {
-  margin-bottom: 12px;
-}
-
-.sidebar ul li a {
-  color: #ccc;
-  text-decoration: none;
-  transition: 0.3s;
-  display: block;
-  padding: 8px;
-  border-radius: 8px;
-}
-
-.sidebar ul li a:hover,
-.sidebar ul li a.active {
-  background-color: #00ffff;
-  color: #000;
-  font-weight: bold;
-}
-
-.main-content {
-  flex: 1;
-  padding: 40px;
-  overflow-y: auto;
-  background: rgba(0, 0, 0, 0.65);
-}
-
-h1, h2, h3 {
-  color: #00ffff;
-}
-
-.card {
-  background: #111;
-  padding: 20px;
-  margin-bottom: 30px;
-  border-radius: 16px;
-  box-shadow: 0 0 15px rgba(0,255,255,0.2);
-}
-
-input, select, button {
-  padding: 12px;
-  margin-top: 10px;
-  margin-bottom: 15px;
-  width: 100%;
-  max-width: 400px;
-  border: none;
-  border-radius: 10px;
-  font-size: 1em;
   box-sizing: border-box;
 }
 
-input, select {
-  background: #222;
-  color: #fff;
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #0a0a0a;
+  color: #ffffff;
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
-button {
-  background: #00ffff;
-  color: #000;
-  cursor: pointer;
-  font-weight: bold;
-  transition: 0.3s;
+/* Container principal cu sidebar + content */
+.main-container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  min-height: 100vh;
+  overflow: hidden;
 }
 
-button:hover {
-  background: #00cccc;
+/* Sidebar */
+.sidebar {
+  width: 250px;
+  background-color: #1a1a1a;
+  padding: 20px;
+  color: white;
+  flex-shrink: 0;
 }
 
-.entry {
-  margin-bottom: 15px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #444;
-}
-
-a {
+.sidebar h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
   color: #00ffff;
 }
 
+.sidebar a,
+.sidebar button {
+  display: block;
+  padding: 10px 0;
+  color: white;
+  text-decoration: none;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sidebar a:hover,
+.sidebar button:hover {
+  color: #00ffff;
+}
+
+/* Conținut principal */
+.content {
+  flex-grow: 1;
+  padding: 20px;
+  min-width: 0;
+  overflow-x: hidden;
+  background: linear-gradient(to bottom right, #0f0f0f, #1a1a1a);
+  border-left: 2px solid #111;
+}
+
+/* Titluri și text */
+h1, h2, h3 {
+  color: #00ffff;
+  margin-bottom: 20px;
+}
+
+p {
+  margin-bottom: 10px;
+}
+
+/* Carduri sau secțiuni */
+.card {
+  background-color: #2a2a2a;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+  margin-bottom: 20px;
+}
+
+/* Butoane */
+button,
+.btn {
+  background-color: #00ffff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  color: black;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+button:hover,
+.btn:hover {
+  background-color: #00dddd;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
-  .main-body {
+  .main-container {
     flex-direction: column;
   }
 
   .sidebar {
     width: 100%;
-    text-align: center;
+    padding: 15px;
   }
 
-  .main-content {
-    padding: 20px;
+  .content {
+    padding: 15px;
+  }
+
+  .sidebar a,
+  .sidebar button {
+    padding: 8px 0;
+    font-size: 14px;
   }
 }
