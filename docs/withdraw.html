@@ -4,108 +4,89 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Withdraw - Safe Crypto Vault</title>
-  <link rel="stylesheet" href="style.css" />
   <style>
-    .form-group {
-      margin-bottom: 20px;
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #000;
+      color: #fff;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      color: cyan;
+      margin-bottom: 10px;
+    }
+
+    .info {
+      margin: 5px 0;
+    }
+
+    form {
+      margin-top: 20px;
+      background: #111;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 500px;
     }
 
     label {
       display: block;
-      margin-bottom: 6px;
-      font-weight: bold;
+      margin-top: 10px;
+      margin-bottom: 5px;
     }
 
-    input {
+    input, select {
       width: 100%;
       padding: 10px;
       background: #222;
-      border: 1px solid cyan;
-      border-radius: 6px;
-      color: white;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
     }
 
-    .submit-btn {
+    button {
+      margin-top: 20px;
+      padding: 12px;
       background: cyan;
       color: #000;
       font-weight: bold;
-      padding: 10px 20px;
       border: none;
-      border-radius: 6px;
+      border-radius: 5px;
       cursor: pointer;
     }
 
-    .message {
+    #message {
       margin-top: 20px;
-      padding: 10px;
-      border-left: 4px solid cyan;
-      background: #111;
-      border-radius: 6px;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <div class="main-container">
-    <div class="sidebar">
-      <h2>Vault Menu</h2>
-      <ul>
-        <li onclick="goTo('dashboard.html')">Dashboard</li>
-        <li onclick="goTo('deposit.html')">Open Deposit</li>
-        <li onclick="goTo('withdraw.html')">Withdraw</li>
-        <li onclick="goTo('history.html')">History</li>
-        <li onclick="goTo('team.html')">My Team</li>
-        <li onclick="goTo('affiliate.html')">Affiliate Link</li>
-        <li onclick="goTo('settings.html')">Settings</li>
-        <li onclick="goTo('security.html')">Security</li>
-        <li onclick="logout()">Exit</li>
-      </ul>
-    </div>
+  <h1>Withdraw Request</h1>
 
-    <div class="content">
-      <h1>Withdraw</h1>
+  <div class="info">Username: <span id="username">-</span></div>
+  <div class="info">Email: <span id="email">-</span></div>
 
-      <div class="form-group">
-        <label for="withdrawAmount">Amount to withdraw (USDT):</label>
-        <input type="number" id="withdrawAmount" placeholder="e.g. 500" />
-      </div>
+  <form id="withdraw-form">
+    <label for="amount">Amount (USDT):</label>
+    <input type="number" id="amount" min="1" required />
 
-      <button class="submit-btn" onclick="requestWithdraw()">Request Withdraw</button>
+    <label for="wallet">Your BEP20 Wallet Address:</label>
+    <input type="text" id="wallet" required />
 
-      <div id="withdraw-message" class="message" style="display: none;"></div>
-    </div>
-  </div>
+    <label for="plan">Select Plan:</label>
+    <select id="plan" required>
+      <option value="1-month">1 Month</option>
+      <option value="3-months">3 Months</option>
+      <option value="5-months">5 Months</option>
+    </select>
 
-  <script src="js/script.js"></script>
-  <script>
-    function requestWithdraw() {
-      const amount = parseFloat(document.getElementById("withdrawAmount").value);
-      const messageBox = document.getElementById("withdraw-message");
+    <button type="submit">Submit Withdrawal</button>
+  </form>
 
-      if (localStorage.getItem("pendingWithdraw") === "yes") {
-        messageBox.innerText = "You already have a pending withdrawal request. Please wait for confirmation.";
-        messageBox.style.display = "block";
-        return;
-      }
+  <div id="message"></div>
 
-      if (isNaN(amount) || amount <= 0) {
-        alert("Enter a valid amount.");
-        return;
-      }
-
-      const entry = {
-        amount: amount.toFixed(2),
-        status: "pending",
-        date: new Date().toLocaleString()
-      };
-
-      let history = JSON.parse(localStorage.getItem("withdrawHistory") || "[]");
-      history.push(entry);
-      localStorage.setItem("withdrawHistory", JSON.stringify(history));
-      localStorage.setItem("pendingWithdraw", "yes");
-
-      messageBox.innerText = `✅ Withdraw request of ${amount.toFixed(2)} USDT submitted. Awaiting approval.`;
-      messageBox.style.display = "block";
-    }
-  </script>
+  <script src="js/withdraw.js"></script>
 </body>
 </html>
