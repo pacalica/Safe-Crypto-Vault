@@ -5,120 +5,124 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Safe Crypto Vault - Dashboard</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
     body {
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(to bottom right, #0ff, #8000ff);
-      color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      overflow-x: hidden;
+      font-family: 'Segoe UI', sans-serif;
+      background: #000;
+      color: #fff;
     }
 
-    .container {
+    .main-container {
+      display: flex;
+      flex-direction: row;
+      height: 100vh;
       width: 100%;
-      max-width: 420px;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      background: #1a1a1a;
+      width: 250px;
       padding: 20px;
-      margin-top: 20px;
-      background-color: rgba(0, 0, 0, 0.65);
-      border-radius: 15px;
-      box-shadow: 0 0 10px cyan;
+      box-sizing: border-box;
+      flex-shrink: 0;
     }
 
-    h1 {
-      text-align: center;
-      font-size: 1.6rem;
-      margin-bottom: 1rem;
+    .sidebar h2 {
+      color: cyan;
+      font-size: 24px;
+      margin-bottom: 20px;
     }
 
-    .stat {
-      background: rgba(255, 255, 255, 0.1);
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .sidebar ul li {
+      margin: 12px 0;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .content {
+      flex-grow: 1;
+      padding: 20px;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+
+    .header {
+      font-size: 28px;
+      color: cyan;
+      margin-bottom: 10px;
+    }
+
+    .info {
       margin: 10px 0;
-      padding: 12px 16px;
-      border-radius: 12px;
-      font-size: 1rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      font-size: 18px;
     }
 
-    .label {
-      font-weight: bold;
+    .referral-box {
+      margin-top: 20px;
+      background: #111;
+      padding: 10px;
+      border-left: 3px solid cyan;
+      word-break: break-all;
     }
 
-    @media (max-height: 600px) {
-      .container {
-        margin-top: 10px;
-        padding: 15px;
+    /* 🔁 Responsive design */
+    @media (max-width: 768px) {
+      .main-container {
+        flex-direction: column;
       }
 
-      h1 {
-        font-size: 1.3rem;
+      .sidebar {
+        width: 100%;
       }
 
-      .stat {
-        font-size: 0.95rem;
+      .content {
+        width: 100%;
       }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Dashboard</h1>
-
-    <div class="stat">
-      <span class="label">Total Invested:</span>
-      <span id="totalInvested">0 USDT</span>
+  <div class="main-container">
+    <div class="sidebar">
+      <h2>Vault Menu</h2>
+      <ul>
+        <li>Dashboard</li>
+        <li>Open Deposit</li>
+        <li>Withdraw</li>
+        <li>History</li>
+        <li>My Team</li>
+        <li>Affiliate Link</li>
+        <li>Settings</li>
+        <li>Security</li>
+        <li>Exit</li>
+      </ul>
     </div>
+    <div class="content">
+      <div class="header">Safe Crypto Vault</div>
+      <div class="info">User: <span id="username">-</span></div>
+      <div class="info">Email: <span id="email">-</span></div>
+      <div class="info">Total Deposit: <span id="total">0</span> USDT</div>
 
-    <div class="stat">
-      <span class="label">Active Deposits:</span>
-      <span id="activeDeposits">0</span>
-    </div>
-
-    <div class="stat">
-      <span class="label">Referral Earnings:</span>
-      <span id="refEarnings">0 USDT</span>
-    </div>
-
-    <div class="stat">
-      <span class="label">Last Deposit:</span>
-      <span id="lastDeposit">N/A</span>
+      <div class="referral-box">
+        Your referral link: <br />
+        <span id="referral">https://pacalica.github.io?ref=wallet</span>
+      </div>
     </div>
   </div>
 
   <script>
-    function loadDashboard() {
-      const deposits = JSON.parse(localStorage.getItem("deposits") || "[]");
-      let total = 0;
-      let last = "N/A";
-
-      if (deposits.length > 0) {
-        deposits.forEach(d => {
-          total += d.amount;
-        });
-
-        last = new Date(deposits[deposits.length - 1].timestamp).toLocaleString();
-      }
-
-      document.getElementById("totalInvested").textContent = `${total} USDT`;
-      document.getElementById("activeDeposits").textContent = deposits.length;
-      document.getElementById("lastDeposit").textContent = last;
-
-      const ref1 = parseFloat(localStorage.getItem("ref1Earnings") || "0");
-      const ref2 = parseFloat(localStorage.getItem("ref2Earnings") || "0");
-      const totalRef = (ref1 + ref2).toFixed(2);
-      document.getElementById("refEarnings").textContent = `${totalRef} USDT`;
-    }
-
-    loadDashboard();
+    // Afișare din localStorage
+    document.getElementById('username').innerText = localStorage.getItem('username') || '-';
+    document.getElementById('email').innerText = localStorage.getItem('email') || '-';
+    const wallet = localStorage.getItem('wallet') || 'wallet';
+    document.getElementById('referral').innerText = `https://pacalica.github.io?ref=${wallet}`;
   </script>
 </body>
 </html>
