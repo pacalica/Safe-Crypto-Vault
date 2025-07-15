@@ -3,22 +3,94 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Safe Crypto Vault</title>
-  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#00ffff"/>
+  <title>Safe Crypto Vault - Login</title>
   <link rel="stylesheet" href="css/styles.css" />
-  <link rel="icon" href="icons/icon-192.png" />
-  <meta name="theme-color" content="#0ff">
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/png" href="icons/icon-192.png"/>
+  <style>
+    body {
+      background: linear-gradient(135deg, #000000 0%, #0f0f3e 50%, #000000 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .login-container {
+      background: rgba(0, 0, 0, 0.85);
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 0 25px #00ffff;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+    }
+    .login-container h1 {
+      color: #00ffff;
+      margin-bottom: 25px;
+    }
+    .login-container input {
+      background: #111;
+      border: none;
+      padding: 12px;
+      margin: 10px 0;
+      width: 100%;
+      color: #fff;
+      border-radius: 8px;
+    }
+    .login-container button {
+      background: #00ffff;
+      color: #000;
+      border: none;
+      padding: 12px;
+      margin-top: 15px;
+      width: 100%;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: background 0.3s;
+    }
+    .login-container button:hover {
+      background: #00cccc;
+    }
+  </style>
 </head>
-<body class="landing-body">
-  <div class="landing-container">
-    <h1>🛡️ Safe Crypto Vault</h1>
-    <p>Secure your BNB with trust. Earn interest, build referrals, and withdraw safely.</p>
-    <a href="login.html" class="enter-button">🔐 Enter the Vault</a>
+<body>
+  <div class="login-container">
+    <h1>Safe Crypto Vault</h1>
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="text" id="username" placeholder="Username" required />
+    <button onclick="login()">Login</button>
   </div>
 
   <script>
+    // Auto-login if credentials exist
+    const savedEmail = localStorage.getItem("vaultEmail");
+    const savedUsername = localStorage.getItem("vaultUsername");
+
+    if (savedEmail && savedUsername) {
+      window.location.href = "dashboard.html";
+    }
+
+    function login() {
+      const email = document.getElementById("email").value.trim();
+      const username = document.getElementById("username").value.trim();
+
+      if (email && username) {
+        localStorage.setItem("vaultEmail", email);
+        localStorage.setItem("vaultUsername", username);
+        window.location.href = "dashboard.html";
+      } else {
+        alert("Please fill in both fields.");
+      }
+    }
+
+    // Register service worker
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js');
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log("Service Worker registered"))
+        .catch(error => console.error("Service Worker error:", error));
     }
   </script>
 </body>
