@@ -1,40 +1,38 @@
-document.addEventListener("DOMContentLoaded", function () {
-  const history = JSON.parse(localStorage.getItem("vault_history") || "[]");
-  const table = document.getElementById("historyTable");
-
-  if (history.length === 0) {
-    const row = document.createElement("tr");
-    row.innerHTML = `<td colspan="4">No transactions found.</td>`;
-    table.appendChild(row);
+document.addEventListener("DOMContentLoaded", () => {
+  const username = localStorage.getItem("user_name");
+  if (!username) {
+    window.location.href = "login.html";
     return;
   }
 
-  history.forEach(entry => {
+  const historyTable = document.getElementById("historyTableBody");
+  const withdrawals = JSON.parse(localStorage.getItem("withdrawals") || "[]");
+
+  const userWithdrawals = withdrawals
+    .filter(w => w.username === username)
+    .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  if (userWithdrawals.length === 0) {
+    historyTable.innerHTML = `<tr><td colspan="3">No withdrawal history found.</td></tr>`;
+    return;
+  }
+
+  userWithdrawals.forEach(entry => {
     const row = document.createElement("tr");
+    const date = new Date(entry.date).toLocaleString();
+    const amount = `${entry.amount} USDT`;
+    const status = entry.status;
 
-    const typeCell = document.createElement("td");
-    typeCell.textContent = entry.type;
+    let statusColor = "#ffcc00"; // pending
+    if (status === "successful") statusColor = "#00ff99";
+    if (status === "rejected") statusColor = "#ff4444";
 
-    const amountCell = document.createElement("td");
-    amountCell.textContent = entry.amount.toFixed(4);
+    row.innerHTML = `
+      <td>${date}</td>
+      <td>${amount}</td>
+      <td style="color:${statusColor}; font-weight: bold;">${status}</td>
+    `;
 
-    const dateCell = document.createElement("td");
-    const d = new Date(entry.date);
-    dateCell.textContent = d.toLocaleString();
-
-    const statusCell = document.createElement("td");
-    statusCell.textContent = entry.status;
-    statusCell.className = `status-${entry.status}`;
-
-    row.appendChild(typeCell);
-    row.appendChild(amountCell);
-    row.appendChild(dateCell);
-    row.appendChild(statusCell);
-
-    table.appendChild(row);
+    historyTable.appendChild(row);
   });
 });
-
-function logout() {
-  localStorage.clear();
-}
