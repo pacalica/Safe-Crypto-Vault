@@ -72,12 +72,19 @@
       color: #0ff;
       text-decoration: none;
     }
+
+    #userEmail {
+      margin-bottom: 20px;
+      color: #00ffff;
+      font-size: 0.95rem;
+    }
   </style>
 </head>
 <body class="withdraw-page">
   <div class="container">
     <h1>💸 Withdraw Funds</h1>
 
+    <div id="userEmail"></div>
     <div id="statusMessage"></div>
 
     <form id="withdrawForm">
@@ -98,9 +105,18 @@
       const withdrawAmount = document.getElementById("withdrawAmount");
       const statusMessage = document.getElementById("statusMessage");
       const countdownBox = document.getElementById("countdownBox");
+      const userEmailBox = document.getElementById("userEmail");
 
-      const username = localStorage.getItem("user_name");
-      if (!username) return (window.location.href = "login.html");
+      const user = JSON.parse(localStorage.getItem("loggedInUser"));
+      if (!user || !user.username || !user.email) {
+        return (window.location.href = "login.html");
+      }
+
+      const username = user.username;
+      const email = user.email;
+
+      // Afișăm emailul utilizatorului
+      userEmailBox.textContent = `Logged in as: ${email}`;
 
       const withdrawals = JSON.parse(localStorage.getItem("withdrawals") || "[]");
 
@@ -136,6 +152,7 @@
 
         const withdrawal = {
           username,
+          email,
           amount,
           date: now.toISOString(),
           status: "pending"
