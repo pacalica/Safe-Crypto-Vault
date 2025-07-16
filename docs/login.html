@@ -4,90 +4,62 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login - Safe Crypto Vault</title>
-  <link rel="stylesheet" href="css/styles.css" />
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to bottom, #0f0f0f, #1a1a1a);
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-
-    .login-box {
-      background: #111;
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 0 20px cyan;
-      width: 90%;
-      max-width: 400px;
-    }
-
-    .login-box h2 {
-      text-align: center;
-      margin-bottom: 20px;
-      color: cyan;
-    }
-
-    .login-box input {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      border: none;
-      border-radius: 5px;
-      background: #222;
-      color: #fff;
-    }
-
-    .login-box label {
-      font-size: 14px;
-    }
-
-    .checkbox-row {
-      display: flex;
-      align-items: center;
-      margin: 10px 0;
-    }
-
-    .checkbox-row input {
-      width: auto;
-      margin-right: 8px;
-    }
-
-    .login-box button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 15px;
-      border: none;
-      border-radius: 5px;
-      background: cyan;
-      color: #000;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    .login-box button:hover {
-      background: #00ffff;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body>
-  <div class="login-box">
-    <h2>Safe Crypto Vault</h2>
-    <input type="email" id="email" placeholder="Email" required />
-    <input type="text" id="username" placeholder="Username" required />
-    <input type="password" id="password" placeholder="Password" required />
-    <div class="checkbox-row">
-      <input type="checkbox" id="rememberPass" />
-      <label for="rememberPass">Remember password</label>
-    </div>
-    <button onclick="login()">Login</button>
+<body class="login-body">
+  <div class="login-container">
+    <h2>Login</h2>
+    <form id="loginForm">
+      <input type="email" id="email" placeholder="Email" required />
+      
+      <div class="password-field">
+        <input type="password" id="password" placeholder="Password" required />
+        <span id="toggleLoginPassword" class="toggle-eye">👁️</span>
+      </div>
+
+      <label>
+        <input type="checkbox" id="remember"> Remember me
+      </label>
+
+      <button type="submit">Login</button>
+      <p>Don't have an account? <a href="register.html">Register</a></p>
+    </form>
   </div>
 
-  <script src="js/login.js"></script>
+  <script>
+    const toggleLoginPassword = document.getElementById("toggleLoginPassword");
+    const loginPasswordInput = document.getElementById("password");
+
+    toggleLoginPassword.addEventListener("click", () => {
+      const isVisible = loginPasswordInput.type === "text";
+      loginPasswordInput.type = isVisible ? "password" : "text";
+      toggleLoginPassword.textContent = isVisible ? "👁️" : "🙈";
+    });
+
+    document.getElementById("loginForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const email = document.getElementById("email").value.trim();
+      const password = loginPasswordInput.value.trim();
+
+      if (!email.includes("@") || !email.includes(".")) {
+        alert("Invalid email address.");
+        return;
+      }
+
+      const users = JSON.parse(localStorage.getItem("users")) || [];
+      const user = users.find(u => u.email === email && u.password === password);
+
+      if (!user) {
+        alert("Incorrect email or password.");
+        return;
+      }
+
+      localStorage.setItem("currentUser", JSON.stringify(user));
+      if (document.getElementById("remember").checked) {
+        localStorage.setItem("rememberPassword", "yes");
+      }
+      window.location.href = "dashboard.html";
+    });
+  </script>
 </body>
 </html>
