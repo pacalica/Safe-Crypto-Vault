@@ -44,9 +44,9 @@ function confirmDeposit() {
   });
   localStorage.setItem("vault_history", JSON.stringify(history));
 
-  // Trimite email prin EmailJS
+  // Trimite email către administrator
   const emailParams = {
-    to_email: user.email,
+    to_email: "policagabrielvictor@gmail.com",  // Email-ul tău de admin
     username: user.username,
     amount: amount,
     tx_hash: "manual"
@@ -54,13 +54,13 @@ function confirmDeposit() {
 
   emailjs.send("service_mnaa5dl", "template_2pbn9v4", emailParams)
     .then(res => {
-      console.log("✅ Email de depunere trimis:", res.status);
+      console.log("✅ Email de depunere trimis către admin:", res.status);
     })
     .catch(err => {
       console.error("❌ Eroare trimitere email depunere:", err);
     });
 
-  alert("Deposit saved. Redirecting to dashboard...");
+  alert("✅ Deposit saved. Redirecting to dashboard...");
   window.location.href = "dashboard.html";
 }
 
