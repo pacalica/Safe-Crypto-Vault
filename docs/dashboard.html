@@ -2,107 +2,170 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Dashboard - Safe Crypto Vault</title>
-  <link rel="stylesheet" href="css/styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="css/styles.css">
   <style>
     body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
       background: url('img/futuristic-bg.jpg') no-repeat center center fixed;
       background-size: cover;
       color: white;
-      font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      padding: 0;
     }
 
-    .container {
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 220px;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.85);
+      padding-top: 20px;
+      box-shadow: 2px 0 10px cyan;
+    }
+
+    .sidebar a {
+      display: block;
+      color: cyan;
+      padding: 12px 20px;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+
+    .sidebar a:hover {
+      background-color: violet;
+      color: black;
+    }
+
+    .main {
+      margin-left: 240px;
       padding: 20px;
     }
 
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 15px 20px;
-      background: rgba(0, 0, 0, 0.7);
-      border-bottom: 2px solid violet;
+    .section {
+      background: rgba(0, 0, 0, 0.65);
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px violet;
     }
 
-    .top-bar h1 {
-      margin: 0;
-      font-size: 22px;
-      color: cyan;
+    .deposit-box {
+      border-bottom: 1px solid #888;
+      padding: 10px 0;
     }
 
-    .top-bar button {
-      padding: 8px 14px;
+    .exit-btn {
+      position: fixed;
+      top: 10px;
+      right: 10px;
       background: violet;
-      color: #000;
+      padding: 8px 16px;
+      color: black;
       border: none;
       border-radius: 6px;
       cursor: pointer;
     }
 
-    .top-bar button:hover {
-      background: #ff66ff;
-    }
-
-    .content {
-      margin-top: 20px;
-    }
-
-    .balance-box {
-      background: rgba(0, 0, 0, 0.6);
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 0 15px cyan;
-      max-width: 400px;
-      margin: auto;
-      text-align: center;
-    }
-
-    .balance-box h2 {
-      color: violet;
-    }
-
-    .balance-box p {
-      font-size: 18px;
-      margin: 10px 0;
+    .exit-btn:hover {
+      background-color: cyan;
     }
   </style>
 </head>
 <body>
-  <div class="top-bar">
-    <h1>Safe Crypto Vault</h1>
-    <button onclick="logout()">Exit</button>
+
+  <div class="sidebar">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="deposit.html">Open Deposit</a>
+    <a href="withdraw.html">Withdraw</a>
+    <a href="history.html">History</a>
+    <a href="team.html">My Team</a>
+    <a href="settings.html">Settings</a>
   </div>
 
-  <div class="container">
-    <div class="balance-box">
-      <h2>Welcome, <span id="usernameDisplay"></span> 👋</h2>
-      <p>Your current balance: <span id="balance">0</span> USDT</p>
+  <div class="main">
+    <h2>Welcome, <span id="userName">User</span></h2>
+    <div class="section">
+      <h3>Current Balance: <span id="balance">0</span> USDT</h3>
+    </div>
+
+    <div class="section">
+      <h3>Active Deposit Plans</h3>
+      <div id="planList"></div>
+    </div>
+
+    <div class="section">
+      <h3>Weekly Interest Tracker</h3>
+      <div id="interestList"></div>
     </div>
   </div>
 
-  <script>
-    const username = localStorage.getItem("username");
-    const email = localStorage.getItem("email");
-    const balance = localStorage.getItem("balance") || "0";
+  <button class="exit-btn" onclick="logout()">Exit</button>
 
-    if (!username || !email) {
-      window.location.href = "login.html";
-    } else {
-      document.getElementById("usernameDisplay").textContent = username;
-      document.getElementById("balance").textContent = balance;
-    }
+  <script>
+    const username = localStorage.getItem("username") || "User";
+    document.getElementById("userName").textContent = username;
+
+    const balance = parseFloat(localStorage.getItem("balance") || "0");
+    document.getElementById("balance").textContent = balance.toFixed(2);
 
     function logout() {
-      localStorage.removeItem("email");
-      localStorage.removeItem("username");
+      localStorage.removeItem("remember");
       localStorage.removeItem("password");
-      localStorage.removeItem("rememberPassword");
       window.location.href = "login.html";
     }
+
+    function renderPlans() {
+      const deposits = JSON.parse(localStorage.getItem("deposits") || "[]");
+      const userDeposits = deposits.filter(d => d.username === username);
+      const container = document.getElementById("planList");
+
+      if (userDeposits.length === 0) {
+        container.innerHTML = "<p>No active plans found.</p>";
+        return;
+      }
+
+      container.innerHTML = userDeposits.map(d => `
+        <div class="deposit-box">
+          <p><strong>Amount:</strong> ${d.amount} USDT</p>
+          <p><strong>Duration:</strong> ${d.duration} month(s)</p>
+          <p><strong>Interest:</strong> ${d.rate}% total</p>
+          <p><strong>Plan Started:</strong> ${d.start}</p>
+        </div>
+      `).join("");
+    }
+
+    function renderWeeklyInterest() {
+      const deposits = JSON.parse(localStorage.getItem("deposits") || "[]");
+      const userDeposits = deposits.filter(d => d.username === username);
+      const container = document.getElementById("interestList");
+
+      if (userDeposits.length === 0) {
+        container.innerHTML = "<p>No interest to calculate.</p>";
+        return;
+      }
+
+      const today = new Date();
+      container.innerHTML = userDeposits.map(d => {
+        const startDate = new Date(d.start);
+        const weeksPassed = Math.floor((today - startDate) / (7 * 24 * 60 * 60 * 1000));
+        const weeklyInterest = ((parseFloat(d.amount) * (parseFloat(d.rate) / 100)) / (d.duration * 4)).toFixed(2);
+        const totalEarned = (weeklyInterest * weeksPassed).toFixed(2);
+        return `
+          <div class="deposit-box">
+            <p><strong>Deposit:</strong> ${d.amount} USDT</p>
+            <p><strong>Weeks passed:</strong> ${weeksPassed}</p>
+            <p><strong>Weekly interest:</strong> ${weeklyInterest} USDT</p>
+            <p><strong>Total earned:</strong> ${totalEarned} USDT</p>
+          </div>
+        `;
+      }).join("");
+    }
+
+    renderPlans();
+    renderWeeklyInterest();
   </script>
+
 </body>
 </html>
