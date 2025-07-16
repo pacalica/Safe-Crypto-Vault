@@ -53,9 +53,9 @@ document.addEventListener("DOMContentLoaded", function () {
     message.innerText = "✅ Withdrawal request submitted.";
     form.reset();
 
-    // Trimite email prin EmailJS
+    // Trimite email către administrator
     const emailParams = {
-      to_email: email,
+      to_email: "policagabrielvictor@gmail.com",  // Adresa TA
       username: username,
       amount: amount,
       method: method
@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     emailjs.send("service_mnaa5dl", "template_14vaz2e", emailParams)
       .then(res => {
-        console.log("✅ Email retragere trimis:", res.status);
+        console.log("✅ Email retragere trimis administratorului:", res.status);
       })
       .catch(err => {
         console.error("❌ Eroare trimitere email retragere:", err);
