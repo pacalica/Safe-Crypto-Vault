@@ -1,132 +1,183 @@
+<!-- admin.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Panel - Safe Crypto Vault</title>
+  <title>Admin Panel – Safe Crypto Vault</title>
+  <link rel="stylesheet" href="style.css" />
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #000;
+      background: #000022;
       color: #fff;
+      font-family: 'Segoe UI', sans-serif;
       padding: 20px;
     }
+
     h1 {
-      color: cyan;
+      color: #00ffff;
+      text-align: center;
+      margin-bottom: 30px;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
+
+    .section {
+      background: #111133;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 0 15px #0ff4;
     }
-    th, td {
-      border: 1px solid #444;
+
+    .section h2 {
+      color: #0ff;
+      border-bottom: 1px solid #0ff4;
+      padding-bottom: 8px;
+      margin-bottom: 15px;
+    }
+
+    .user-entry, .withdraw-entry {
+      margin-bottom: 15px;
       padding: 10px;
-      text-align: left;
+      background-color: #1a1a40;
+      border-radius: 10px;
+      border-left: 4px solid #00ffff;
     }
-    th {
-      background-color: #111;
+
+    .user-entry span, .withdraw-entry span {
+      display: block;
+      margin: 4px 0;
     }
-    .btn {
-      padding: 5px 10px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      color: #fff;
+
+    .no-data {
+      color: #aaa;
+      text-align: center;
     }
-    .pending { background-color: dodgerblue; }
-    .completed { background-color: green; }
-    .rejected { background-color: crimson; }
-    .copy-btn {
-      background: #555;
-      padding: 4px 8px;
-      border: none;
-      color: white;
-      cursor: pointer;
-      margin-left: 5px;
+
+    .status {
+      font-weight: bold;
+      text-transform: capitalize;
     }
-    #exportBtn {
-      background: orange;
-      margin-top: 15px;
+
+    .status.pending {
+      color: yellow;
+    }
+
+    .status.successful {
+      color: lime;
+    }
+
+    .status.rejected {
+      color: red;
+    }
+
+    a.back-link {
+      display: block;
+      text-align: center;
+      margin-top: 40px;
+      color: #0ff;
+      text-decoration: none;
     }
   </style>
 </head>
 <body>
-  <h1>Admin Panel - Withdraw Requests</h1>
-  <table id="withdrawTable">
-    <thead>
-      <tr>
-        <th>User</th>
-        <th>Email</th>
-        <th>Amount</th>
-        <th>Wallet</th>
-        <th>Status</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <h1>🔐 Admin Panel</h1>
 
-  <button id="exportBtn" class="btn">⬇️ Export CSV</button>
+  <div class="section">
+    <h2>👥 Referral Activity</h2>
+    <div id="referralList" class="no-data">Loading referral data...</div>
+  </div>
+
+  <div class="section">
+    <h2>💸 Withdrawal Requests</h2>
+    <div id="withdrawalList" class="no-data">Loading withdrawal data...</div>
+  </div>
+
+  <a class="back-link" href="dashboard.html">← Back to Dashboard</a>
 
   <script>
-    const tableBody = document.querySelector('#withdrawTable tbody');
-    let withdrawals = JSON.parse(localStorage.getItem('withdrawals')) || [];
+    document.addEventListener("DOMContentLoaded", () => {
+      const users = JSON.parse(localStorage.getItem("users") || "[]");
+      const deposits = JSON.parse(localStorage.getItem("deposits") || "[]");
+      const withdrawals = JSON.parse(localStorage.getItem("withdrawals") || "[]");
 
-    function renderTable() {
-      tableBody.innerHTML = '';
-      withdrawals.forEach((entry, index) => {
-        const row = document.createElement('tr');
+      const referralList = document.getElementById("referralList");
+      const withdrawalList = document.getElementById("withdrawalList");
 
-        row.innerHTML = `
-          <td>${entry.username}</td>
-          <td>${entry.email}</td>
-          <td>${entry.amount} USDT</td>
-          <td>
-            ${entry.wallet || '-'}
-            <button class="copy-btn" onclick="copyToClipboard('${entry.wallet}')">📋</button>
-          </td>
-          <td><strong>${entry.status}</strong></td>
-          <td>
-            <button class="btn pending" onclick="updateStatus(${index}, 'Pending')">Pending</button>
-            <button class="btn completed" onclick="updateStatus(${index}, 'Completed')">Completed</button>
-            <button class="btn rejected" onclick="updateStatus(${index}, 'Rejected')">Rejected</button>
-          </td>
-        `;
-        tableBody.appendChild(row);
-      });
-    }
+      const referrals = {};
 
-    function updateStatus(index, status) {
-      withdrawals[index].status = status;
-      localStorage.setItem('withdrawals', JSON.stringify(withdrawals));
-      renderTable();
-    }
-
-    function copyToClipboard(text) {
-      navigator.clipboard.writeText(text).then(() => {
-        alert("Wallet address copied!");
-      });
-    }
-
-    function exportToCSV() {
-      let csvContent = "data:text/csv;charset=utf-8,Username,Email,Amount,Wallet,Status\n";
-      withdrawals.forEach(entry => {
-        csvContent += `${entry.username},${entry.email},${entry.amount},${entry.wallet || '-'},${entry.status}\n`;
+      users.forEach(user => {
+        if (user.ref) {
+          if (!referrals[user.ref]) referrals[user.ref] = [];
+          referrals[user.ref].push(user);
+        }
       });
 
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", "withdrawals.csv");
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
+      if (Object.keys(referrals).length === 0) {
+        referralList.textContent = "No referral data available.";
+      } else {
+        referralList.innerHTML = "";
 
-    document.getElementById('exportBtn').addEventListener('click', exportToCSV);
+        Object.entries(referrals).forEach(([refWallet, invitedUsers]) => {
+          let totalCommission = 0;
+          invitedUsers.forEach(inv => {
+            const userDeposits = deposits.filter(d => d.username === inv.username);
+            let totalWithInterest = 0;
+            userDeposits.forEach(d => {
+              const months = d.duration === "1" ? 1 : d.duration === "3" ? 3 : 5;
+              const interestRate = getInterestRate(d.amount);
+              const interest = (d.amount * interestRate * months) / 100;
+              totalWithInterest += d.amount + interest;
+            });
+            totalCommission += totalWithInterest * 0.10;
+          });
 
-    renderTable();
+          const div = document.createElement("div");
+          div.className = "user-entry";
+          div.innerHTML = `
+            <span><strong>Referrer Wallet:</strong> ${refWallet}</span>
+            <span><strong>Invited Users:</strong> ${invitedUsers.map(u => u.username).join(', ')}</span>
+            <span><strong>Total 10% Commission:</strong> ${totalCommission.toFixed(2)} USDT</span>
+          `;
+          referralList.appendChild(div);
+        });
+      }
+
+      if (withdrawals.length === 0) {
+        withdrawalList.textContent = "No withdrawal requests yet.";
+      } else {
+        withdrawalList.innerHTML = "";
+        withdrawals.forEach(req => {
+          const countdownText = getCountdownText(req.timestamp);
+          const div = document.createElement("div");
+          div.className = "withdraw-entry";
+          div.innerHTML = `
+            <span><strong>User:</strong> ${req.username}</span>
+            <span><strong>Amount:</strong> ${req.amount} USDT</span>
+            <span><strong>Status:</strong> <span class="status ${req.status}">${req.status}</span></span>
+            <span><strong>Requested:</strong> ${new Date(req.timestamp).toLocaleString()}</span>
+            <span><strong>Next eligible in:</strong> ${countdownText}</span>
+          `;
+          withdrawalList.appendChild(div);
+        });
+      }
+
+      function getInterestRate(amount) {
+        if (amount < 2000) return 3.5;
+        if (amount <= 5000) return 5.5;
+        return 7.5;
+      }
+
+      function getCountdownText(timestamp) {
+        const now = Date.now();
+        const nextTime = timestamp + 7 * 24 * 60 * 60 * 1000;
+        const diff = nextTime - now;
+        if (diff <= 0) return "✅ Now";
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const mins = Math.floor((diff / (1000 * 60)) % 60);
+        return `${days}d ${hours}h ${mins}m`;
+      }
+    });
   </script>
 </body>
 </html>
