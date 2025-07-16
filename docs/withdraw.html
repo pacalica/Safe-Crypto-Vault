@@ -1,158 +1,175 @@
+<!-- withdraw.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Withdraw - Safe Crypto Vault</title>
-  <link rel="stylesheet" href="css/styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Withdraw – Safe Crypto Vault</title>
+  <link rel="stylesheet" href="style.css" />
   <style>
-    body {
-      margin: 0;
+    body.withdraw-page {
+      background: linear-gradient(to bottom, #0d0d0d, #1a0033);
       font-family: 'Segoe UI', sans-serif;
-      background: url('img/futuristic-bg.jpg') no-repeat center center fixed;
-      background-size: cover;
       color: white;
-    }
-
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 220px;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.8);
-      padding-top: 20px;
-      box-shadow: 2px 0 10px cyan;
-    }
-
-    .sidebar a {
-      display: block;
-      color: cyan;
-      padding: 12px 20px;
-      text-decoration: none;
-      transition: 0.3s;
-    }
-
-    .sidebar a:hover {
-      background-color: violet;
-      color: black;
-    }
-
-    .main {
-      margin-left: 240px;
-      padding: 20px;
-    }
-
-    .form-box {
-      background: rgba(0, 0, 0, 0.6);
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 15px violet;
-      max-width: 400px;
-      margin: auto;
+      padding: 40px 20px;
       text-align: center;
     }
 
-    input {
-      padding: 10px;
-      width: 90%;
-      margin-bottom: 15px;
-      border-radius: 6px;
+    .container {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 30px;
+      border-radius: 15px;
+      max-width: 400px;
+      margin: auto;
+      box-shadow: 0 0 15px #00ffff88;
+    }
+
+    h1 {
+      margin-bottom: 25px;
+      color: #00ffff;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
       border: none;
+      margin-bottom: 15px;
+      background-color: #222;
+      color: #fff;
     }
 
     button {
-      padding: 10px 20px;
-      background-color: cyan;
+      padding: 12px 20px;
+      background-color: #00ffff;
+      color: #000;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
+      font-weight: bold;
       cursor: pointer;
+      transition: background-color 0.3s ease;
     }
 
     button:hover {
-      background-color: violet;
-      color: black;
+      background-color: #00cccc;
     }
 
-    .back-btn {
-      position: fixed;
-      top: 15px;
-      right: 15px;
-      background: violet;
-      color: black;
+    #countdownBox {
+      color: #ffcc00;
+      font-weight: bold;
+      margin-top: 15px;
+    }
+
+    #statusMessage {
+      margin-bottom: 15px;
+      color: #ff6666;
+      font-weight: bold;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 30px;
+      color: #0ff;
+      text-decoration: none;
     }
   </style>
 </head>
-<body>
-  <div class="sidebar">
-    <a href="dashboard.html">Dashboard</a>
-    <a href="deposit.html">Open Deposit</a>
-    <a href="withdraw.html">Withdraw</a>
-    <a href="history.html">History</a>
-    <a href="team.html">My Team</a>
-    <a href="settings.html">Settings</a>
-  </div>
+<body class="withdraw-page">
+  <div class="container">
+    <h1>💸 Withdraw Funds</h1>
 
-  <div class="main">
-    <h2>Withdraw Funds</h2>
-    <div class="form-box">
-      <p>Balance: <span id="balanceDisplay">0</span> USDT</p>
-      <input type="number" id="amount" placeholder="Amount to withdraw" />
-      <button onclick="requestWithdrawal()">Request Withdrawal</button>
-      <p id="message"></p>
-    </div>
-  </div>
+    <div id="statusMessage"></div>
 
-  <button class="back-btn" onclick="goBack()">← Back</button>
+    <form id="withdrawForm">
+      <label for="withdrawAmount">Amount to withdraw (USDT)</label>
+      <input type="number" id="withdrawAmount" min="1" step="0.01" required />
+
+      <button type="submit">Request Withdrawal</button>
+    </form>
+
+    <div id="countdownBox"></div>
+
+    <a href="dashboard.html" class="back-link">← Back to Dashboard</a>
+  </div>
 
   <script>
-    function goBack() {
-      window.location.href = "dashboard.html";
-    }
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("withdrawForm");
+      const withdrawAmount = document.getElementById("withdrawAmount");
+      const statusMessage = document.getElementById("statusMessage");
+      const countdownBox = document.getElementById("countdownBox");
 
-    const username = localStorage.getItem("username");
-    const balance = parseFloat(localStorage.getItem("balance") || "0");
-    const withdrawals = JSON.parse(localStorage.getItem("withdrawals") || "[]");
-    const pending = withdrawals.find(w => w.username === username && w.status === "pending");
+      const username = localStorage.getItem("user_name");
+      if (!username) return (window.location.href = "login.html");
 
-    document.getElementById("balanceDisplay").textContent = balance;
+      const withdrawals = JSON.parse(localStorage.getItem("withdrawals") || "[]");
 
-    function requestWithdrawal() {
-      const amount = parseFloat(document.getElementById("amount").value);
-      const msg = document.getElementById("message");
-      msg.textContent = "";
+      const lastWithdraw = withdrawals
+        .filter(w => w.username === username)
+        .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
 
-      if (!amount || amount <= 0) {
-        msg.textContent = "Enter a valid amount.";
-        return;
-      }
+      const now = new Date();
+      const nextAllowedDate = lastWithdraw
+        ? new Date(new Date(lastWithdraw.date).getTime() + 7 * 24 * 60 * 60 * 1000)
+        : null;
+
+      const pending = withdrawals.find(
+        w => w.username === username && w.status === "pending"
+      );
 
       if (pending) {
-        msg.textContent = "Denied. You have a withdrawal request in pending.";
-        return;
+        form.style.display = "none";
+        statusMessage.textContent = `⚠️ You already have a pending withdrawal of ${pending.amount} USDT`;
+      } else if (nextAllowedDate && nextAllowedDate > now) {
+        form.style.display = "none";
+        showCountdown(nextAllowedDate);
       }
 
-      if (amount > balance) {
-        msg.textContent = "Denied. Insufficient balance.";
-        return;
+      form.addEventListener("submit", e => {
+        e.preventDefault();
+        const amount = parseFloat(withdrawAmount.value);
+
+        if (isNaN(amount) || amount <= 0) {
+          statusMessage.textContent = "Invalid amount.";
+          return;
+        }
+
+        const withdrawal = {
+          username,
+          amount,
+          date: now.toISOString(),
+          status: "pending"
+        };
+
+        withdrawals.push(withdrawal);
+        localStorage.setItem("withdrawals", JSON.stringify(withdrawals));
+        statusMessage.style.color = "#00ff99";
+        statusMessage.textContent = "✅ Withdrawal request submitted!";
+        form.style.display = "none";
+
+        showCountdown(new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000));
+      });
+
+      function showCountdown(targetDate) {
+        function updateCountdown() {
+          const remaining = targetDate - new Date();
+          if (remaining <= 0) {
+            countdownBox.textContent = "✅ You can now request a new withdrawal.";
+            return;
+          }
+
+          const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((remaining / (1000 * 60 * 60)) % 24);
+          const minutes = Math.floor((remaining / (1000 * 60)) % 60);
+          const seconds = Math.floor((remaining / 1000) % 60);
+
+          countdownBox.textContent = `⏳ Next withdrawal available in ${days}d ${hours}h ${minutes}m ${seconds}s`;
+          setTimeout(updateCountdown, 1000);
+        }
+
+        updateCountdown();
       }
-
-      const newBalance = balance - amount;
-      localStorage.setItem("balance", newBalance.toString());
-
-      const withdrawal = {
-        username,
-        amount,
-        date: new Date().toLocaleString(),
-        status: "pending"
-      };
-
-      withdrawals.push(withdrawal);
-      localStorage.setItem("withdrawals", JSON.stringify(withdrawals));
-
-      msg.textContent = "Withdrawal request submitted.";
-      document.getElementById("balanceDisplay").textContent = newBalance;
-    }
+    });
   </script>
 </body>
 </html>
