@@ -3,110 +3,120 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>History - Safe Crypto Vault</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Withdrawal History</title>
   <style>
-    .history-table {
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #000;
+      color: #fff;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 20px;
+      background: #111;
+      border-radius: 10px;
+    }
+
+    h2 {
+      text-align: center;
+      color: cyan;
+    }
+
+    table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 20px;
     }
 
-    .history-table th,
-    .history-table td {
-      border: 1px solid cyan;
+    th, td {
       padding: 10px;
       text-align: center;
+      border-bottom: 1px solid #444;
     }
 
-    .history-table th {
-      background: #111;
+    th {
+      background-color: #222;
       color: cyan;
     }
 
-    .status {
+    .status-btn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
       font-weight: bold;
-      padding: 4px 8px;
-      border-radius: 4px;
+      color: white;
+      cursor: default;
     }
 
-    .pending {
-      color: orange;
+    .status-btn.pending {
+      background-color: #3498db;
     }
 
-    .successful {
-      color: lime;
+    .status-btn.completed {
+      background-color: #2ecc71;
     }
 
-    .rejected {
-      color: red;
+    .status-btn.rejected {
+      background-color: #e74c3c;
     }
 
-    .no-data {
-      margin-top: 20px;
-      background: #111;
-      padding: 15px;
-      border-left: 4px solid cyan;
+    @media (max-width: 768px) {
+      .container {
+        padding: 10px;
+      }
+
+      th, td {
+        font-size: 14px;
+        padding: 6px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="main-container">
-    <div class="sidebar">
-      <h2>Vault Menu</h2>
-      <ul>
-        <li onclick="goTo('dashboard.html')">Dashboard</li>
-        <li onclick="goTo('deposit.html')">Open Deposit</li>
-        <li onclick="goTo('withdraw.html')">Withdraw</li>
-        <li onclick="goTo('history.html')">History</li>
-        <li onclick="goTo('team.html')">My Team</li>
-        <li onclick="goTo('affiliate.html')">Affiliate Link</li>
-        <li onclick="goTo('settings.html')">Settings</li>
-        <li onclick="goTo('security.html')">Security</li>
-        <li onclick="logout()">Exit</li>
-      </ul>
-    </div>
-
-    <div class="content">
-      <h1>Withdraw History</h1>
-
-      <div id="historyContainer"></div>
-    </div>
+  <div class="container">
+    <h2>Withdrawal History</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Amount (USDT)</th>
+          <th>Date</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="historyBody">
+        <!-- Retragerile vor fi afișate aici -->
+      </tbody>
+    </table>
   </div>
 
-  <script src="js/script.js"></script>
   <script>
-    const historyContainer = document.getElementById('historyContainer');
-    const history = JSON.parse(localStorage.getItem('withdrawHistory') || '[]');
+    const historyBody = document.getElementById('historyBody');
+    const currentUser = localStorage.getItem('username');
+    const allRequests = JSON.parse(localStorage.getItem('withdrawals') || '[]');
 
-    if (history.length === 0) {
-      historyContainer.innerHTML = `<div class="no-data">You have no withdrawal history.</div>`;
-    } else {
-      let html = `
-        <table class="history-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Amount (USDT)</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
+    const userRequests = allRequests.filter(req => req.username === currentUser);
+
+    userRequests.forEach(req => {
+      const row = document.createElement('tr');
+      const statusClass = req.status === 'pending' ? 'pending' :
+                          req.status === 'completed' ? 'completed' :
+                          'rejected';
+
+      row.innerHTML = `
+        <td>${req.username}</td>
+        <td>${req.email}</td>
+        <td>${req.amount}</td>
+        <td>${req.date}</td>
+        <td><button class="status-btn ${statusClass}">${req.status}</button></td>
       `;
-
-      history.reverse().forEach(item => {
-        html += `
-          <tr>
-            <td>${item.date}</td>
-            <td>${item.amount}</td>
-            <td><span class="status ${item.status}">${item.status}</span></td>
-          </tr>
-        `;
-      });
-
-      html += '</tbody></table>';
-      historyContainer.innerHTML = html;
-    }
+      historyBody.appendChild(row);
+    });
   </script>
 </body>
 </html>
