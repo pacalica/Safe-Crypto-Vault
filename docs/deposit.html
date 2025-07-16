@@ -1,4 +1,3 @@
-<!-- deposit.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -45,12 +44,20 @@
     </div>
   </div>
 
+  <!-- QR Code lib -->
   <script src="https://cdn.jsdelivr.net/npm/qrious/dist/qrious.min.js"></script>
+
+  <!-- EmailJS -->
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <script>
+    emailjs.init("7_PGCuxLtg1WCWvU0"); // Replace with your EmailJS user ID
+  </script>
+
   <script>
     const user = JSON.parse(localStorage.getItem("loggedInUser"));
     if (!user) window.location.href = "login.html";
 
-    // QR code
+    // QR Code generate
     const qr = new QRious({
       element: document.getElementById("qrCanvas"),
       value: "0x124377FCe14439248a4959ce528314aA3A897321",
@@ -66,6 +73,7 @@
         return;
       }
 
+      // Save deposit in localStorage
       const deposits = JSON.parse(localStorage.getItem("deposits") || "[]");
       deposits.push({
         wallet: user.wallet,
@@ -77,8 +85,20 @@
       });
       localStorage.setItem("deposits", JSON.stringify(deposits));
 
-      alert("Deposit submitted. Await confirmation from admin.");
-      window.location.href = "dashboard.html";
+      // Send email via EmailJS
+      emailjs.send("service_mnaa5dl", "template_2pbn9v4", {
+        username: user.username,
+        wallet: user.wallet,
+        amount: amount.toString(),
+        duration: duration
+      }).then(() => {
+        alert("Deposit submitted & email sent. Await admin confirmation.");
+        window.location.href = "dashboard.html";
+      }).catch((error) => {
+        console.error("Email error:", error);
+        alert("Deposit saved, but email failed.");
+        window.location.href = "dashboard.html";
+      });
     }
 
     function logout() {
