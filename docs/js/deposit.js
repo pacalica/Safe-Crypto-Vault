@@ -1,69 +1,87 @@
-document.addEventListener("DOMContentLoaded", function () {
-  // Dacă există referal în URL, îl salvăm
-  const urlParams = new URLSearchParams(window.location.search);
-  const ref = urlParams.get("ref");
-  if (ref) {
-    localStorage.setItem("vault_ref", ref);
+document.getElementById("confirmDeposit").addEventListener("click", () => {
+  const amount = parseFloat(document.getElementById("depositAmount").value);
+  const plan = document.getElementById("planSelect").value;
+
+  const user = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
+  if (!user.email || !user.username) {
+    alert("User not logged in.");
+    window.location.href = "login.html";
+    return;
   }
 
-  // Inițializare EmailJS
-  emailjs.init("7_PGCuxLtg1WCWvU0");
-});
-
-function copyAddress() {
-  const addressInput = document.getElementById("depositAddress");
-  addressInput.select();
-  addressInput.setSelectionRange(0, 99999);
-  document.execCommand("copy");
-  alert("Deposit address copied!");
-}
-
-function confirmDeposit() {
-  const amount = parseFloat(document.getElementById("amountSent").value);
-  if (isNaN(amount) || amount <= 0) {
+  if (!amount || amount <= 0) {
     alert("Please enter a valid amount.");
     return;
   }
 
-  const user = JSON.parse(localStorage.getItem("userData"));
-  if (!user || !user.email || !user.username) {
-    alert("User data missing. Please log in again.");
-    return;
-  }
-
-  // Salvăm suma totală investită
-  localStorage.setItem("vault_deposit", amount.toString());
-
-  // Simulăm salvarea într-un istoric local
-  const history = JSON.parse(localStorage.getItem("vault_history") || "[]");
-  history.push({
-    type: "deposit",
-    amount: amount,
-    date: new Date().toISOString(),
-    status: "confirmed"
-  });
-  localStorage.setItem("vault_history", JSON.stringify(history));
-
-  // Trimite email către administrator
-  const emailParams = {
-    to_email: "policagabrielvictor@gmail.com",  // Email-ul tău de admin
-    username: user.username,
-    amount: amount,
-    tx_hash: "manual"
+  const plans = {
+    "1month": 3.5,
+    "3months": 5.5,
+    "5months": 7.5
   };
 
-  emailjs.send("service_mnaa5dl", "template_2pbn9v4", emailParams)
-    .then(res => {
-      console.log("✅ Email de depunere trimis către admin:", res.status);
-    })
-    .catch(err => {
-      console.error("❌ Eroare trimitere email depunere:", err);
+  const interest = plans[plan];
+  const depositDate = new Date();
+  const depositTimestamp = depositDate.getTime();
+
+  const deposit = {
+    email: user.email,
+    username: user.username,
+    amount,
+    plan,
+    interest,
+    depositDate: depositDate.toLocaleDateString(),
+    depositTime: depositDate.toLocaleTimeString(),
+    timestamp: depositTimestamp,
+    status: "pending"
+  };
+
+  // Salvează în istoric
+  const deposits = JSON.parse(localStorage.getItem("deposits") || "[]");
+  deposits.push(deposit);
+  localStorage.setItem("deposits", JSON.stringify(deposits));
+
+  // Salvează și în earnings
+  const earnings = JSON.parse(localStorage.getItem("earnings") || "[]");
+  earnings.push({
+    email: user.email,
+    amount,
+    plan,
+    interest,
+    timestamp: depositTimestamp,
+    earned: 0
+  });
+  localStorage.setItem("earnings", JSON.stringify(earnings));
+
+  // Referral
+  const refWallet = localStorage.getItem("refWallet");
+  if (refWallet && refWallet !== user.wallet) {
+    const referrals = JSON.parse(localStorage.getItem("referrals") || "[]");
+    referrals.push({
+      from: user.wallet,
+      to: refWallet,
+      level: 1,
+      amount: amount * 0.02
     });
+    localStorage.setItem("referrals", JSON.stringify(referrals));
+  }
 
-  alert("✅ Deposit saved. Redirecting to dashboard...");
+  // Trimite email
+  fetch("https://formspree.io/f/xyyrddrw", {
+    method: "POST",
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email: "safecryptovault@gmail.com",
+      subject: "💰 New Deposit Confirmed",
+      message: `
+        User: ${user.username} (${user.email})\n
+        Amount: ${amount} USDT\n
+        Plan: ${plan} (${interest}% interest)\n
+        Date: ${depositDate.toLocaleDateString()} - ${depositDate.toLocaleTimeString()}
+      `
+    })
+  });
+
+  alert("Deposit submitted! You'll see it in History shortly.");
   window.location.href = "dashboard.html";
-}
-
-function logout() {
-  localStorage.clear();
-}
+});
