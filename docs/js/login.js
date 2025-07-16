@@ -1,47 +1,54 @@
-window.onload = () => {
-  // Autocompletare dacă există date salvate
-  document.getElementById('email').value = localStorage.getItem('email') || '';
-  document.getElementById('username').value = localStorage.getItem('username') || '';
-  const savedPass = localStorage.getItem('password');
-  if (savedPass) {
-    document.getElementById('password').value = atob(savedPass);
-    document.getElementById('rememberPass').checked = true;
-  }
-};
+// login.js
 
-function login() {
-  const email = document.getElementById('email').value.trim();
-  const username = document.getElementById('username').value.trim();
-  const password = document.getElementById('password').value;
-  const remember = document.getElementById('rememberPass').checked;
+window.addEventListener('DOMContentLoaded', () => {
+  const emailInput = document.getElementById('email');
+  const usernameInput = document.getElementById('username');
+  const passwordInput = document.getElementById('password');
+  const togglePassword = document.getElementById('togglePassword');
+  const rememberCheckbox = document.getElementById('rememberPassword');
+  const loginForm = document.getElementById('loginForm');
 
-  // Validare email
-  if (!email.includes('@') || !email.includes('.')) {
-    alert('Please enter a valid email address.');
-    return;
+  // 🧠 Auto-complete dacă există salvare
+  if (localStorage.getItem('rememberPassword') === 'true') {
+    emailInput.value = localStorage.getItem('email') || '';
+    usernameInput.value = localStorage.getItem('username') || '';
+    passwordInput.value = localStorage.getItem('password') || '';
+    rememberCheckbox.checked = true;
   }
 
-  // Validare username
-  if (username.length < 3) {
-    alert('Username must be at least 3 characters.');
-    return;
-  }
+  // 👁️ Toggle vizibilitate parolă
+  togglePassword.addEventListener('click', () => {
+    const isPassword = passwordInput.type === 'password';
+    passwordInput.type = isPassword ? 'text' : 'password';
+    togglePassword.textContent = isPassword ? '🙈' : '👁️';
+  });
 
-  // Validare parolă
-  if (password.length < 4) {
-    alert('Password must be at least 4 characters.');
-    return;
-  }
+  // 📥 Login
+  loginForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const email = emailInput.value.trim();
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value;
 
-  // Salvare în localStorage
-  localStorage.setItem('email', email);
-  localStorage.setItem('username', username);
-  if (remember) {
-    localStorage.setItem('password', btoa(password));
-  } else {
-    localStorage.removeItem('password');
-  }
+    // Salvare locală
+    if (rememberCheckbox.checked) {
+      localStorage.setItem('rememberPassword', 'true');
+      localStorage.setItem('email', email);
+      localStorage.setItem('username', username);
+      localStorage.setItem('password', password);
+    } else {
+      localStorage.removeItem('rememberPassword');
+      localStorage.removeItem('email');
+      localStorage.removeItem('username');
+      localStorage.removeItem('password');
+    }
 
-  // Redirecționare
-  window.location.href = 'dashboard.html';
-}
+    // 🔐 Salvare pentru sesiune
+    localStorage.setItem('user_email', email);
+    localStorage.setItem('user_name', username);
+    localStorage.setItem('user_logged_in', 'true');
+
+    // Redirectare către aplicație
+    window.location.href = 'dashboard.html';
+  });
+});
