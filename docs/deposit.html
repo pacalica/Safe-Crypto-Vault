@@ -2,181 +2,238 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Deposit - Safe Crypto Vault</title>
-  <link rel="stylesheet" href="css/styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Safe Crypto Vault – Deposit</title>
   <style>
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: url('img/futuristic-bg.jpg') no-repeat center center fixed;
-      background-size: cover;
-      color: white;
+      background: #000;
+      color: #fff;
+    }
+
+    .container {
+      display: flex;
+      min-height: 100vh;
     }
 
     .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 220px;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.8);
-      padding-top: 20px;
-      box-shadow: 2px 0 10px cyan;
+      width: 240px;
+      background-color: #111;
+      padding: 20px;
+      box-sizing: border-box;
     }
 
-    .sidebar a {
-      display: block;
+    .sidebar h2 {
       color: cyan;
-      padding: 12px 20px;
-      text-decoration: none;
-      transition: 0.3s;
+      margin-bottom: 20px;
     }
 
-    .sidebar a:hover {
-      background-color: violet;
-      color: black;
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .sidebar ul li {
+      margin: 10px 0;
+      cursor: pointer;
+      color: #ccc;
+    }
+
+    .sidebar ul li:hover {
+      color: cyan;
     }
 
     .main {
-      margin-left: 240px;
-      padding: 20px;
+      flex-grow: 1;
+      padding: 30px;
+      box-sizing: border-box;
     }
 
-    .form-box {
-      background: rgba(0, 0, 0, 0.6);
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 15px violet;
-      max-width: 400px;
-      margin: auto;
-      text-align: center;
+    h1 {
+      color: cyan;
+    }
+
+    label {
+      display: block;
+      margin-top: 20px;
     }
 
     input, select {
       padding: 10px;
-      width: 90%;
-      margin-bottom: 15px;
-      border-radius: 6px;
+      width: 100%;
+      margin-top: 8px;
+      border-radius: 5px;
       border: none;
+      background: #222;
+      color: #fff;
     }
 
     button {
-      padding: 10px 20px;
-      background-color: cyan;
+      margin-top: 30px;
+      padding: 12px 20px;
       border: none;
-      border-radius: 6px;
+      background-color: cyan;
+      color: black;
+      font-weight: bold;
       cursor: pointer;
+      border-radius: 5px;
     }
 
-    button:hover {
-      background-color: violet;
-      color: black;
+    .result {
+      margin-top: 20px;
+      background: #111;
+      padding: 15px;
+      border-left: 3px solid cyan;
     }
 
-    .back-btn {
-      position: fixed;
-      top: 15px;
-      right: 15px;
-      background: violet;
-      color: black;
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="sidebar">
-    <a href="dashboard.html">Dashboard</a>
-    <a href="deposit.html">Open Deposit</a>
-    <a href="withdraw.html">Withdraw</a>
-    <a href="history.html">History</a>
-    <a href="team.html">My Team</a>
-    <a href="settings.html">Settings</a>
-  </div>
+  <div class="container">
+    <div class="sidebar">
+      <h2>Vault Menu</h2>
+      <ul>
+        <li onclick="location.href='dashboard.html'">Dashboard</li>
+        <li onclick="location.href='deposit.html'">Deposit</li>
+        <li onclick="location.href='withdraw.html'">Withdraw</li>
+        <li onclick="location.href='history.html'">History</li>
+        <li onclick="location.href='team.html'">My Team</li>
+        <li onclick="location.href='referral.html'">Affiliate Link</li>
+        <li onclick="location.href='settings.html'">Settings</li>
+        <li onclick="location.href='security.html'">Security</li>
+        <li onclick="logout()">Exit</li>
+      </ul>
+    </div>
 
-  <div class="main">
-    <h2>Open New Deposit</h2>
-    <div class="form-box">
-      <p>Current Balance: <span id="balanceDisplay">0</span> USDT</p>
-      <input type="number" id="amount" placeholder="Amount to deposit" />
-      <select id="duration">
-        <option value="1">1 month</option>
-        <option value="3">3 months</option>
-        <option value="5">5 months</option>
-      </select>
-      <button onclick="simulate()">Simulate Plan</button>
-      <p id="planResult"></p>
-      <button onclick="confirmDeposit()">Confirm Deposit</button>
-      <p id="message"></p>
+    <div class="main">
+      <h1>Open New Deposit</h1>
+
+      <div>
+        <label>Available Balance (USDT):</label>
+        <div id="balance">Loading...</div>
+
+        <label>Deposit Amount (USDT):</label>
+        <input type="number" id="amount" placeholder="Enter amount" />
+
+        <label>Select Duration:</label>
+        <select id="duration">
+          <option value="1">1 month</option>
+          <option value="3">3 months</option>
+          <option value="5">5 months</option>
+        </select>
+
+        <div class="result" id="summary">
+          <strong>Interest:</strong> 0% <br />
+          <strong>Estimated Earnings:</strong> 0 USDT <br />
+          <strong>Total After Period:</strong> 0 USDT
+        </div>
+
+        <button onclick="confirmDeposit()">Confirm Deposit</button>
+      </div>
     </div>
   </div>
 
-  <button class="back-btn" onclick="window.location.href='dashboard.html'">← Back</button>
-
   <script>
-    const username = localStorage.getItem("username");
-    let balance = parseFloat(localStorage.getItem("balance") || "0");
-    document.getElementById("balanceDisplay").textContent = balance.toFixed(2);
+    const balanceEl = document.getElementById("balance");
+    const amountEl = document.getElementById("amount");
+    const durationEl = document.getElementById("duration");
+    const summaryEl = document.getElementById("summary");
 
-    function getInterestRate(amount) {
-      if (amount < 2000) return 3.5;
-      if (amount < 5000) return 5.5;
-      return 7.5;
+    function getUserBalance() {
+      const deposits = JSON.parse(localStorage.getItem("deposits") || "[]");
+      const withdrawals = JSON.parse(localStorage.getItem("withdrawals") || "[]");
+
+      let totalDeposits = deposits.reduce((sum, d) => sum + parseFloat(d.amount), 0);
+      let totalWithdrawals = withdrawals.reduce((sum, w) => sum + parseFloat(w.amount), 0);
+
+      return totalDeposits - totalWithdrawals;
     }
 
-    function simulate() {
-      const amount = parseFloat(document.getElementById("amount").value);
-      const duration = parseInt(document.getElementById("duration").value);
-      const result = document.getElementById("planResult");
+    function updateBalanceDisplay() {
+      const balance = getUserBalance();
+      balanceEl.innerText = `${balance.toFixed(2)} USDT`;
+    }
 
-      if (!amount || amount <= 0) {
-        result.textContent = "Enter a valid amount.";
-        return;
-      }
+    function calculateInterest(amount, duration) {
+      let rate = 0;
+      if (amount >= 0 && amount < 2000) rate = 3.5;
+      else if (amount >= 2000 && amount < 5000) rate = 5.5;
+      else if (amount >= 5000 && amount <= 10000) rate = 7.5;
 
-      const rate = getInterestRate(amount);
-      const totalReturn = amount + (amount * rate / 100 * duration);
-      result.innerHTML = `
-        Plan: ${duration} months<br>
-        Interest: ${rate}% / month<br>
-        Total return: ${totalReturn.toFixed(2)} USDT
+      const earnings = (amount * (rate / 100) * duration);
+      return {
+        rate,
+        earnings,
+        total: amount + earnings
+      };
+    }
+
+    function updateSummary() {
+      const amount = parseFloat(amountEl.value) || 0;
+      const duration = parseInt(durationEl.value);
+
+      const { rate, earnings, total } = calculateInterest(amount, duration);
+
+      summaryEl.innerHTML = `
+        <strong>Interest:</strong> ${rate}%<br />
+        <strong>Estimated Earnings:</strong> ${earnings.toFixed(2)} USDT<br />
+        <strong>Total After Period:</strong> ${total.toFixed(2)} USDT
       `;
     }
 
     function confirmDeposit() {
-      const amount = parseFloat(document.getElementById("amount").value);
-      const duration = parseInt(document.getElementById("duration").value);
-      const msg = document.getElementById("message");
+      const amount = parseFloat(amountEl.value);
+      const duration = parseInt(durationEl.value);
+      const username = localStorage.getItem("username");
 
       if (!amount || amount <= 0) {
-        msg.textContent = "Enter a valid amount.";
+        alert("Please enter a valid deposit amount.");
         return;
       }
 
+      const balance = getUserBalance();
       if (amount > balance) {
-        msg.textContent = "Insufficient balance.";
+        alert("Insufficient balance.");
         return;
       }
 
-      const rate = getInterestRate(amount);
-      const totalReturn = amount + (amount * rate / 100 * duration);
-      const deposits = JSON.parse(localStorage.getItem("deposits") || "[]");
+      const { rate } = calculateInterest(amount, duration);
 
-      deposits.push({
+      const newDeposit = {
         username,
         amount,
         duration,
-        rate,
-        totalReturn: totalReturn.toFixed(2),
-        start: new Date().toLocaleDateString(),
-      });
+        interest: rate,
+        startDate: new Date().toISOString()
+      };
 
-      balance -= amount;
+      const deposits = JSON.parse(localStorage.getItem("deposits") || "[]");
+      deposits.push(newDeposit);
       localStorage.setItem("deposits", JSON.stringify(deposits));
-      localStorage.setItem("balance", balance.toString());
 
-      document.getElementById("balanceDisplay").textContent = balance.toFixed(2);
-      msg.textContent = "Deposit successful.";
+      alert("Deposit confirmed!");
+      window.location.href = "dashboard.html";
     }
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = "login.html";
+    }
+
+    amountEl.addEventListener("input", updateSummary);
+    durationEl.addEventListener("change", updateSummary);
+
+    updateBalanceDisplay();
+    updateSummary();
   </script>
 </body>
 </html>
