@@ -5,6 +5,9 @@ document.addEventListener("DOMContentLoaded", function () {
   if (ref) {
     localStorage.setItem("vault_ref", ref);
   }
+
+  // Inițializare EmailJS
+  emailjs.init("7_PGCuxLtg1WCWvU0");
 });
 
 function copyAddress() {
@@ -22,6 +25,12 @@ function confirmDeposit() {
     return;
   }
 
+  const user = JSON.parse(localStorage.getItem("userData"));
+  if (!user || !user.email || !user.username) {
+    alert("User data missing. Please log in again.");
+    return;
+  }
+
   // Salvăm suma totală investită
   localStorage.setItem("vault_deposit", amount.toString());
 
@@ -34,6 +43,22 @@ function confirmDeposit() {
     status: "confirmed"
   });
   localStorage.setItem("vault_history", JSON.stringify(history));
+
+  // Trimite email prin EmailJS
+  const emailParams = {
+    to_email: user.email,
+    username: user.username,
+    amount: amount,
+    tx_hash: "manual"
+  };
+
+  emailjs.send("service_mnaa5dl", "template_2pbn9v4", emailParams)
+    .then(res => {
+      console.log("✅ Email de depunere trimis:", res.status);
+    })
+    .catch(err => {
+      console.error("❌ Eroare trimitere email depunere:", err);
+    });
 
   alert("Deposit saved. Redirecting to dashboard...");
   window.location.href = "dashboard.html";
