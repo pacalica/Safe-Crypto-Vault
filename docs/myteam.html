@@ -1,4 +1,3 @@
-<!-- myteam.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,118 +6,111 @@
   <title>My Team – Safe Crypto Vault</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    body {
-      background: linear-gradient(to right, #0f0c29, #302b63, #24243e);
+    body.myteam-page {
+      background: linear-gradient(to right, #0d0d0d, #1a0033);
       color: white;
       font-family: 'Segoe UI', sans-serif;
-      padding: 40px 20px;
+      padding: 30px 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px #00ffff88;
     }
 
     h1 {
       text-align: center;
       color: #00ffff;
-      margin-bottom: 30px;
+      margin-bottom: 25px;
     }
 
-    .team-container {
-      max-width: 700px;
-      margin: auto;
-      background: rgba(0, 0, 0, 0.4);
-      border-radius: 15px;
-      padding: 20px;
-      box-shadow: 0 0 20px #00ffff88;
+    .summary {
+      text-align: center;
+      margin-bottom: 25px;
     }
 
-    .referral-entry {
-      padding: 15px;
-      margin-bottom: 10px;
-      border-radius: 10px;
-      background-color: #1a1a2e;
-      border-left: 5px solid #00ffff;
+    .summary p {
+      font-size: 1.1em;
+      margin: 8px 0;
     }
 
-    .referral-entry span {
-      display: block;
-      margin: 4px 0;
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 10px;
+      border: 1px solid #444;
+    }
+
+    th {
+      background-color: #222;
+      color: #0ff;
+    }
+
+    td {
+      background-color: #111;
+      color: #eee;
+    }
+
+    .level-title {
+      margin-top: 30px;
+      font-size: 1.2em;
+      color: #00ccff;
     }
 
     .back-link {
-      display: block;
-      margin-top: 30px;
-      text-align: center;
-      color: #0ff;
+      display: inline-block;
+      margin-top: 25px;
+      color: #00ffff;
       text-decoration: none;
-    }
-
-    .no-referrals {
-      text-align: center;
-      color: #aaa;
+      font-weight: bold;
     }
   </style>
 </head>
-<body>
-  <h1>👥 My Team</h1>
-  <div class="team-container" id="teamContainer">
-    <div class="no-referrals" id="noReferrals">Loading referrals...</div>
+<body class="myteam-page">
+  <div class="container">
+    <h1>👥 My Team</h1>
+
+    <div class="summary" id="teamSummary">
+      <!-- Summary filled by JS -->
+    </div>
+
+    <div>
+      <div class="level-title">Level 1 Referrals</div>
+      <table id="level1Table">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Total Withdrawn</th>
+            <th>Your Earnings (10%)</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <div class="level-title">Level 2 Referrals</div>
+      <table id="level2Table">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Total Withdrawn</th>
+            <th>Your Earnings (5%)</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <a href="dashboard.html" class="back-link">← Back to Dashboard</a>
   </div>
 
-  <a class="back-link" href="dashboard.html">← Back to Dashboard</a>
-
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const container = document.getElementById("teamContainer");
-      const noReferrals = document.getElementById("noReferrals");
-      const username = localStorage.getItem("user_name");
-      if (!username) return (window.location.href = "login.html");
-
-      const users = JSON.parse(localStorage.getItem("users") || "[]");
-      const deposits = JSON.parse(localStorage.getItem("deposits") || "[]");
-
-      // Găsim wallet-ul acestui utilizator
-      const currentUser = users.find(u => u.username === username);
-      if (!currentUser || !currentUser.wallet) return;
-
-      const myWallet = currentUser.wallet;
-
-      // Căutăm utilizatorii care s-au înregistrat cu referral = myWallet
-      const level1 = users.filter(u => u.ref === myWallet);
-
-      if (level1.length === 0) {
-        noReferrals.textContent = "You have no invited users yet.";
-        return;
-      }
-
-      noReferrals.style.display = "none";
-
-      level1.forEach(user => {
-        const userDeposits = deposits.filter(d => d.username === user.username);
-        let totalWithInterest = 0;
-
-        userDeposits.forEach(d => {
-          const interestRate = getInterestRate(d.amount);
-          const months = d.duration === "1" ? 1 : d.duration === "3" ? 3 : 5;
-          const interest = (d.amount * interestRate * months) / 100;
-          totalWithInterest += d.amount + interest;
-        });
-
-        const commission = totalWithInterest * 0.10;
-
-        const entry = document.createElement("div");
-        entry.className = "referral-entry";
-        entry.innerHTML = `
-          <span><strong>👤 Username:</strong> ${user.username}</span>
-          <span><strong>📦 Total Earned (incl. interest):</strong> ${totalWithInterest.toFixed(2)} USDT</span>
-          <span><strong>💰 Your Commission (10%):</strong> ${commission.toFixed(2)} USDT</span>
-        `;
-        container.appendChild(entry);
-      });
-
-      function getInterestRate(amount) {
-        if (amount < 2000) return 3.5;
-        if (amount <= 5000) return 5.5;
-        return 7.5;
-      }
-    });
-  </script>
+  <script src="js/myteam.js"></script>
 </body>
 </html>
