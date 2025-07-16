@@ -1,22 +1,47 @@
-document.addEventListener("DOMContentLoaded", function () {
-  const form = document.getElementById("loginForm");
+window.onload = () => {
+  // Autocompletare dacă există date salvate
+  document.getElementById('email').value = localStorage.getItem('email') || '';
+  document.getElementById('username').value = localStorage.getItem('username') || '';
+  const savedPass = localStorage.getItem('password');
+  if (savedPass) {
+    document.getElementById('password').value = atob(savedPass);
+    document.getElementById('rememberPass').checked = true;
+  }
+};
 
-  // Verificare autologin
-  const savedEmail = localStorage.getItem("vault_email");
-  const savedUsername = localStorage.getItem("vault_username");
-  if (savedEmail && savedUsername) {
-    window.location.href = "dashboard.html";
+function login() {
+  const email = document.getElementById('email').value.trim();
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+  const remember = document.getElementById('rememberPass').checked;
+
+  // Validare email
+  if (!email.includes('@') || !email.includes('.')) {
+    alert('Please enter a valid email address.');
+    return;
   }
 
-  form.addEventListener("submit", function (e) {
-    e.preventDefault();
-    const email = document.getElementById("email").value.trim();
-    const username = document.getElementById("username").value.trim();
+  // Validare username
+  if (username.length < 3) {
+    alert('Username must be at least 3 characters.');
+    return;
+  }
 
-    if (email && username) {
-      localStorage.setItem("vault_email", email);
-      localStorage.setItem("vault_username", username);
-      window.location.href = "dashboard.html";
-    }
-  });
-});
+  // Validare parolă
+  if (password.length < 4) {
+    alert('Password must be at least 4 characters.');
+    return;
+  }
+
+  // Salvare în localStorage
+  localStorage.setItem('email', email);
+  localStorage.setItem('username', username);
+  if (remember) {
+    localStorage.setItem('password', btoa(password));
+  } else {
+    localStorage.removeItem('password');
+  }
+
+  // Redirecționare
+  window.location.href = 'dashboard.html';
+}
