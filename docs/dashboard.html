@@ -2,126 +2,107 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Safe Crypto Vault - Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard - Safe Crypto Vault</title>
+  <link rel="stylesheet" href="css/styles.css" />
   <style>
     body {
+      background: url('img/futuristic-bg.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #000;
-      color: #fff;
     }
 
-    .main-container {
-      display: flex;
-      flex-direction: row;
-      height: 100vh;
-      width: 100%;
-      overflow: hidden;
-    }
-
-    .sidebar {
-      background: #1a1a1a;
-      width: 250px;
+    .container {
       padding: 20px;
-      box-sizing: border-box;
-      flex-shrink: 0;
     }
 
-    .sidebar h2 {
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+      background: rgba(0, 0, 0, 0.7);
+      border-bottom: 2px solid violet;
+    }
+
+    .top-bar h1 {
+      margin: 0;
+      font-size: 22px;
       color: cyan;
-      font-size: 24px;
-      margin-bottom: 20px;
     }
 
-    .sidebar ul {
-      list-style: none;
-      padding: 0;
-    }
-
-    .sidebar ul li {
-      margin: 12px 0;
-      font-size: 16px;
+    .top-bar button {
+      padding: 8px 14px;
+      background: violet;
+      color: #000;
+      border: none;
+      border-radius: 6px;
       cursor: pointer;
     }
 
-    .sidebar ul li:hover {
-      color: violet;
+    .top-bar button:hover {
+      background: #ff66ff;
     }
 
     .content {
-      flex-grow: 1;
-      padding: 20px;
-      box-sizing: border-box;
-      overflow-y: auto;
-    }
-
-    .header {
-      font-size: 28px;
-      color: cyan;
-      margin-bottom: 10px;
-    }
-
-    .info {
-      margin: 10px 0;
-      font-size: 18px;
-    }
-
-    .referral-box {
       margin-top: 20px;
-      background: #111;
-      padding: 10px;
-      border-left: 3px solid cyan;
-      word-break: break-word;
     }
 
-    @media (max-width: 768px) {
-      .main-container {
-        flex-direction: column;
-        height: auto;
-      }
+    .balance-box {
+      background: rgba(0, 0, 0, 0.6);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px cyan;
+      max-width: 400px;
+      margin: auto;
+      text-align: center;
+    }
 
-      .sidebar {
-        width: 100%;
-      }
+    .balance-box h2 {
+      color: violet;
+    }
 
-      .content {
-        width: 100%;
-      }
+    .balance-box p {
+      font-size: 18px;
+      margin: 10px 0;
     }
   </style>
 </head>
 <body>
-  <div class="main-container">
-    <div class="sidebar">
-      <h2>Vault Menu</h2>
-      <ul>
-        <li onclick="goTo('dashboard.html')">Dashboard</li>
-        <li onclick="goTo('deposit.html')">Open Deposit</li>
-        <li onclick="goTo('withdraw.html')">Withdraw</li>
-        <li onclick="goTo('history.html')">History</li>
-        <li onclick="goTo('team.html')">My Team</li>
-        <li onclick="goTo('affiliate.html')">Affiliate Link</li>
-        <li onclick="goTo('settings.html')">Settings</li>
-        <li onclick="goTo('security.html')">Security</li>
-        <li onclick="logout()">Exit</li>
-      </ul>
-    </div>
+  <div class="top-bar">
+    <h1>Safe Crypto Vault</h1>
+    <button onclick="logout()">Exit</button>
+  </div>
 
-    <div class="content">
-      <div class="header">Safe Crypto Vault</div>
-      <div class="info">User: <span id="username">-</span></div>
-      <div class="info">Email: <span id="email">-</span></div>
-      <div class="info">Total Deposit: <span id="total">0</span> USDT</div>
-
-      <div class="referral-box">
-        Your referral link: <br />
-        <span id="referral">https://pacalica.github.io/Safe-Crypto-Vault/?ref=wallet</span>
-      </div>
+  <div class="container">
+    <div class="balance-box">
+      <h2>Welcome, <span id="usernameDisplay"></span> 👋</h2>
+      <p>Your current balance: <span id="balance">0</span> USDT</p>
     </div>
   </div>
 
-  <script src="js/script.js"></script>
+  <script>
+    const username = localStorage.getItem("username");
+    const email = localStorage.getItem("email");
+    const balance = localStorage.getItem("balance") || "0";
+
+    if (!username || !email) {
+      window.location.href = "login.html";
+    } else {
+      document.getElementById("usernameDisplay").textContent = username;
+      document.getElementById("balance").textContent = balance;
+    }
+
+    function logout() {
+      localStorage.removeItem("email");
+      localStorage.removeItem("username");
+      localStorage.removeItem("password");
+      localStorage.removeItem("rememberPassword");
+      window.location.href = "login.html";
+    }
+  </script>
 </body>
 </html>
