@@ -1,4 +1,3 @@
-<!-- register.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,7 +16,7 @@
       height: 100vh;
     }
 
-    .login-box {
+    .register-box {
       background-color: rgba(0,0,0,0.8);
       padding: 30px;
       border-radius: 16px;
@@ -26,13 +25,15 @@
       box-shadow: 0 0 20px #00ffff88;
     }
 
-    .login-box h2 {
+    .register-box h2 {
       text-align: center;
       margin-bottom: 25px;
       color: #00ffff;
     }
 
-    .login-box input {
+    .register-box input[type="text"],
+    .register-box input[type="email"],
+    .register-box input[type="password"] {
       width: 100%;
       padding: 12px;
       margin: 10px 0;
@@ -42,7 +43,7 @@
       color: #fff;
     }
 
-    .login-box button {
+    .register-box button {
       width: 100%;
       padding: 12px;
       background: #00ffff;
@@ -54,28 +55,35 @@
       margin-top: 15px;
     }
 
-    .login-box .error {
+    .register-box .error {
       color: #ff6666;
       font-size: 14px;
       margin-top: 10px;
       text-align: center;
     }
+
+    .register-box a {
+      display: block;
+      text-align: center;
+      color: #00ffff;
+      text-decoration: underline;
+      margin-top: 15px;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
-  <div class="login-box">
-    <h2>Create Account</h2>
+  <div class="register-box">
+    <h2>Create an Account</h2>
     <input type="email" id="email" placeholder="Email" required />
     <input type="text" id="username" placeholder="Username" required />
-    <input type="password" id="password" placeholder="Password" required />
+    <input type="password" id="password" placeholder="Password (min. 6 chars)" required />
 
     <button onclick="register()">Register</button>
 
     <div class="error" id="errorMsg"></div>
-    <p style="text-align:center; margin-top: 15px;">
-      Already have an account?
-      <a href="login.html" style="color:#0ff;">Login</a>
-    </p>
+
+    <a href="login.html">Already have an account? Login</a>
   </div>
 
   <script>
@@ -87,6 +95,11 @@
 
       if (!email || !username || !password) {
         errorMsg.textContent = "Please fill in all fields.";
+        return;
+      }
+
+      if (password.length < 6) {
+        errorMsg.textContent = "Password must be at least 6 characters.";
         return;
       }
 
@@ -102,7 +115,6 @@
       users.push(newUser);
       localStorage.setItem("users", JSON.stringify(users));
 
-      // Autologin după înregistrare
       localStorage.setItem("loggedInUser", JSON.stringify(newUser));
       localStorage.setItem("userData", JSON.stringify(newUser));
 
