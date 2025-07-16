@@ -6,47 +6,45 @@
   <title>Withdraw - Safe Crypto Vault</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #000;
-      color: #fff;
       margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #000;
+      color: #fff;
       padding: 20px;
     }
 
     h1 {
       color: cyan;
-      margin-bottom: 10px;
-    }
-
-    .info {
-      margin: 5px 0;
+      text-align: center;
+      margin-bottom: 20px;
     }
 
     form {
-      margin-top: 20px;
+      max-width: 400px;
+      margin: 0 auto;
       background: #111;
       padding: 20px;
       border-radius: 10px;
-      max-width: 500px;
+      box-shadow: 0 0 10px cyan;
     }
 
     label {
       display: block;
-      margin-top: 10px;
-      margin-bottom: 5px;
+      margin: 10px 0 5px;
     }
 
     input, select {
       width: 100%;
       padding: 10px;
-      background: #222;
-      color: #fff;
       border: none;
       border-radius: 5px;
+      margin-bottom: 15px;
+      background: #222;
+      color: #fff;
     }
 
     button {
-      margin-top: 20px;
+      width: 100%;
       padding: 12px;
       background: cyan;
       color: #000;
@@ -56,37 +54,39 @@
       cursor: pointer;
     }
 
-    #message {
-      margin-top: 20px;
+    button:hover {
+      background: #00ffffcc;
+    }
+
+    #withdrawMessage {
+      text-align: center;
+      margin-top: 15px;
+      color: yellow;
       font-weight: bold;
     }
   </style>
 </head>
 <body>
+
   <h1>Withdraw Request</h1>
 
-  <div class="info">Username: <span id="username">-</span></div>
-  <div class="info">Email: <span id="email">-</span></div>
+  <form id="withdrawForm">
+    <label for="amount">Amount to Withdraw (USDT)</label>
+    <input type="number" id="amount" required min="1" step="0.01" />
 
-  <form id="withdraw-form">
-    <label for="amount">Amount (USDT):</label>
-    <input type="number" id="amount" min="1" required />
-
-    <label for="wallet">Your BEP20 Wallet Address:</label>
-    <input type="text" id="wallet" required />
-
-    <label for="plan">Select Plan:</label>
-    <select id="plan" required>
-      <option value="1-month">1 Month</option>
-      <option value="3-months">3 Months</option>
-      <option value="5-months">5 Months</option>
+    <label for="method">Withdrawal Method</label>
+    <select id="method" required>
+      <option value="">Select method</option>
+      <option value="BEP20">USDT - BEP20 (BNB Chain)</option>
+      <option value="TRC20">USDT - TRC20 (TRON)</option>
     </select>
 
     <button type="submit">Submit Withdrawal</button>
   </form>
 
-  <div id="message"></div>
+  <div id="withdrawMessage"></div>
 
   <script src="js/withdraw.js"></script>
+
 </body>
 </html>
