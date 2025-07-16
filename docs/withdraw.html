@@ -1,191 +1,116 @@
-<!-- withdraw.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Withdraw – Safe Crypto Vault</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Withdraw - Safe Crypto Vault</title>
   <link rel="stylesheet" href="style.css" />
-  <style>
-    body.withdraw-page {
-      background: linear-gradient(to bottom, #0d0d0d, #1a0033);
-      font-family: 'Segoe UI', sans-serif;
-      color: white;
-      padding: 40px 20px;
-      text-align: center;
-    }
-
-    .container {
-      background: rgba(255, 255, 255, 0.05);
-      padding: 30px;
-      border-radius: 15px;
-      max-width: 400px;
-      margin: auto;
-      box-shadow: 0 0 15px #00ffff88;
-    }
-
-    h1 {
-      margin-bottom: 25px;
-      color: #00ffff;
-    }
-
-    input[type="number"] {
-      width: 100%;
-      padding: 12px;
-      border-radius: 8px;
-      border: none;
-      margin-bottom: 15px;
-      background-color: #222;
-      color: #fff;
-    }
-
-    button {
-      padding: 12px 20px;
-      background-color: #00ffff;
-      color: #000;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    button:hover {
-      background-color: #00cccc;
-    }
-
-    #countdownBox {
-      color: #ffcc00;
-      font-weight: bold;
-      margin-top: 15px;
-    }
-
-    #statusMessage {
-      margin-bottom: 15px;
-      color: #ff6666;
-      font-weight: bold;
-    }
-
-    .back-link {
-      display: inline-block;
-      margin-top: 30px;
-      color: #0ff;
-      text-decoration: none;
-    }
-
-    #userEmail {
-      margin-bottom: 20px;
-      color: #00ffff;
-      font-size: 0.95rem;
-    }
-  </style>
+  <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
 </head>
-<body class="withdraw-page">
+<body>
   <div class="container">
-    <h1>💸 Withdraw Funds</h1>
-
-    <div id="userEmail"></div>
-    <div id="statusMessage"></div>
+    <h2>Withdraw Funds</h2>
 
     <form id="withdrawForm">
-      <label for="withdrawAmount">Amount to withdraw (USDT)</label>
-      <input type="number" id="withdrawAmount" min="1" step="0.01" required />
+      <label for="amount">Amount (USDT):</label>
+      <input type="number" id="amount" placeholder="Enter amount" required />
 
-      <button type="submit">Request Withdrawal</button>
+      <label for="method">Withdrawal Method:</label>
+      <select id="method">
+        <option value="BEP20">BEP20</option>
+        <option value="TRC20">TRC20</option>
+      </select>
+
+      <button type="submit">Submit Withdrawal</button>
     </form>
 
-    <div id="countdownBox"></div>
-
-    <a href="dashboard.html" class="back-link">← Back to Dashboard</a>
+    <p id="withdrawMessage" style="margin-top: 1rem; font-weight: bold;"></p>
   </div>
 
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", function () {
+      // Inițializare EmailJS
+      emailjs.init("7_PGCuxLtg1WCWvU0");
+
       const form = document.getElementById("withdrawForm");
-      const withdrawAmount = document.getElementById("withdrawAmount");
-      const statusMessage = document.getElementById("statusMessage");
-      const countdownBox = document.getElementById("countdownBox");
-      const userEmailBox = document.getElementById("userEmail");
+      const message = document.getElementById("withdrawMessage");
 
-      const user = JSON.parse(localStorage.getItem("loggedInUser"));
-      if (!user || !user.username || !user.email) {
-        return (window.location.href = "login.html");
+      const username = localStorage.getItem("username") || "guest";
+      const email = localStorage.getItem("email") || "unknown@nowhere.com";
+      const wallet = localStorage.getItem("wallet") || "not connected";
+      const total = parseFloat(localStorage.getItem("totalDeposit")) || 0;
+
+      const history = JSON.parse(localStorage.getItem("withdrawHistory") || "[]");
+
+      const hasPending = history.some(h => h.username === username && h.status === "Pending");
+
+      if (hasPending) {
+        message.innerText = "❌ Denied. You have a withdrawal request in pending.";
+        form.style.display = "none";
+        return;
       }
 
-      const username = user.username;
-      const email = user.email;
-
-      // Afișăm emailul utilizatorului
-      userEmailBox.textContent = `Logged in as: ${email}`;
-
-      const withdrawals = JSON.parse(localStorage.getItem("withdrawals") || "[]");
-
-      const lastWithdraw = withdrawals
-        .filter(w => w.username === username)
-        .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-
-      const now = new Date();
-      const nextAllowedDate = lastWithdraw
-        ? new Date(new Date(lastWithdraw.date).getTime() + 7 * 24 * 60 * 60 * 1000)
-        : null;
-
-      const pending = withdrawals.find(
-        w => w.username === username && w.status === "pending"
-      );
-
-      if (pending) {
+      if (total <= 0) {
+        message.innerText = "❌ You must deposit before you can withdraw.";
         form.style.display = "none";
-        statusMessage.textContent = `⚠️ You already have a pending withdrawal of ${pending.amount} USDT`;
-      } else if (nextAllowedDate && nextAllowedDate > now) {
-        form.style.display = "none";
-        showCountdown(nextAllowedDate);
+        return;
       }
 
-      form.addEventListener("submit", e => {
+      form.addEventListener("submit", function (e) {
         e.preventDefault();
-        const amount = parseFloat(withdrawAmount.value);
+        const amount = parseFloat(document.getElementById("amount").value);
+        const method = document.getElementById("method").value;
 
         if (isNaN(amount) || amount <= 0) {
-          statusMessage.textContent = "Invalid amount.";
+          message.innerText = "⚠️ Enter a valid withdrawal amount.";
           return;
         }
 
-        const withdrawal = {
-          username,
-          email,
-          amount,
-          date: now.toISOString(),
-          status: "pending"
-        };
-
-        withdrawals.push(withdrawal);
-        localStorage.setItem("withdrawals", JSON.stringify(withdrawals));
-        statusMessage.style.color = "#00ff99";
-        statusMessage.textContent = "✅ Withdrawal request submitted!";
-        form.style.display = "none";
-
-        showCountdown(new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000));
-      });
-
-      function showCountdown(targetDate) {
-        function updateCountdown() {
-          const remaining = targetDate - new Date();
-          if (remaining <= 0) {
-            countdownBox.textContent = "✅ You can now request a new withdrawal.";
-            return;
-          }
-
-          const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
-          const hours = Math.floor((remaining / (1000 * 60 * 60)) % 24);
-          const minutes = Math.floor((remaining / (1000 * 60)) % 60);
-          const seconds = Math.floor((remaining / 1000) % 60);
-
-          countdownBox.textContent = `⏳ Next withdrawal available in ${days}d ${hours}h ${minutes}m ${seconds}s`;
-          setTimeout(updateCountdown, 1000);
+        if (amount > total) {
+          message.innerText = `❌ You can't withdraw more than your balance (${total} USDT).`;
+          return;
         }
 
-        updateCountdown();
-      }
+        const now = new Date();
+        const newRequest = {
+          id: "wd_" + Math.random().toString(36).substring(2, 10),
+          username,
+          email,
+          wallet,
+          amount,
+          method,
+          status: "Pending",
+          date: now.toLocaleDateString(),
+          time: now.toLocaleTimeString()
+        };
+
+        history.push(newRequest);
+        localStorage.setItem("withdrawHistory", JSON.stringify(history));
+        message.innerText = "✅ Withdrawal request submitted.";
+        form.reset();
+
+        // Trimite email către administrator
+        const emailParams = {
+          to_email: "policagabrielvictor@gmail.com",
+          username: username,
+          email: email,
+          wallet: wallet,
+          amount: amount + " USDT",
+          method: method,
+          date: newRequest.date,
+          time: newRequest.time,
+          deposit_total: total + " USDT",
+          request_id: newRequest.id
+        };
+
+        emailjs.send("service_mnaa5dl", "template_14vaz2e", emailParams)
+          .then(res => {
+            console.log("✅ Email retragere trimis administratorului:", res.status);
+          })
+          .catch(err => {
+            console.error("❌ Eroare trimitere email retragere:", err);
+          });
+      });
     });
   </script>
 </body>
