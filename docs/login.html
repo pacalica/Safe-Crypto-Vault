@@ -3,22 +3,134 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login – Safe Crypto Vault</title>
-  <link rel="stylesheet" href="css/styles.css" />
-  <link rel="icon" href="icons/icon-192.png" />
-</head>
-<body class="login-body">
-  <div class="login-container">
-    <h2>🔐 Safe Crypto Vault</h2>
-    <p>Login to access your vault</p>
+  <title>Safe Crypto Vault - Login</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #000000, #0a0a0a);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
 
-    <form id="loginForm">
-      <input type="email" id="email" placeholder="Email address" required />
-      <input type="text" id="username" placeholder="Username" required />
-      <button type="submit">Login</button>
-    </form>
+    .login-box {
+      background: #111;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px cyan;
+      width: 90%;
+      max-width: 400px;
+    }
+
+    .login-box h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: cyan;
+    }
+
+    .login-box input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    .login-box label {
+      font-size: 14px;
+    }
+
+    .login-box button {
+      width: 100%;
+      padding: 12px;
+      background: cyan;
+      color: #000;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      margin-top: 5px;
+    }
+
+    .checkbox-container input {
+      margin-right: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <h2>Safe Crypto Vault</h2>
+    <input type="text" id="email" placeholder="Email" />
+    <input type="text" id="username" placeholder="Username" />
+    <input type="password" id="password" placeholder="Password" />
+
+    <div class="checkbox-container">
+      <input type="checkbox" id="rememberPass" />
+      <label for="rememberPass">Remember Password</label>
+    </div>
+
+    <button onclick="login()">Login</button>
   </div>
 
-  <script src="js/login.js"></script>
+  <script>
+    // Autocomplete dacă există date salvate
+    window.onload = () => {
+      document.getElementById('email').value = localStorage.getItem('email') || '';
+      document.getElementById('username').value = localStorage.getItem('username') || '';
+      const savedPass = localStorage.getItem('password');
+      if (savedPass) {
+        document.getElementById('password').value = atob(savedPass);
+        document.getElementById('rememberPass').checked = true;
+      }
+    };
+
+    function login() {
+      const email = document.getElementById('email').value.trim();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const remember = document.getElementById('rememberPass').checked;
+
+      // Validare email
+      if (!email.includes('@') || !email.includes('.')) {
+        alert('Please enter a valid email address.');
+        return;
+      }
+
+      // Validare username
+      if (username.length < 3) {
+        alert('Username must be at least 3 characters.');
+        return;
+      }
+
+      // Validare parolă
+      if (password.length < 4) {
+        alert('Password must be at least 4 characters.');
+        return;
+      }
+
+      // Salvare în localStorage
+      localStorage.setItem('email', email);
+      localStorage.setItem('username', username);
+      if (remember) {
+        localStorage.setItem('password', btoa(password)); // criptat simplu
+      } else {
+        localStorage.removeItem('password');
+      }
+
+      // Redirect
+      window.location.href = 'dashboard.html';
+    }
+  </script>
 </body>
 </html>
