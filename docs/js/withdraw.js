@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const username = localStorage.getItem("username") || "guest";
   const email = localStorage.getItem("email") || "unknown@nowhere.com";
+  const wallet = localStorage.getItem("wallet") || "not connected";
   const total = parseFloat(localStorage.getItem("totalDeposit")) || 0;
 
   const history = JSON.parse(localStorage.getItem("withdrawHistory") || "[]");
@@ -40,12 +41,17 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
+    const now = new Date();
     const newRequest = {
+      id: "wd_" + Math.random().toString(36).substring(2, 10),
       username,
+      email,
+      wallet,
       amount,
       method,
       status: "Pending",
-      date: new Date().toLocaleString()
+      date: now.toLocaleDateString(),
+      time: now.toLocaleTimeString()
     };
 
     history.push(newRequest);
@@ -55,10 +61,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Trimite email către administrator
     const emailParams = {
-      to_email: "policagabrielvictor@gmail.com",  // Adresa TA
+      to_email: "policagabrielvictor@gmail.com",
       username: username,
-      amount: amount,
-      method: method
+      email: email,
+      wallet: wallet,
+      amount: amount + " USDT",
+      method: method,
+      date: newRequest.date,
+      time: newRequest.time,
+      deposit_total: total + " USDT",
+      request_id: newRequest.id
     };
 
     emailjs.send("service_mnaa5dl", "template_14vaz2e", emailParams)
