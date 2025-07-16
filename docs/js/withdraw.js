@@ -1,8 +1,12 @@
 document.addEventListener("DOMContentLoaded", function () {
+  // Inițializare EmailJS
+  emailjs.init("7_PGCuxLtg1WCWvU0");
+
   const form = document.getElementById("withdrawForm");
   const message = document.getElementById("withdrawMessage");
 
   const username = localStorage.getItem("username") || "guest";
+  const email = localStorage.getItem("email") || "unknown@nowhere.com";
   const total = parseFloat(localStorage.getItem("totalDeposit")) || 0;
 
   const history = JSON.parse(localStorage.getItem("withdrawHistory") || "[]");
@@ -48,5 +52,21 @@ document.addEventListener("DOMContentLoaded", function () {
     localStorage.setItem("withdrawHistory", JSON.stringify(history));
     message.innerText = "✅ Withdrawal request submitted.";
     form.reset();
+
+    // Trimite email prin EmailJS
+    const emailParams = {
+      to_email: email,
+      username: username,
+      amount: amount,
+      method: method
+    };
+
+    emailjs.send("service_mnaa5dl", "template_14vaz2e", emailParams)
+      .then(res => {
+        console.log("✅ Email retragere trimis:", res.status);
+      })
+      .catch(err => {
+        console.error("❌ Eroare trimitere email retragere:", err);
+      });
   });
 });
