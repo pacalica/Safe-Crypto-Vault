@@ -1,57 +1,52 @@
-// withdraw.js
+document.addEventListener("DOMContentLoaded", function () {
+  const form = document.getElementById("withdrawForm");
+  const message = document.getElementById("withdrawMessage");
 
-document.addEventListener("DOMContentLoaded", () => {
-  const emailSpan = document.getElementById("email");
-  const usernameSpan = document.getElementById("username");
-  const form = document.getElementById("withdraw-form");
-  const messageBox = document.getElementById("message");
+  const username = localStorage.getItem("username") || "guest";
+  const total = parseFloat(localStorage.getItem("totalDeposit")) || 0;
 
-  // Afișare user info
-  const email = localStorage.getItem("email") || "-";
-  const username = localStorage.getItem("username") || "-";
-  emailSpan.innerText = email;
-  usernameSpan.innerText = username;
+  const history = JSON.parse(localStorage.getItem("withdrawHistory") || "[]");
 
-  // Verificare dacă există o cerere pending
-  const existingRequest = JSON.parse(localStorage.getItem("withdrawRequest"));
+  const hasPending = history.some(h => h.username === username && h.status === "Pending");
 
-  if (existingRequest && existingRequest.status === "pending") {
-    messageBox.innerText = "❌ Denied. You have a withdrawal request in pending.";
+  if (hasPending) {
+    message.innerText = "❌ Denied. You have a withdrawal request in pending.";
     form.style.display = "none";
     return;
   }
 
-  form.addEventListener("submit", (e) => {
+  if (total <= 0) {
+    message.innerText = "❌ You must deposit before you can withdraw.";
+    form.style.display = "none";
+    return;
+  }
+
+  form.addEventListener("submit", function (e) {
     e.preventDefault();
-
     const amount = parseFloat(document.getElementById("amount").value);
-    const wallet = document.getElementById("wallet").value;
-    const plan = document.getElementById("plan").value;
+    const method = document.getElementById("method").value;
 
-    if (!amount || !wallet) {
-      messageBox.innerText = "❗Please fill in all fields.";
+    if (isNaN(amount) || amount <= 0) {
+      message.innerText = "⚠️ Enter a valid withdrawal amount.";
       return;
     }
 
-    const request = {
-      email,
+    if (amount > total) {
+      message.innerText = `❌ You can't withdraw more than your balance (${total} USDT).`;
+      return;
+    }
+
+    const newRequest = {
       username,
       amount,
-      wallet,
-      plan,
-      date: new Date().toLocaleString(),
-      status: "pending",
+      method,
+      status: "Pending",
+      date: new Date().toLocaleString()
     };
 
-    // Salvare în withdrawRequest
-    localStorage.setItem("withdrawRequest", JSON.stringify(request));
-
-    // Salvare în istoric
-    const history = JSON.parse(localStorage.getItem("withdrawHistory")) || [];
-    history.push(request);
+    history.push(newRequest);
     localStorage.setItem("withdrawHistory", JSON.stringify(history));
-
-    messageBox.innerText = "✅ Withdrawal request submitted.";
-    form.style.display = "none";
+    message.innerText = "✅ Withdrawal request submitted.";
+    form.reset();
   });
 });
