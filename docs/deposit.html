@@ -3,128 +3,179 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Open Deposit - Safe Crypto Vault</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Deposit - Safe Crypto Vault</title>
+  <link rel="stylesheet" href="css/styles.css" />
   <style>
-    .deposit-section {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-      align-items: center;
-      background: #111;
-      padding: 10px;
-      border-left: 3px solid cyan;
-      border-radius: 10px;
-      margin: 20px 0;
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: url('img/futuristic-bg.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: white;
     }
 
-    .address-box {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 220px;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      padding-top: 20px;
+      box-shadow: 2px 0 10px cyan;
     }
 
-    .address-box code {
+    .sidebar a {
+      display: block;
       color: cyan;
-      font-size: 14px;
-      word-break: break-all;
+      padding: 12px 20px;
+      text-decoration: none;
+      transition: 0.3s;
     }
 
-    .copy-button {
-      background: cyan;
+    .sidebar a:hover {
+      background-color: violet;
+      color: black;
+    }
+
+    .main {
+      margin-left: 240px;
+      padding: 20px;
+    }
+
+    .form-box {
+      background: rgba(0, 0, 0, 0.6);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px violet;
+      max-width: 400px;
+      margin: auto;
+      text-align: center;
+    }
+
+    input, select {
+      padding: 10px;
+      width: 90%;
+      margin-bottom: 15px;
+      border-radius: 6px;
       border: none;
-      padding: 6px 12px;
-      margin-top: 8px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: cyan;
+      border: none;
+      border-radius: 6px;
       cursor: pointer;
-      border-radius: 4px;
-      color: #000;
-      font-weight: bold;
-      max-width: 100px;
     }
 
-    .qr-code img {
-      width: 130px;
-      height: 130px;
-      border: 2px solid cyan;
-      border-radius: 8px;
+    button:hover {
+      background-color: violet;
+      color: black;
     }
 
-    @media (max-width: 600px) {
-      .deposit-section {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .qr-code img {
-        width: 100px;
-        height: 100px;
-      }
+    .back-btn {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      background: violet;
+      color: black;
     }
   </style>
 </head>
 <body>
-  <div class="main-container">
-    <div class="sidebar">
-      <h2>Vault Menu</h2>
-      <ul>
-        <li onclick="goTo('dashboard.html')">Dashboard</li>
-        <li onclick="goTo('deposit.html')">Open Deposit</li>
-        <li onclick="goTo('withdraw.html')">Withdraw</li>
-        <li onclick="goTo('history.html')">History</li>
-        <li onclick="goTo('team.html')">My Team</li>
-        <li onclick="goTo('affiliate.html')">Affiliate Link</li>
-        <li onclick="goTo('settings.html')">Settings</li>
-        <li onclick="goTo('security.html')">Security</li>
-        <li onclick="logout()">Exit</li>
-      </ul>
-    </div>
+  <div class="sidebar">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="deposit.html">Open Deposit</a>
+    <a href="withdraw.html">Withdraw</a>
+    <a href="history.html">History</a>
+    <a href="team.html">My Team</a>
+    <a href="settings.html">Settings</a>
+  </div>
 
-    <div class="content">
-      <h1>Open Deposit</h1>
-      <p>Please send USDT (BEP20) to the address below:</p>
-
-      <div class="deposit-section">
-        <div class="address-box">
-          <code id="deposit-address">0x124377FCe14439248a4959ce528314aA3A897321</code>
-          <button class="copy-button" onclick="copyAddress()">Copy</button>
-        </div>
-        <div class="qr-code">
-          <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=0x124377FCe14439248a4959ce528314aA3A897321" alt="QR Code">
-        </div>
-      </div>
-
-      <div>
-        <label for="amount">Amount sent (USDT):</label><br/>
-        <input type="number" id="amount" placeholder="e.g. 2000" /><br/><br/>
-        <button onclick="confirmDeposit()">I've Sent Deposit</button>
-      </div>
-
-      <div id="confirmation" style="margin-top: 20px; display: none;">
-        ✅ Deposit recorded! Awaiting admin confirmation.
-      </div>
+  <div class="main">
+    <h2>Open New Deposit</h2>
+    <div class="form-box">
+      <p>Current Balance: <span id="balanceDisplay">0</span> USDT</p>
+      <input type="number" id="amount" placeholder="Amount to deposit" />
+      <select id="duration">
+        <option value="1">1 month</option>
+        <option value="3">3 months</option>
+        <option value="5">5 months</option>
+      </select>
+      <button onclick="simulate()">Simulate Plan</button>
+      <p id="planResult"></p>
+      <button onclick="confirmDeposit()">Confirm Deposit</button>
+      <p id="message"></p>
     </div>
   </div>
 
-  <script src="js/script.js"></script>
+  <button class="back-btn" onclick="window.location.href='dashboard.html'">← Back</button>
+
   <script>
-    function confirmDeposit() {
+    const username = localStorage.getItem("username");
+    let balance = parseFloat(localStorage.getItem("balance") || "0");
+    document.getElementById("balanceDisplay").textContent = balance.toFixed(2);
+
+    function getInterestRate(amount) {
+      if (amount < 2000) return 3.5;
+      if (amount < 5000) return 5.5;
+      return 7.5;
+    }
+
+    function simulate() {
       const amount = parseFloat(document.getElementById("amount").value);
-      if (isNaN(amount) || amount <= 0) {
-        alert("Please enter a valid amount.");
+      const duration = parseInt(document.getElementById("duration").value);
+      const result = document.getElementById("planResult");
+
+      if (!amount || amount <= 0) {
+        result.textContent = "Enter a valid amount.";
         return;
       }
 
-      localStorage.setItem("totalDeposit", amount.toFixed(2));
-      document.getElementById("confirmation").style.display = "block";
+      const rate = getInterestRate(amount);
+      const totalReturn = amount + (amount * rate / 100 * duration);
+      result.innerHTML = `
+        Plan: ${duration} months<br>
+        Interest: ${rate}% / month<br>
+        Total return: ${totalReturn.toFixed(2)} USDT
+      `;
     }
 
-    function copyAddress() {
-      const address = document.getElementById("deposit-address").textContent;
-      navigator.clipboard.writeText(address).then(() => {
-        alert("Deposit address copied to clipboard!");
-      }).catch(() => {
-        alert("Failed to copy address.");
+    function confirmDeposit() {
+      const amount = parseFloat(document.getElementById("amount").value);
+      const duration = parseInt(document.getElementById("duration").value);
+      const msg = document.getElementById("message");
+
+      if (!amount || amount <= 0) {
+        msg.textContent = "Enter a valid amount.";
+        return;
+      }
+
+      if (amount > balance) {
+        msg.textContent = "Insufficient balance.";
+        return;
+      }
+
+      const rate = getInterestRate(amount);
+      const totalReturn = amount + (amount * rate / 100 * duration);
+      const deposits = JSON.parse(localStorage.getItem("deposits") || "[]");
+
+      deposits.push({
+        username,
+        amount,
+        duration,
+        rate,
+        totalReturn: totalReturn.toFixed(2),
+        start: new Date().toLocaleDateString(),
       });
+
+      balance -= amount;
+      localStorage.setItem("deposits", JSON.stringify(deposits));
+      localStorage.setItem("balance", balance.toString());
+
+      document.getElementById("balanceDisplay").textContent = balance.toFixed(2);
+      msg.textContent = "Deposit successful.";
     }
   </script>
 </body>
