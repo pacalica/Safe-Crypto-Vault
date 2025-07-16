@@ -66,18 +66,58 @@
       <thead>
         <tr>
           <th>Date</th>
+          <th>Email</th>
           <th>Amount</th>
           <th>Status</th>
         </tr>
       </thead>
       <tbody id="historyTableBody">
-        <!-- Populated by history.js -->
+        <!-- Populated by script below -->
       </tbody>
     </table>
 
     <a href="dashboard.html" class="back-link">← Back to Dashboard</a>
   </div>
 
-  <script src="js/history.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const username = localStorage.getItem("user_name");
+      const tbody = document.getElementById("historyTableBody");
+
+      if (!username) return (window.location.href = "login.html");
+
+      const withdrawals = JSON.parse(localStorage.getItem("withdrawals") || "[]");
+
+      const userWithdrawals = withdrawals.filter(w => w.username === username);
+
+      if (userWithdrawals.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">No withdrawals yet.</td></tr>`;
+        return;
+      }
+
+      userWithdrawals.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(w => {
+        const row = document.createElement("tr");
+
+        const dateCell = document.createElement("td");
+        dateCell.textContent = new Date(w.date).toLocaleString();
+
+        const emailCell = document.createElement("td");
+        emailCell.textContent = w.email || "—";
+
+        const amountCell = document.createElement("td");
+        amountCell.textContent = `${w.amount} USDT`;
+
+        const statusCell = document.createElement("td");
+        statusCell.textContent = w.status;
+
+        row.appendChild(dateCell);
+        row.appendChild(emailCell);
+        row.appendChild(amountCell);
+        row.appendChild(statusCell);
+
+        tbody.appendChild(row);
+      });
+    });
+  </script>
 </body>
 </html>
