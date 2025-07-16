@@ -1,0 +1,124 @@
+<!-- myteam.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Team – Safe Crypto Vault</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      background: linear-gradient(to right, #0f0c29, #302b63, #24243e);
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #00ffff;
+      margin-bottom: 30px;
+    }
+
+    .team-container {
+      max-width: 700px;
+      margin: auto;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 0 20px #00ffff88;
+    }
+
+    .referral-entry {
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      background-color: #1a1a2e;
+      border-left: 5px solid #00ffff;
+    }
+
+    .referral-entry span {
+      display: block;
+      margin: 4px 0;
+    }
+
+    .back-link {
+      display: block;
+      margin-top: 30px;
+      text-align: center;
+      color: #0ff;
+      text-decoration: none;
+    }
+
+    .no-referrals {
+      text-align: center;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <h1>👥 My Team</h1>
+  <div class="team-container" id="teamContainer">
+    <div class="no-referrals" id="noReferrals">Loading referrals...</div>
+  </div>
+
+  <a class="back-link" href="dashboard.html">← Back to Dashboard</a>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const container = document.getElementById("teamContainer");
+      const noReferrals = document.getElementById("noReferrals");
+      const username = localStorage.getItem("user_name");
+      if (!username) return (window.location.href = "login.html");
+
+      const users = JSON.parse(localStorage.getItem("users") || "[]");
+      const deposits = JSON.parse(localStorage.getItem("deposits") || "[]");
+
+      // Găsim wallet-ul acestui utilizator
+      const currentUser = users.find(u => u.username === username);
+      if (!currentUser || !currentUser.wallet) return;
+
+      const myWallet = currentUser.wallet;
+
+      // Căutăm utilizatorii care s-au înregistrat cu referral = myWallet
+      const level1 = users.filter(u => u.ref === myWallet);
+
+      if (level1.length === 0) {
+        noReferrals.textContent = "You have no invited users yet.";
+        return;
+      }
+
+      noReferrals.style.display = "none";
+
+      level1.forEach(user => {
+        const userDeposits = deposits.filter(d => d.username === user.username);
+        let totalWithInterest = 0;
+
+        userDeposits.forEach(d => {
+          const interestRate = getInterestRate(d.amount);
+          const months = d.duration === "1" ? 1 : d.duration === "3" ? 3 : 5;
+          const interest = (d.amount * interestRate * months) / 100;
+          totalWithInterest += d.amount + interest;
+        });
+
+        const commission = totalWithInterest * 0.10;
+
+        const entry = document.createElement("div");
+        entry.className = "referral-entry";
+        entry.innerHTML = `
+          <span><strong>👤 Username:</strong> ${user.username}</span>
+          <span><strong>📦 Total Earned (incl. interest):</strong> ${totalWithInterest.toFixed(2)} USDT</span>
+          <span><strong>💰 Your Commission (10%):</strong> ${commission.toFixed(2)} USDT</span>
+        `;
+        container.appendChild(entry);
+      });
+
+      function getInterestRate(amount) {
+        if (amount < 2000) return 3.5;
+        if (amount <= 5000) return 5.5;
+        return 7.5;
+      }
+    });
+  </script>
+</body>
+</html>
