@@ -1,62 +1,113 @@
+<!-- register.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Register - Safe Crypto Vault</title>
+  <title>Register – Safe Crypto Vault</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      background: linear-gradient(135deg, #0ff, #8000ff);
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .login-box {
+      background-color: rgba(0,0,0,0.8);
+      padding: 30px;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 0 20px #00ffff88;
+    }
+
+    .login-box h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #00ffff;
+    }
+
+    .login-box input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 8px;
+      background-color: #222;
+      color: #fff;
+    }
+
+    .login-box button {
+      width: 100%;
+      padding: 12px;
+      background: #00ffff;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+
+    .login-box .error {
+      color: #ff6666;
+      font-size: 14px;
+      margin-top: 10px;
+      text-align: center;
+    }
+  </style>
 </head>
-<body class="login-body">
-  <div class="login-container">
-    <h2>Register</h2>
-    <form id="registerForm">
-      <input type="text" id="username" placeholder="Username" required />
-      <input type="email" id="email" placeholder="Email" required />
+<body>
+  <div class="login-box">
+    <h2>Create Account</h2>
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="text" id="username" placeholder="Username" required />
+    <input type="password" id="password" placeholder="Password" required />
 
-      <div class="password-field">
-        <input type="password" id="password" placeholder="Password" required />
-        <span id="toggleRegisterPassword" class="toggle-eye">👁️</span>
-      </div>
+    <button onclick="register()">Register</button>
 
-      <button type="submit">Register</button>
-      <p>Already have an account? <a href="login.html">Login</a></p>
-    </form>
+    <div class="error" id="errorMsg"></div>
+    <p style="text-align:center; margin-top: 15px;">
+      Already have an account?
+      <a href="login.html" style="color:#0ff;">Login</a>
+    </p>
   </div>
 
   <script>
-    const toggleRegisterPassword = document.getElementById("toggleRegisterPassword");
-    const registerPasswordInput = document.getElementById("password");
-
-    toggleRegisterPassword.addEventListener("click", () => {
-      const isVisible = registerPasswordInput.type === "text";
-      registerPasswordInput.type = isVisible ? "password" : "text";
-      toggleRegisterPassword.textContent = isVisible ? "👁️" : "🙈";
-    });
-
-    document.getElementById("registerForm").addEventListener("submit", function (e) {
-      e.preventDefault();
-      const username = document.getElementById("username").value.trim();
+    function register() {
       const email = document.getElementById("email").value.trim();
-      const password = registerPasswordInput.value.trim();
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const errorMsg = document.getElementById("errorMsg");
 
-      if (!email.includes("@") || !email.includes(".")) {
-        alert("Invalid email address.");
+      if (!email || !username || !password) {
+        errorMsg.textContent = "Please fill in all fields.";
         return;
       }
 
-      const users = JSON.parse(localStorage.getItem("users")) || [];
+      let users = JSON.parse(localStorage.getItem("users") || "[]");
+      const exists = users.some(u => u.email === email || u.username === username);
 
-      if (users.find(u => u.email === email)) {
-        alert("Email already registered.");
+      if (exists) {
+        errorMsg.textContent = "Email or username already in use.";
         return;
       }
 
-      const newUser = { username, email, password };
+      const newUser = { email, username, password };
       users.push(newUser);
       localStorage.setItem("users", JSON.stringify(users));
-      localStorage.setItem("currentUser", JSON.stringify(newUser));
+
+      // Autologin după înregistrare
+      localStorage.setItem("loggedInUser", JSON.stringify(newUser));
+      localStorage.setItem("userData", JSON.stringify(newUser));
+
       window.location.href = "dashboard.html";
-    });
+    }
   </script>
 </body>
 </html>
