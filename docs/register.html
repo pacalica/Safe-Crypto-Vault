@@ -3,155 +3,60 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Register – Safe Crypto Vault</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #0ff, #80f);
-      margin: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      color: #fff;
-    }
-
-    .register-box {
-      background: #111;
-      padding: 40px;
-      border-radius: 10px;
-      box-shadow: 0 0 15px #0ff;
-      width: 90%;
-      max-width: 400px;
-    }
-
-    h2 {
-      text-align: center;
-      color: cyan;
-    }
-
-    label {
-      display: block;
-      margin-top: 20px;
-    }
-
-    input[type="email"],
-    input[type="text"],
-    input[type="password"] {
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 6px;
-      background: #222;
-      color: white;
-      margin-top: 5px;
-    }
-
-    .checkbox {
-      margin-top: 15px;
-      display: flex;
-      align-items: center;
-    }
-
-    .checkbox input {
-      margin-right: 8px;
-    }
-
-    button {
-      width: 100%;
-      margin-top: 25px;
-      padding: 12px;
-      background: cyan;
-      color: black;
-      font-weight: bold;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    .link {
-      margin-top: 15px;
-      text-align: center;
-    }
-
-    .link a {
-      color: #0ff;
-      text-decoration: none;
-    }
-
-    .error {
-      color: red;
-      margin-top: 10px;
-      font-size: 14px;
-    }
-  </style>
+  <title>Register - Safe Crypto Vault</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body>
-  <div class="register-box">
-    <h2>Create Account</h2>
+<body class="login-body">
+  <div class="login-container">
+    <h2>Register</h2>
+    <form id="registerForm">
+      <input type="text" id="username" placeholder="Username" required />
+      <input type="email" id="email" placeholder="Email" required />
 
-    <label for="email">Email:</label>
-    <input type="email" id="email" placeholder="your@email.com" required />
+      <div class="password-field">
+        <input type="password" id="password" placeholder="Password" required />
+        <span id="toggleRegisterPassword" class="toggle-eye">👁️</span>
+      </div>
 
-    <label for="username">Username:</label>
-    <input type="text" id="username" placeholder="Choose a username" required />
-
-    <label for="password">Password:</label>
-    <input type="password" id="password" placeholder="Choose a password" required />
-
-    <div class="checkbox">
-      <input type="checkbox" id="rememberPassword" />
-      <label for="rememberPassword">Remember password</label>
-    </div>
-
-    <button onclick="register()">Register</button>
-
-    <div class="link">Already have an account? <a href="login.html">Login here</a></div>
-
-    <div class="error" id="error"></div>
+      <button type="submit">Register</button>
+      <p>Already have an account? <a href="login.html">Login</a></p>
+    </form>
   </div>
 
   <script>
-    function isValidEmail(email) {
-      const re = /^[^@]+@[^@]+\.[a-z]{2,}$/i;
-      return re.test(email);
-    }
+    const toggleRegisterPassword = document.getElementById("toggleRegisterPassword");
+    const registerPasswordInput = document.getElementById("password");
 
-    function register() {
-      const email = document.getElementById("email").value.trim();
+    toggleRegisterPassword.addEventListener("click", () => {
+      const isVisible = registerPasswordInput.type === "text";
+      registerPasswordInput.type = isVisible ? "password" : "text";
+      toggleRegisterPassword.textContent = isVisible ? "👁️" : "🙈";
+    });
+
+    document.getElementById("registerForm").addEventListener("submit", function (e) {
+      e.preventDefault();
       const username = document.getElementById("username").value.trim();
-      const password = document.getElementById("password").value;
-      const remember = document.getElementById("rememberPassword").checked;
-      const errorDiv = document.getElementById("error");
+      const email = document.getElementById("email").value.trim();
+      const password = registerPasswordInput.value.trim();
 
-      if (!email || !username || !password) {
-        errorDiv.innerText = "All fields are required.";
+      if (!email.includes("@") || !email.includes(".")) {
+        alert("Invalid email address.");
         return;
       }
 
-      if (!isValidEmail(email)) {
-        errorDiv.innerText = "Invalid email format.";
+      const users = JSON.parse(localStorage.getItem("users")) || [];
+
+      if (users.find(u => u.email === email)) {
+        alert("Email already registered.");
         return;
       }
 
-      const users = JSON.parse(localStorage.getItem("users") || "{}");
-
-      if (users[email]) {
-        errorDiv.innerText = "This email is already registered.";
-        return;
-      }
-
-      users[email] = { username, password };
+      const newUser = { username, email, password };
+      users.push(newUser);
       localStorage.setItem("users", JSON.stringify(users));
-
-      localStorage.setItem("email", email);
-      localStorage.setItem("username", username);
-      if (remember) {
-        localStorage.setItem("password", password);
-      }
-
+      localStorage.setItem("currentUser", JSON.stringify(newUser));
       window.location.href = "dashboard.html";
-    }
+    });
   </script>
 </body>
 </html>
