@@ -4,89 +4,155 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Withdraw - Safe Crypto Vault</title>
+  <link rel="stylesheet" href="css/styles.css" />
   <style>
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background-color: #000;
-      color: #fff;
+      background: url('img/futuristic-bg.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 220px;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      padding-top: 20px;
+      box-shadow: 2px 0 10px cyan;
+    }
+
+    .sidebar a {
+      display: block;
+      color: cyan;
+      padding: 12px 20px;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+
+    .sidebar a:hover {
+      background-color: violet;
+      color: black;
+    }
+
+    .main {
+      margin-left: 240px;
       padding: 20px;
     }
 
-    h1 {
-      color: cyan;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    form {
-      max-width: 400px;
-      margin: 0 auto;
-      background: #111;
+    .form-box {
+      background: rgba(0, 0, 0, 0.6);
       padding: 20px;
       border-radius: 10px;
-      box-shadow: 0 0 10px cyan;
+      box-shadow: 0 0 15px violet;
+      max-width: 400px;
+      margin: auto;
+      text-align: center;
     }
 
-    label {
-      display: block;
-      margin: 10px 0 5px;
-    }
-
-    input, select {
-      width: 100%;
+    input {
       padding: 10px;
-      border: none;
-      border-radius: 5px;
+      width: 90%;
       margin-bottom: 15px;
-      background: #222;
-      color: #fff;
+      border-radius: 6px;
+      border: none;
     }
 
     button {
-      width: 100%;
-      padding: 12px;
-      background: cyan;
-      color: #000;
-      font-weight: bold;
+      padding: 10px 20px;
+      background-color: cyan;
       border: none;
-      border-radius: 5px;
+      border-radius: 6px;
       cursor: pointer;
     }
 
     button:hover {
-      background: #00ffffcc;
+      background-color: violet;
+      color: black;
     }
 
-    #withdrawMessage {
-      text-align: center;
-      margin-top: 15px;
-      color: yellow;
-      font-weight: bold;
+    .back-btn {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      background: violet;
+      color: black;
     }
   </style>
 </head>
 <body>
+  <div class="sidebar">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="deposit.html">Open Deposit</a>
+    <a href="withdraw.html">Withdraw</a>
+    <a href="history.html">History</a>
+    <a href="team.html">My Team</a>
+    <a href="settings.html">Settings</a>
+  </div>
 
-  <h1>Withdraw Request</h1>
+  <div class="main">
+    <h2>Withdraw Funds</h2>
+    <div class="form-box">
+      <p>Balance: <span id="balanceDisplay">0</span> USDT</p>
+      <input type="number" id="amount" placeholder="Amount to withdraw" />
+      <button onclick="requestWithdrawal()">Request Withdrawal</button>
+      <p id="message"></p>
+    </div>
+  </div>
 
-  <form id="withdrawForm">
-    <label for="amount">Amount to Withdraw (USDT)</label>
-    <input type="number" id="amount" required min="1" step="0.01" />
+  <button class="back-btn" onclick="goBack()">← Back</button>
 
-    <label for="method">Withdrawal Method</label>
-    <select id="method" required>
-      <option value="">Select method</option>
-      <option value="BEP20">USDT - BEP20 (BNB Chain)</option>
-      <option value="TRC20">USDT - TRC20 (TRON)</option>
-    </select>
+  <script>
+    function goBack() {
+      window.location.href = "dashboard.html";
+    }
 
-    <button type="submit">Submit Withdrawal</button>
-  </form>
+    const username = localStorage.getItem("username");
+    const balance = parseFloat(localStorage.getItem("balance") || "0");
+    const withdrawals = JSON.parse(localStorage.getItem("withdrawals") || "[]");
+    const pending = withdrawals.find(w => w.username === username && w.status === "pending");
 
-  <div id="withdrawMessage"></div>
+    document.getElementById("balanceDisplay").textContent = balance;
 
-  <script src="js/withdraw.js"></script>
+    function requestWithdrawal() {
+      const amount = parseFloat(document.getElementById("amount").value);
+      const msg = document.getElementById("message");
+      msg.textContent = "";
 
+      if (!amount || amount <= 0) {
+        msg.textContent = "Enter a valid amount.";
+        return;
+      }
+
+      if (pending) {
+        msg.textContent = "Denied. You have a withdrawal request in pending.";
+        return;
+      }
+
+      if (amount > balance) {
+        msg.textContent = "Denied. Insufficient balance.";
+        return;
+      }
+
+      const newBalance = balance - amount;
+      localStorage.setItem("balance", newBalance.toString());
+
+      const withdrawal = {
+        username,
+        amount,
+        date: new Date().toLocaleString(),
+        status: "pending"
+      };
+
+      withdrawals.push(withdrawal);
+      localStorage.setItem("withdrawals", JSON.stringify(withdrawals));
+
+      msg.textContent = "Withdrawal request submitted.";
+      document.getElementById("balanceDisplay").textContent = newBalance;
+    }
+  </script>
 </body>
 </html>
