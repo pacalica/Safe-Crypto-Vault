@@ -21,6 +21,12 @@
         <option value="TRC20">TRC20</option>
       </select>
 
+      <div id="confirmWithdrawal" style="display: none;">
+        <label for="confirmCode">Enter confirmation code:</label>
+        <input type="text" id="confirmCode" placeholder="Enter confirmation code" />
+        <button type="button" onclick="confirmWithdrawal()">Confirm Withdrawal</button>
+      </div>
+
       <button type="submit">Submit Withdrawal</button>
     </form>
 
@@ -29,11 +35,12 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", function () {
-      // Inițializare EmailJS
+      // Initialize EmailJS
       emailjs.init("7_PGCuxLtg1WCWvU0");
 
       const form = document.getElementById("withdrawForm");
       const message = document.getElementById("withdrawMessage");
+      const confirmWithdrawal = document.getElementById("confirmWithdrawal");
 
       const username = localStorage.getItem("username") || "guest";
       const email = localStorage.getItem("email") || "unknown@nowhere.com";
@@ -71,6 +78,28 @@
           return;
         }
 
+        // Add confirmation step for large withdrawals (example: if amount > 5000 USDT)
+        if (amount > 5000) {
+          confirmWithdrawal.style.display = "block";
+          message.innerText = "⚠️ Please confirm your withdrawal with the code sent to your email.";
+          return;
+        }
+
+        processWithdrawal(amount, method);
+      });
+
+      function confirmWithdrawal() {
+        const code = document.getElementById("confirmCode").value;
+        if (code === "123456") { // This is just a mock code for demonstration purposes
+          const amount = parseFloat(document.getElementById("amount").value);
+          const method = document.getElementById("method").value;
+          processWithdrawal(amount, method);
+        } else {
+          message.innerText = "❌ Invalid confirmation code.";
+        }
+      }
+
+      function processWithdrawal(amount, method) {
         const now = new Date();
         const newRequest = {
           id: "wd_" + Math.random().toString(36).substring(2, 10),
@@ -89,7 +118,7 @@
         message.innerText = "✅ Withdrawal request submitted.";
         form.reset();
 
-        // Trimite email către administrator
+        // Send email to administrator
         const emailParams = {
           to_email: "policagabrielvictor@gmail.com",
           username: username,
@@ -105,12 +134,12 @@
 
         emailjs.send("service_mnaa5dl", "template_14vaz2e", emailParams)
           .then(res => {
-            console.log("✅ Email retragere trimis administratorului:", res.status);
+            console.log("✅ Withdrawal email sent to admin:", res.status);
           })
           .catch(err => {
-            console.error("❌ Eroare trimitere email retragere:", err);
+            console.error("❌ Error sending withdrawal email:", err);
           });
-      });
+      }
     });
   </script>
 </body>
