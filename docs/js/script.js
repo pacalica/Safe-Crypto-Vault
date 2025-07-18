@@ -70,6 +70,11 @@ document.getElementById('withdrawForm').addEventListener('submit', function (e) 
 
   const message = document.getElementById('withdrawMessage');
   
+  // Debugging: Afișează informațiile introduse pentru retragere
+  console.log('Amount:', amount);
+  console.log('Method:', method);
+  console.log('Address:', address);
+  
   if (isNaN(amount) || amount <= 0) {
     message.innerText = "⚠️ Enter a valid withdrawal amount.";
     return;
@@ -132,4 +137,9 @@ document.getElementById('withdrawForm').addEventListener('submit', function (e) 
     .catch(err => {
       console.error("❌ Error sending withdrawal email:", err);
     });
+});
+
+// Adăugarea butonului "Back to Dashboard"
+document.getElementById("backToDashboard").addEventListener("click", function() {
+  goTo('dashboard.html'); // Navighează la dashboard
 });
