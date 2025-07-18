@@ -25,21 +25,18 @@ document.addEventListener("DOMContentLoaded", function () {
   if (referralElem) referralElem.innerText = `https://pacalica.github.io/Safe-Crypto-Vault/?ref=${wallet}`;
 });
 
-// Funcția pentru navigare între pagini
+// Navigare între pagini
 function goTo(page) {
   window.location.href = page;
 }
 
-// Funcția de logout: șterge toate datele din localStorage și redirecționează către login
+// Logout: șterge toate datele din localStorage și redirecționează către login
 function logout() {
-  // Șterge datele de autentificare și alte informații din localStorage
   localStorage.removeItem("username");
   localStorage.removeItem("email");
   localStorage.removeItem("wallet");
   localStorage.removeItem("totalDeposit");
-
-  // Redirecționează utilizatorul la pagina de login
-  window.location.href = "index.html"; 
+  window.location.href = "index.html"; // Redirecționează către pagina de login
 }
 
 // Verifică dacă utilizatorul este autentificat înainte de a accesa paginile protejate
