@@ -27,7 +27,9 @@ body {
 /* Inputuri generale */
 input[type="text"],
 input[type="email"],
-input[type="password"] {
+input[type="password"],
+input[type="number"],
+select {
   width: 100%;
   padding: 12px 14px;
   margin: 10px 0 20px;
@@ -100,5 +102,80 @@ a {
 }
 
 a:hover {
+  text-decoration: underline;
+}
+
+/* Specific Styles for Open Deposit Page */
+#open-deposit-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#open-deposit-container form {
+  width: 100%;
+  max-width: 400px;
+}
+
+#open-deposit-container label {
+  font-size: 1rem;
+  color: #ffffff;
+}
+
+#open-deposit-container button {
+  width: 100%;
+  background-color: #1e88e5;
+}
+
+#open-deposit-container p {
+  font-size: 1rem;
+  color: #ffffff;
+}
+
+/* Specific Styles for Withdraw Page */
+#withdraw-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#withdraw-container form {
+  width: 100%;
+  max-width: 400px;
+}
+
+#withdraw-container label {
+  font-size: 1rem;
+  color: #ffffff;
+}
+
+#withdraw-container button {
+  width: 100%;
+  background-color: #ff5722;
+}
+
+#withdraw-container p {
+  font-size: 1rem;
+  color: #ffffff;
+}
+
+/* Specific Styles for Dashboard Page */
+#dashboard-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#dashboard-container h2 {
+  font-size: 1.8rem;
+}
+
+#dashboard-container a {
+  color: #0ff;
+  text-decoration: none;
+  font-size: 1rem;
+}
+
+#dashboard-container a:hover {
   text-decoration: underline;
 }
