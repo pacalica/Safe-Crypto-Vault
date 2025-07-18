@@ -7,21 +7,28 @@ body {
   color: #fff;
 }
 
-/* Container formular */
-.form-container {
-  max-width: 400px;
+/* Container formular și pagini */
+.container {
+  max-width: 600px;
   margin: 80px auto;
-  background-color: #1c1c1c;
   padding: 30px;
+  background-color: #1c1c1c;
   border-radius: 16px;
   box-shadow: 0 0 25px #0ff, 0 0 40px #8f00ff;
 }
 
-/* Titlu */
-.form-container h2 {
+h1, h2 {
   text-align: center;
-  margin-bottom: 24px;
   color: #0ff;
+}
+
+/* Titluri și subtitluri */
+h1 {
+  font-size: 2rem;
+}
+
+h2 {
+  font-size: 1.6rem;
 }
 
 /* Inputuri generale */
@@ -42,35 +49,7 @@ select {
   box-shadow: inset 0 0 4px #0ff;
 }
 
-/* Grup parolă + ochi */
-.password-group {
-  position: relative;
-}
-
-.password-group input[type="password"],
-.password-group input[type="text"] {
-  padding-right: 42px;
-}
-
-.toggle-password {
-  position: absolute;
-  top: 50%;
-  right: 12px;
-  transform: translateY(-50%);
-  cursor: pointer;
-  font-size: 18px;
-  color: #0ff;
-}
-
-/* Checkbox + label */
-label {
-  font-size: 14px;
-  display: block;
-  margin-top: 10px;
-  color: #ccc;
-}
-
-/* Buton */
+/* Butoane */
 button {
   width: 100%;
   background: linear-gradient(to right, #0ff, #8f00ff);
@@ -162,18 +141,20 @@ a:hover {
 /* Specific Styles for Dashboard Page */
 #dashboard-container {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
 }
 
 #dashboard-container h2 {
   font-size: 1.8rem;
+  margin-bottom: 1rem;
 }
 
 #dashboard-container a {
   color: #0ff;
   text-decoration: none;
   font-size: 1rem;
+  margin-top: 15px;
 }
 
 #dashboard-container a:hover {
