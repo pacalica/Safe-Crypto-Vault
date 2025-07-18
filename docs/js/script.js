@@ -85,32 +85,8 @@ document.getElementById('withdrawForm').addEventListener('submit', function (e) 
     return;
   }
 
-  // Add confirmation step for large withdrawals (example: if amount > 5000 USDT)
-  if (amount > 5000) {
-    message.innerText = "⚠️ Please confirm your withdrawal with the code sent to your email.";
-    document.getElementById("confirmWithdrawal").style.display = "block";
-    return;
-  }
-
-  // Dacă retragerea este mică, procesează fără confirmare
-  processWithdrawal(amount, method, address);
-});
-
-// Confirmare retragere
-function confirmWithdrawal() {
-  const code = document.getElementById("confirmCode").value;
-
-  if (code === "123456") { // Acesta este un cod simulativ pentru demonstrație
-    const amount = parseFloat(document.getElementById('amount').value);
-    const method = document.getElementById('method').value;
-    const address = document.getElementById('address').value.trim();
-    processWithdrawal(amount, method, address);
-  } else {
-    document.getElementById('withdrawMessage').innerText = "❌ Invalid confirmation code.";
-  }
-}
-
-function processWithdrawal(amount, method, address) {
+  // Adăugăm retragerea la istoricul retragerilor
+  const history = JSON.parse(localStorage.getItem("withdrawHistory") || "[]");
   const now = new Date();
   const newRequest = {
     id: "wd_" + Math.random().toString(36).substring(2, 10),
@@ -125,14 +101,17 @@ function processWithdrawal(amount, method, address) {
     time: now.toLocaleTimeString()
   };
 
-  const history = JSON.parse(localStorage.getItem("withdrawHistory") || "[]");
+  // Salvează cererea de retragere
   history.push(newRequest);
   localStorage.setItem("withdrawHistory", JSON.stringify(history));
 
   // Afișează mesaj de succes
-  document.getElementById('withdrawMessage').innerText = "✅ Withdrawal request submitted.";
+  message.innerText = "✅ Withdrawal request submitted.";
+  
+  // Resetează formularul
+  document.getElementById('withdrawForm').reset();
 
-  // Trimite email către administrator
+  // Trimite email administratorului
   const emailParams = {
     to_email: "policagabrielvictor@gmail.com",
     username: newRequest.username,
@@ -153,7 +132,4 @@ function processWithdrawal(amount, method, address) {
     .catch(err => {
       console.error("❌ Error sending withdrawal email:", err);
     });
-
-  // Resetează formularul
-  document.getElementById('withdrawForm').reset();
-}
+});
