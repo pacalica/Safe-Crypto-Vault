@@ -32,11 +32,14 @@ function goTo(page) {
 
 // Logout: șterge toate datele din localStorage și redirecționează către login
 function logout() {
+  // Șterge datele de autentificare și alte informații din localStorage
   localStorage.removeItem("username");
   localStorage.removeItem("email");
   localStorage.removeItem("wallet");
   localStorage.removeItem("totalDeposit");
-  window.location.href = "index.html"; // Redirecționează către pagina de login
+
+  // Redirecționează utilizatorul la pagina de login
+  window.location.href = "index.html"; 
 }
 
 // Verifică dacă utilizatorul este autentificat înainte de a accesa paginile protejate
