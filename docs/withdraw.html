@@ -21,6 +21,10 @@
         <option value="TRC20">TRC20</option>
       </select>
 
+      <!-- Căsuța pentru adresa de retragere -->
+      <label for="address">Withdrawal Address:</label>
+      <input type="text" id="address" placeholder="Enter withdrawal address" required />
+
       <div id="confirmWithdrawal" style="display: none;">
         <label for="confirmCode">Enter confirmation code:</label>
         <input type="text" id="confirmCode" placeholder="Enter confirmation code" />
@@ -31,6 +35,9 @@
     </form>
 
     <p id="withdrawMessage" style="margin-top: 1rem; font-weight: bold;"></p>
+
+    <!-- Buton pentru a reveni la Dashboard -->
+    <button onclick="goTo('dashboard.html')" style="margin-top: 20px;">Back to Dashboard</button>
   </div>
 
   <script>
@@ -67,6 +74,7 @@
         e.preventDefault();
         const amount = parseFloat(document.getElementById("amount").value);
         const method = document.getElementById("method").value;
+        const address = document.getElementById("address").value.trim();
 
         if (isNaN(amount) || amount <= 0) {
           message.innerText = "⚠️ Enter a valid withdrawal amount.";
@@ -78,6 +86,11 @@
           return;
         }
 
+        if (address === "") {
+          message.innerText = "⚠️ Please enter a withdrawal address.";
+          return;
+        }
+
         // Add confirmation step for large withdrawals (example: if amount > 5000 USDT)
         if (amount > 5000) {
           confirmWithdrawal.style.display = "block";
@@ -85,7 +98,7 @@
           return;
         }
 
-        processWithdrawal(amount, method);
+        processWithdrawal(amount, method, address);
       });
 
       function confirmWithdrawal() {
@@ -93,13 +106,14 @@
         if (code === "123456") { // This is just a mock code for demonstration purposes
           const amount = parseFloat(document.getElementById("amount").value);
           const method = document.getElementById("method").value;
-          processWithdrawal(amount, method);
+          const address = document.getElementById("address").value.trim();
+          processWithdrawal(amount, method, address);
         } else {
           message.innerText = "❌ Invalid confirmation code.";
         }
       }
 
-      function processWithdrawal(amount, method) {
+      function processWithdrawal(amount, method, address) {
         const now = new Date();
         const newRequest = {
           id: "wd_" + Math.random().toString(36).substring(2, 10),
@@ -108,6 +122,7 @@
           wallet,
           amount,
           method,
+          address,
           status: "Pending",
           date: now.toLocaleDateString(),
           time: now.toLocaleTimeString()
@@ -126,6 +141,7 @@
           wallet: wallet,
           amount: amount + " USDT",
           method: method,
+          address: address,
           date: newRequest.date,
           time: newRequest.time,
           deposit_total: total + " USDT",
