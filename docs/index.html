@@ -71,14 +71,41 @@
       margin-bottom: 2rem;
       font-size: 0.9rem;
     }
+
+    .password-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #toggle-password {
+      background: none;
+      border: none;
+      color: #00bcd4;
+      cursor: pointer;
+      font-size: 18px;
+    }
   </style>
 </head>
 <body>
   <div class="login-box">
     <h1>Safe Crypto Vault</h1>
     <div class="tagline">Earn securely with crypto deposits.</div>
+    
     <input type="email" id="email" placeholder="Email" required />
     <input type="text" id="username" placeholder="Username" required />
+
+    <div class="password-container">
+      <input type="password" id="password" placeholder="Password" required />
+      <button type="button" id="toggle-password">👁️</button>
+    </div>
+    
+    <div>
+      <label for="remember-password">
+        <input type="checkbox" id="remember-password" /> Remember me
+      </label>
+    </div>
+
     <button onclick="login()">Login</button>
   </div>
 
@@ -87,7 +114,9 @@
     window.addEventListener('DOMContentLoaded', () => {
       const email = localStorage.getItem('email');
       const username = localStorage.getItem('username');
-      if (email && username) {
+      const password = localStorage.getItem('password');
+      
+      if (email && username && password) {
         window.location.href = 'dashboard.html';
       }
     });
@@ -95,16 +124,30 @@
     function login() {
       const email = document.getElementById('email').value.trim();
       const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
 
-      if (!email || !username) {
-        alert('Please enter email and username.');
+      if (!email || !username || !password) {
+        alert('Please enter email, username, and password.');
         return;
       }
 
-      localStorage.setItem('email', email);
-      localStorage.setItem('username', username);
+      // Store credentials in localStorage if "Remember me" is checked
+      if (document.getElementById('remember-password').checked) {
+        localStorage.setItem('email', email);
+        localStorage.setItem('username', username);
+        localStorage.setItem('password', password);
+      }
+
       window.location.href = 'dashboard.html';
     }
+
+    // Toggle password visibility
+    document.getElementById('toggle-password').addEventListener('click', function() {
+      const passwordField = document.getElementById('password');
+      const type = passwordField.type === 'password' ? 'text' : 'password';
+      passwordField.type = type;
+      this.textContent = type === 'password' ? '👁️' : '🙈';
+    });
 
     // Service Worker registration
     if ('serviceWorker' in navigator) {
