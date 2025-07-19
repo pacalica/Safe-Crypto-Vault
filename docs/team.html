@@ -3,109 +3,157 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>My Team - Safe Crypto Vault</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <title>My Team – Safe Crypto Vault</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" href="icons/icon-192.png" />
   <style>
     .team-section {
-      margin-top: 20px;
-      background: #111;
+      margin-top: 24px;
+      background: #131344;
       padding: 20px;
-      border-left: 4px solid cyan;
+      border-left: 4px solid #00ffff;
+      border-radius: 10px;
+      margin-bottom: 32px;
+      box-shadow: 0 0 15px #0ff4;
     }
-
     .team-section h3 {
       margin-top: 0;
-      color: cyan;
+      color: #0ff;
     }
-
     .team-list {
-      margin-top: 10px;
+      margin-top: 12px;
       padding-left: 20px;
     }
-
     .team-list li {
       margin: 6px 0;
+      color: #eee;
     }
-
     .no-members {
-      color: gray;
+      color: #aaa;
       font-style: italic;
     }
-
     .amount {
-      color: lime;
+      color: #00ff6a;
       font-weight: bold;
     }
+    .main-content { max-width: 800px; margin: 35px auto 0 auto; }
+    .back-btn {
+      margin-top: 35px;
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      background: linear-gradient(90deg,#0ff,#8f00ff);
+      color: #111;
+      font-size: 1.08em;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .back-btn:hover { background: #0ff; }
   </style>
 </head>
-<body>
-  <div class="main-container">
-    <div class="sidebar">
-      <h2>Vault Menu</h2>
-      <ul>
-        <li onclick="goTo('dashboard.html')">Dashboard</li>
-        <li onclick="goTo('deposit.html')">Open Deposit</li>
-        <li onclick="goTo('withdraw.html')">Withdraw</li>
-        <li onclick="goTo('history.html')">History</li>
-        <li onclick="goTo('team.html')">My Team</li>
-        <li onclick="goTo('affiliate.html')">Affiliate Link</li>
-        <li onclick="goTo('settings.html')">Settings</li>
-        <li onclick="goTo('security.html')">Security</li>
-        <li onclick="logout()">Exit</li>
-      </ul>
-    </div>
+<body style="background:linear-gradient(120deg,#181836,#1e044f 65%,#14152e 100%);">
 
-    <div class="content">
-      <h1>My Team</h1>
-
-      <div class="team-section">
-        <h3>Level 1 Referrals</h3>
-        <ul class="team-list" id="level1List"></ul>
-        <div>Total earned: <span class="amount" id="level1Total">0</span> USDT</div>
-      </div>
-
-      <div class="team-section">
-        <h3>Level 2 Referrals</h3>
-        <ul class="team-list" id="level2List"></ul>
-        <div>Total earned: <span class="amount" id="level2Total">0</span> USDT</div>
-      </div>
-    </div>
+  <div class="sidebar">
+    <h2>🛡️ Vault</h2>
+    <ul>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="open-deposit.html">Open deposit</a></li>
+      <li><a href="withdraw.html">Withdraw</a></li>
+      <li><a href="history.html">History</a></li>
+      <li><a href="team.html" class="active">My team</a></li>
+      <li><a href="settings.html">Settings</a></li>
+      <li><a href="security.html">Security</a></li>
+      <li id="adminLink" style="display:none;"><a href="admin.html">Admin</a></li>
+      <li><a href="#" onclick="logout()">Exit</a></li>
+    </ul>
   </div>
 
-  <script src="js/script.js"></script>
+  <div class="main-content">
+    <h1 style="text-align:center;color:#0ff;">My Team</h1>
+
+    <div class="team-section">
+      <h3>Level 1 Referrals</h3>
+      <ul class="team-list" id="level1List"></ul>
+      <div>Total earned: <span class="amount" id="level1Total">0</span> USDT</div>
+    </div>
+
+    <div class="team-section">
+      <h3>Level 2 Referrals</h3>
+      <ul class="team-list" id="level2List"></ul>
+      <div>Total earned: <span class="amount" id="level2Total">0</span> USDT</div>
+    </div>
+
+    <button class="back-btn" onclick="window.location.href='dashboard.html'">← Back to Dashboard</button>
+  </div>
+
   <script>
-    // Simulare afișare echipă din localStorage (poate fi extins ulterior)
-    const level1 = JSON.parse(localStorage.getItem('referrals_level1') || '[]');
-    const level2 = JSON.parse(localStorage.getItem('referrals_level2') || '[]');
+    // ADMIN vizibil doar dacă userul e admin
+    const user = JSON.parse(localStorage.getItem("loggedInUser") || "null");
+    if (!user) window.location.href = "login.html";
+    if (user.email === "policagabrielvictor@gmail.com") {
+      document.getElementById("adminLink").style.display = "block";
+    }
 
-    const level1List = document.getElementById('level1List');
-    const level2List = document.getElementById('level2List');
+    // 1. Preluăm toți userii și depunerile
+    const allUsers = JSON.parse(localStorage.getItem("users") || "[]");
+    const deposits = JSON.parse(localStorage.getItem("deposits") || "[]");
 
+    // 2. Referrals direct (level 1) = cei care au ref = user.wallet
+    const level1Refs = allUsers.filter(u => u.ref === user.wallet);
+
+    // 3. Referrals indirect (level 2) = cei care au ca ref pe cineva din level 1
+    let level2Refs = [];
+    level1Refs.forEach(l1 => {
+      level2Refs = level2Refs.concat(allUsers.filter(u => u.ref === l1.wallet));
+    });
+
+    // 4. Calculează câștiguri pentru fiecare referral
     let level1Total = 0;
     let level2Total = 0;
 
-    if (level1.length === 0) {
+    function getDepositAmount(wallet) {
+      // suma totală depusă de un user
+      return deposits.filter(d => d.wallet === wallet && (d.status === "Approved" || d.confirmed))
+                     .reduce((sum, d) => sum + Number(d.amount), 0);
+    }
+
+    // Level 1 (10%)
+    const level1List = document.getElementById('level1List');
+    if (level1Refs.length === 0) {
       level1List.innerHTML = '<li class="no-members">No level 1 referrals yet.</li>';
     } else {
-      level1.forEach(r => {
-        const earned = parseFloat(r.amount) * 0.02;
+      level1Refs.forEach(ref => {
+        const dep = getDepositAmount(ref.wallet);
+        const earned = dep * 0.10;
         level1Total += earned;
-        level1List.innerHTML += `<li>${r.wallet} → deposit: ${r.amount} USDT → earned: <span class="amount">${earned.toFixed(2)}</span> USDT</li>`;
+        level1List.innerHTML += `<li>${ref.username || ref.wallet} <span style="color:#aaa">(wallet: ${ref.wallet})</span> 
+        – deposited: ${dep} USDT – earned: <span class="amount">${earned.toFixed(2)}</span> USDT</li>`;
       });
     }
 
-    if (level2.length === 0) {
+    // Level 2 (5%)
+    const level2List = document.getElementById('level2List');
+    if (level2Refs.length === 0) {
       level2List.innerHTML = '<li class="no-members">No level 2 referrals yet.</li>';
     } else {
-      level2.forEach(r => {
-        const earned = parseFloat(r.amount) * 0.01;
+      level2Refs.forEach(ref => {
+        const dep = getDepositAmount(ref.wallet);
+        const earned = dep * 0.05;
         level2Total += earned;
-        level2List.innerHTML += `<li>${r.wallet} → deposit: ${r.amount} USDT → earned: <span class="amount">${earned.toFixed(2)}</span> USDT</li>`;
+        level2List.innerHTML += `<li>${ref.username || ref.wallet} <span style="color:#aaa">(wallet: ${ref.wallet})</span> 
+        – deposited: ${dep} USDT – earned: <span class="amount">${earned.toFixed(2)}</span> USDT</li>`;
       });
     }
 
     document.getElementById('level1Total').innerText = level1Total.toFixed(2);
     document.getElementById('level2Total').innerText = level2Total.toFixed(2);
+
+    function logout() {
+      localStorage.removeItem("loggedInUser");
+      window.location.href = "login.html";
+    }
   </script>
 </body>
 </html>
