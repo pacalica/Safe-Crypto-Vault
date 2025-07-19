@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Register – Safe Crypto Vault</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="css/style.css" />
   <style>
     body {
       background: linear-gradient(135deg, #0ff, #8000ff);
@@ -15,7 +15,6 @@
       align-items: center;
       height: 100vh;
     }
-
     .register-box {
       background-color: rgba(0,0,0,0.8);
       padding: 30px;
@@ -24,13 +23,11 @@
       max-width: 400px;
       box-shadow: 0 0 20px #00ffff88;
     }
-
     .register-box h2 {
       text-align: center;
       margin-bottom: 25px;
       color: #00ffff;
     }
-
     .register-box input {
       width: 100%;
       padding: 12px;
@@ -40,7 +37,6 @@
       background-color: #222;
       color: #fff;
     }
-
     .register-box button {
       width: 100%;
       padding: 12px;
@@ -52,24 +48,20 @@
       cursor: pointer;
       margin-top: 15px;
     }
-
     .register-box .error {
       color: #ff6666;
       font-size: 14px;
       margin-top: 10px;
       text-align: center;
     }
-
     .login-link {
       text-align: center;
       margin-top: 15px;
     }
-
     .login-link a {
       color: #00ffff;
       text-decoration: none;
     }
-
     .login-link a:hover {
       text-decoration: underline;
     }
@@ -84,13 +76,23 @@
     <button onclick="register()">Register</button>
     <div class="error" id="errorMsg"></div>
     <div class="login-link">
-      Already have an account? <a href="login.html">Login here</a>
+      Already have an account? <a href="index.html">Login here</a>
     </div>
   </div>
 
   <script>
+    // Generate random wallet (poți înlocui cu sistem real dacă ai)
+    function generateWallet() {
+      return '0x' + Array.from(crypto.getRandomValues(new Uint8Array(20)))
+        .map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    // Ia referal pending dacă e
+    let ref = localStorage.getItem('ref_pending') || '';
+    // Poți adăuga validări ca să nu fie tot userul referal la el însuși
+
     function register() {
-      const email = document.getElementById("email").value.trim();
+      const email = document.getElementById("email").value.trim().toLowerCase();
       const username = document.getElementById("username").value.trim();
       const password = document.getElementById("password").value.trim();
       const errorMsg = document.getElementById("errorMsg");
@@ -113,10 +115,14 @@
         return;
       }
 
-      const newUser = { email, username, password };
+      const wallet = generateWallet();
+      const newUser = { email, username, password, wallet, ref };
+
       users.push(newUser);
       localStorage.setItem("users", JSON.stringify(users));
       localStorage.setItem("loggedInUser", JSON.stringify(newUser));
+      // Șterge referralul pending pentru viitoare înregistrări
+      localStorage.removeItem("ref_pending");
       window.location.href = "dashboard.html";
     }
   </script>
