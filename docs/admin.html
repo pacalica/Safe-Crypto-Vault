@@ -1,182 +1,216 @@
-<!-- admin.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin Panel – Safe Crypto Vault</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" href="icons/icon-192.png" />
   <style>
     body {
       background: #000022;
       color: #fff;
       font-family: 'Segoe UI', sans-serif;
-      padding: 20px;
     }
-
+    .main-content {
+      max-width: 900px;
+      margin: 40px auto;
+      background: #111133;
+      border-radius: 14px;
+      padding: 30px 24px 60px 24px;
+      box-shadow: 0 0 25px #00ffff55;
+    }
     h1 {
       color: #00ffff;
       text-align: center;
       margin-bottom: 30px;
     }
-
     .section {
-      background: #111133;
-      border-radius: 12px;
-      padding: 20px;
+      background: #19194d;
+      border-radius: 10px;
+      padding: 24px 18px;
       margin-bottom: 30px;
-      box-shadow: 0 0 15px #0ff4;
+      box-shadow: 0 0 10px #0ff4;
     }
-
     .section h2 {
       color: #0ff;
       border-bottom: 1px solid #0ff4;
       padding-bottom: 8px;
-      margin-bottom: 15px;
+      margin-bottom: 18px;
+      font-size: 1.3rem;
     }
-
-    .user-entry, .withdraw-entry {
-      margin-bottom: 15px;
-      padding: 10px;
-      background-color: #1a1a40;
-      border-radius: 10px;
+    .entry {
+      background: #202048;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      padding: 14px 12px;
       border-left: 4px solid #00ffff;
+      position: relative;
     }
-
-    .user-entry span, .withdraw-entry span {
+    .entry span {
       display: block;
       margin: 4px 0;
+      font-size: 1.01em;
     }
-
     .no-data {
       color: #aaa;
       text-align: center;
+      font-style: italic;
     }
-
     .status {
       font-weight: bold;
       text-transform: capitalize;
+      padding: 2px 10px;
+      border-radius: 6px;
     }
-
-    .status.pending {
-      color: yellow;
+    .status.Pending { background: orange; color: #222; }
+    .status.Approved, .status.Success, .status.Successful { background: #0f0; color: #222; }
+    .status.Rejected, .status.Failed { background: #f33; color: #fff; }
+    .admin-btns {
+      position: absolute;
+      right: 14px;
+      top: 20px;
     }
-
-    .status.successful {
-      color: lime;
+    .admin-btns button {
+      margin-left: 7px;
+      padding: 5px 16px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      background: linear-gradient(90deg, #0ff, #8f00ff);
+      color: #111;
+      cursor: pointer;
+      transition: all 0.2s;
     }
-
-    .status.rejected {
-      color: red;
+    .admin-btns button:hover {
+      transform: scale(1.04);
+      background: #0ff;
     }
-
-    a.back-link {
+    .back-link {
       display: block;
       text-align: center;
-      margin-top: 40px;
+      margin-top: 50px;
       color: #0ff;
       text-decoration: none;
+      font-size: 1.1em;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <h1>🔐 Admin Panel</h1>
+  <div class="main-content">
+    <h1>🔐 Admin Panel</h1>
 
-  <div class="section">
-    <h2>👥 Referral Activity</h2>
-    <div id="referralList" class="no-data">Loading referral data...</div>
+    <div class="section">
+      <h2>Deposits (Manual Approve/Reject)</h2>
+      <div id="depositsList" class="no-data">Loading deposit data...</div>
+    </div>
+
+    <div class="section">
+      <h2>Withdrawal Requests</h2>
+      <div id="withdrawalList" class="no-data">Loading withdrawal data...</div>
+    </div>
+
+    <a class="back-link" href="dashboard.html">← Back to Dashboard</a>
   </div>
-
-  <div class="section">
-    <h2>💸 Withdrawal Requests</h2>
-    <div id="withdrawalList" class="no-data">Loading withdrawal data...</div>
-  </div>
-
-  <a class="back-link" href="dashboard.html">← Back to Dashboard</a>
-
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const users = JSON.parse(localStorage.getItem("users") || "[]");
+    // --- Only admin has access ---
+    const loggedUser = JSON.parse(localStorage.getItem("loggedInUser") || "null");
+    if (!loggedUser || loggedUser.email !== "policagabrielvictor@gmail.com") {
+      window.location.href = "dashboard.html";
+    }
+
+    // ----------- DEPOSITS SECTION -----------
+    function loadDeposits() {
+      const depositsList = document.getElementById("depositsList");
       const deposits = JSON.parse(localStorage.getItem("deposits") || "[]");
-      const withdrawals = JSON.parse(localStorage.getItem("withdrawals") || "[]");
 
-      const referralList = document.getElementById("referralList");
-      const withdrawalList = document.getElementById("withdrawalList");
-
-      const referrals = {};
-
-      users.forEach(user => {
-        if (user.ref) {
-          if (!referrals[user.ref]) referrals[user.ref] = [];
-          referrals[user.ref].push(user);
-        }
-      });
-
-      if (Object.keys(referrals).length === 0) {
-        referralList.textContent = "No referral data available.";
-      } else {
-        referralList.innerHTML = "";
-
-        Object.entries(referrals).forEach(([refWallet, invitedUsers]) => {
-          let totalCommission = 0;
-          invitedUsers.forEach(inv => {
-            const userDeposits = deposits.filter(d => d.username === inv.username);
-            let totalWithInterest = 0;
-            userDeposits.forEach(d => {
-              const months = d.duration === "1" ? 1 : d.duration === "3" ? 3 : 5;
-              const interestRate = getInterestRate(d.amount);
-              const interest = (d.amount * interestRate * months) / 100;
-              totalWithInterest += d.amount + interest;
-            });
-            totalCommission += totalWithInterest * 0.10;
-          });
-
-          const div = document.createElement("div");
-          div.className = "user-entry";
-          div.innerHTML = `
-            <span><strong>Referrer Wallet:</strong> ${refWallet}</span>
-            <span><strong>Invited Users:</strong> ${invitedUsers.map(u => u.username).join(', ')}</span>
-            <span><strong>Total 10% Commission:</strong> ${totalCommission.toFixed(2)} USDT</span>
-          `;
-          referralList.appendChild(div);
-        });
+      if (deposits.length === 0) {
+        depositsList.textContent = "No deposit data available.";
+        return;
       }
+      depositsList.innerHTML = "";
+
+      deposits.slice().reverse().forEach((dep, idx) => {
+        const div = document.createElement("div");
+        div.className = "entry";
+        div.innerHTML = `
+          <span><strong>User:</strong> ${dep.username}</span>
+          <span><strong>Wallet:</strong> ${dep.wallet}</span>
+          <span><strong>Amount:</strong> ${dep.amount} USDT</span>
+          <span><strong>Duration:</strong> ${dep.duration}</span>
+          <span><strong>Date:</strong> ${dep.date ? new Date(dep.date).toLocaleString() : "n/a"}</span>
+          <span><strong>Status:</strong> <span class="status ${dep.status || (dep.confirmed ? 'Approved' : 'Pending')}">${dep.status || (dep.confirmed ? 'Approved' : 'Pending')}</span></span>
+          <div class="admin-btns">
+            <button onclick="markDeposit(${deposits.length-1-idx},'Approved')">Success</button>
+            <button onclick="markDeposit(${deposits.length-1-idx},'Rejected')">Failed</button>
+          </div>
+        `;
+        depositsList.appendChild(div);
+      });
+    }
+
+    window.markDeposit = function(idx, status) {
+      const deposits = JSON.parse(localStorage.getItem("deposits") || "[]");
+      if (!deposits[idx]) return;
+      deposits[idx].status = status;
+      deposits[idx].confirmed = (status === "Approved");
+      localStorage.setItem("deposits", JSON.stringify(deposits));
+
+      // Dacă aprobăm, actualizăm și soldul userului
+      if (status === "Approved") {
+        const users = JSON.parse(localStorage.getItem("users") || "[]");
+        const userIdx = users.findIndex(u => u.wallet === deposits[idx].wallet);
+        if (userIdx !== -1) {
+          users[userIdx].balance = (users[userIdx].balance || 0) + Number(deposits[idx].amount);
+          localStorage.setItem("users", JSON.stringify(users));
+        }
+      }
+      loadDeposits();
+    };
+
+    // ----------- WITHDRAWALS SECTION -----------
+    function loadWithdrawals() {
+      const withdrawalList = document.getElementById("withdrawalList");
+      const withdrawals = JSON.parse(localStorage.getItem("withdrawals") || "[]");
 
       if (withdrawals.length === 0) {
         withdrawalList.textContent = "No withdrawal requests yet.";
-      } else {
-        withdrawalList.innerHTML = "";
-        withdrawals.forEach(req => {
-          const countdownText = getCountdownText(req.timestamp);
-          const div = document.createElement("div");
-          div.className = "withdraw-entry";
-          div.innerHTML = `
-            <span><strong>User:</strong> ${req.username}</span>
-            <span><strong>Amount:</strong> ${req.amount} USDT</span>
-            <span><strong>Status:</strong> <span class="status ${req.status}">${req.status}</span></span>
-            <span><strong>Requested:</strong> ${new Date(req.timestamp).toLocaleString()}</span>
-            <span><strong>Next eligible in:</strong> ${countdownText}</span>
-          `;
-          withdrawalList.appendChild(div);
-        });
+        return;
       }
+      withdrawalList.innerHTML = "";
+      withdrawals.slice().reverse().forEach((req, idx) => {
+        const div = document.createElement("div");
+        div.className = "entry";
+        div.innerHTML = `
+          <span><strong>User:</strong> ${req.username}</span>
+          <span><strong>Wallet:</strong> ${req.wallet}</span>
+          <span><strong>Amount:</strong> ${req.amount} USDT</span>
+          <span><strong>Method:</strong> ${req.method || ""}</span>
+          <span><strong>Status:</strong> <span class="status ${req.status}">${req.status}</span></span>
+          <span><strong>Date:</strong> ${req.date ? req.date : ""}</span>
+          <span><strong>Time:</strong> ${req.time ? req.time : ""}</span>
+          <div class="admin-btns">
+            <button onclick="markWithdraw(${withdrawals.length-1-idx},'Approved')">Success</button>
+            <button onclick="markWithdraw(${withdrawals.length-1-idx},'Rejected')">Failed</button>
+          </div>
+        `;
+        withdrawalList.appendChild(div);
+      });
+    }
 
-      function getInterestRate(amount) {
-        if (amount < 2000) return 3.5;
-        if (amount <= 5000) return 5.5;
-        return 7.5;
-      }
+    window.markWithdraw = function(idx, status) {
+      const withdrawals = JSON.parse(localStorage.getItem("withdrawals") || "[]");
+      if (!withdrawals[idx]) return;
+      withdrawals[idx].status = status;
+      localStorage.setItem("withdrawals", JSON.stringify(withdrawals));
+      loadWithdrawals();
+    };
 
-      function getCountdownText(timestamp) {
-        const now = Date.now();
-        const nextTime = timestamp + 7 * 24 * 60 * 60 * 1000;
-        const diff = nextTime - now;
-        if (diff <= 0) return "✅ Now";
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-        const mins = Math.floor((diff / (1000 * 60)) % 60);
-        return `${days}d ${hours}h ${mins}m`;
-      }
+    // ------- LOAD ALL DATA -------
+    document.addEventListener("DOMContentLoaded", function() {
+      loadDeposits();
+      loadWithdrawals();
     });
   </script>
 </body>
