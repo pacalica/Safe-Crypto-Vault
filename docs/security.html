@@ -9,6 +9,7 @@
 </head>
 <body class="main-body" style="background-image: url('images/robot-bg.jpg');">
 
+  <!-- Sidebar -->
   <div class="sidebar">
     <h2>🛡️ Vault</h2>
     <ul>
@@ -19,63 +20,132 @@
       <li><a href="team.html">My team</a></li>
       <li><a href="settings.html">Settings</a></li>
       <li><a href="security.html" class="active">Security</a></li>
-      <li><a href="admin.html">Admin</a></li>
-      <li><a href="login.html" onclick="logout()">Exit</a></li>
+      <li id="adminLink" style="display:none;"><a href="admin.html">Admin</a></li>
+      <li><a href="#" onclick="logout()">Exit</a></li>
     </ul>
   </div>
 
   <div class="main-content">
-    <h1>Security Settings</h1>
+    <h1>🔒 Security Settings</h1>
 
     <div class="card">
-      <h3>Update Email</h3>
-      <input type="email" id="newEmail" placeholder="Enter new email" />
-      <button onclick="updateEmail()">Update Email</button>
-      <p id="emailMsg" style="color: lime;"></p>
+      <h3>Change Password</h3>
+      <form id="changePasswordForm" autocomplete="off">
+        <label for="currentPass">Current Password:</label>
+        <input type="password" id="currentPass" placeholder="Current password" required />
+
+        <label for="newPass">New Password:</label>
+        <input type="password" id="newPass" placeholder="New password" required />
+
+        <label for="confirmNewPass">Confirm New Password:</label>
+        <input type="password" id="confirmNewPass" placeholder="Confirm new password" required />
+
+        <button type="submit">Change Password</button>
+      </form>
+      <div id="passMessage" style="margin-top:10px;"></div>
     </div>
 
-    <div class="card">
-      <h3>Update Password</h3>
-      <input type="password" id="newPassword" placeholder="Enter new password" />
-      <button onclick="updatePassword()">Update Password</button>
-      <p id="passMsg" style="color: lime;"></p>
+    <div class="card" style="margin-top: 40px;">
+      <h3>Change Email <span style="font-size:0.85em; color:#999;">(optional)</span></h3>
+      <form id="changeEmailForm" autocomplete="off">
+        <label for="newEmail">New Email:</label>
+        <input type="email" id="newEmail" placeholder="Enter new email" required />
+
+        <label for="passwordForEmail">Your Password:</label>
+        <input type="password" id="passwordForEmail" placeholder="Confirm your password" required />
+
+        <button type="submit">Change Email</button>
+      </form>
+      <div id="emailMessage" style="margin-top:10px;"></div>
     </div>
 
-    <div class="card">
-      <h3>Clear All Local Data</h3>
-      <button style="background-color: red;" onclick="clearData()">⚠️ Clear and Logout</button>
-    </div>
+    <button onclick="window.location.href='dashboard.html'" class="back-btn" style="margin-top:40px;">Back to Dashboard</button>
   </div>
 
   <script>
-    function updateEmail() {
+    // Admin vizibil doar dacă userul e admin
+    const user = JSON.parse(localStorage.getItem("loggedInUser") || "null");
+    if (!user) window.location.href = "login.html";
+    if (user.email === "policagabrielvictor@gmail.com") {
+      document.getElementById("adminLink").style.display = "block";
+    }
+
+    // Change Password
+    document.getElementById("changePasswordForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const current = document.getElementById("currentPass").value;
+      const newP = document.getElementById("newPass").value;
+      const confirm = document.getElementById("confirmNewPass").value;
+      const msg = document.getElementById("passMessage");
+
+      if (current !== user.password) {
+        msg.textContent = "❌ Current password is incorrect.";
+        msg.style.color = "crimson";
+        return;
+      }
+      if (newP.length < 6) {
+        msg.textContent = "❌ Password must be at least 6 characters.";
+        msg.style.color = "crimson";
+        return;
+      }
+      if (newP !== confirm) {
+        msg.textContent = "❌ Passwords do not match.";
+        msg.style.color = "crimson";
+        return;
+      }
+
+      // Update user password in storage
+      user.password = newP;
+      localStorage.setItem("loggedInUser", JSON.stringify(user));
+      // Update password in users list
+      const allUsers = JSON.parse(localStorage.getItem("users") || "[]");
+      const idx = allUsers.findIndex(u => u.wallet === user.wallet);
+      if (idx !== -1) {
+        allUsers[idx].password = newP;
+        localStorage.setItem("users", JSON.stringify(allUsers));
+      }
+      msg.textContent = "✅ Password updated!";
+      msg.style.color = "limegreen";
+      this.reset();
+    });
+
+    // Change Email
+    document.getElementById("changeEmailForm").addEventListener("submit", function (e) {
+      e.preventDefault();
       const newEmail = document.getElementById("newEmail").value.trim();
-      if (!newEmail) return;
+      const pass = document.getElementById("passwordForEmail").value;
+      const msg = document.getElementById("emailMessage");
 
-      let user = JSON.parse(localStorage.getItem("vault_user"));
-      if (!user) user = {};
+      if (pass !== user.password) {
+        msg.textContent = "❌ Incorrect password.";
+        msg.style.color = "crimson";
+        return;
+      }
+      if (!/^[^@]+@[^@]+\.[^@]+$/.test(newEmail)) {
+        msg.textContent = "❌ Invalid email.";
+        msg.style.color = "crimson";
+        return;
+      }
+      // Update user email in storage
       user.email = newEmail;
-      localStorage.setItem("vault_user", JSON.stringify(user));
-      document.getElementById("emailMsg").innerText = "Email updated!";
-    }
-
-    function updatePassword() {
-      const newPass = document.getElementById("newPassword").value.trim();
-      if (!newPass) return;
-
-      let user = JSON.parse(localStorage.getItem("vault_user"));
-      if (!user) user = {};
-      user.password = newPass;
-      localStorage.setItem("vault_user", JSON.stringify(user));
-      document.getElementById("passMsg").innerText = "Password updated!";
-    }
-
-    function clearData() {
-      localStorage.clear();
-      window.location.href = "login.html";
-    }
+      localStorage.setItem("loggedInUser", JSON.stringify(user));
+      // Update in users list
+      const allUsers = JSON.parse(localStorage.getItem("users") || "[]");
+      const idx = allUsers.findIndex(u => u.wallet === user.wallet);
+      if (idx !== -1) {
+        allUsers[idx].email = newEmail;
+        localStorage.setItem("users", JSON.stringify(allUsers));
+      }
+      msg.textContent = "✅ Email updated!";
+      msg.style.color = "limegreen";
+      this.reset();
+    });
 
     function logout() {
-      localStorage.clear();
+      localStorage.removeItem("loggedInUser");
+      window.location.href = "login.html";
     }
+  </script>
+</body>
+</html>
  
