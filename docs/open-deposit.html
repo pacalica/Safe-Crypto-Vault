@@ -9,6 +9,7 @@
 </head>
 <body class="main-body" style="background-image: url('images/robot-bg.jpg');">
 
+  <!-- Sidebar -->
   <div class="sidebar">
     <h2>🛡️ Vault</h2>
     <ul>
@@ -19,8 +20,8 @@
       <li><a href="team.html">My team</a></li>
       <li><a href="settings.html">Settings</a></li>
       <li><a href="security.html">Security</a></li>
-      <li><a href="admin.html">Admin</a></li>
-      <li><a href="login.html" onclick="logout()">Exit</a></li>
+      <li id="adminLink" style="display:none;"><a href="admin.html">Admin</a></li>
+      <li><a href="#" onclick="logout()">Exit</a></li>
     </ul>
   </div>
 
@@ -28,9 +29,10 @@
     <h1>Make a Deposit</h1>
 
     <div class="card">
-      <h3>Send BNB (BEP20) to:</h3>
+      <h3>Send USDT (BEP20) to:</h3>
       <input type="text" id="depositAddress" value="0x124377FCe14439248a4959ce528314aA3A897321" readonly />
       <button onclick="copyAddress()">Copy Address</button>
+      <span id="copyMsg" style="color: #0ff; margin-left:10px"></span>
       <div class="qr">
         <img src="images/qr.png" alt="QR Code" width="160" />
       </div>
@@ -38,11 +40,82 @@
 
     <div class="card">
       <h3>Enter the amount you sent:</h3>
-      <input type="number" id="amountSent" placeholder="Amount in BNB" />
+      <input type="number" id="amountSent" min="10" placeholder="Amount in USDT" />
+      <label>Choose your plan:</label>
+      <select id="plan">
+        <option value="plan1">Plan 1 (3.5%/day, 0–1999 USDT)</option>
+        <option value="plan2">Plan 2 (5.5%/day, 2000–5000 USDT)</option>
+        <option value="plan3">Plan 3 (7.5%/day, 5000–10000 USDT)</option>
+      </select>
       <button onclick="confirmDeposit()">I've sent deposit</button>
     </div>
+
+    <!-- Back to Dashboard -->
+    <button onclick="window.location.href='dashboard.html'" class="back-btn">Back to Dashboard</button>
   </div>
 
-  <script src="js/deposit.js"></script>
+  <!-- EmailJS -->
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <script>
+    emailjs.init("7_PGCuxLtg1WCWvU0");
+  </script>
+
+  <script>
+    // Sidebar admin vizibil doar dacă e admin
+    const user = JSON.parse(localStorage.getItem("loggedInUser") || "null");
+    if (!user) window.location.href = "login.html";
+    if (user.email === "policagabrielvictor@gmail.com") {
+      document.getElementById("adminLink").style.display = "block";
+    }
+
+    function copyAddress() {
+      const depositInput = document.getElementById("depositAddress");
+      depositInput.select();
+      depositInput.setSelectionRange(0, 99999);
+      document.execCommand("copy");
+      document.getElementById("copyMsg").textContent = "Copied!";
+      setTimeout(() => { document.getElementById("copyMsg").textContent = ""; }, 1300);
+    }
+
+    function confirmDeposit() {
+      const amount = parseFloat(document.getElementById("amountSent").value);
+      const plan = document.getElementById("plan").value;
+      if (isNaN(amount) || amount < 10) {
+        alert("Minimum deposit is 10 USDT.");
+        return;
+      }
+      // Salvează depunerea ca pending pentru aprobare admin
+      const deposits = JSON.parse(localStorage.getItem("deposits") || "[]");
+      deposits.push({
+        wallet: user.wallet,
+        username: user.username,
+        amount,
+        plan,
+        startDate: new Date().toISOString(),
+        status: "pending"
+      });
+      localStorage.setItem("deposits", JSON.stringify(deposits));
+
+      // Trimite email adminului
+      emailjs.send("service_mnaa5dl", "template_2pbn9v4", {
+        username: user.username,
+        wallet: user.wallet,
+        amount: amount.toString(),
+        plan: plan
+      }).then(() => {
+        alert("Deposit submitted & email sent. Await admin confirmation.");
+        window.location.href = "dashboard.html";
+      }).catch((error) => {
+        console.error("Email error:", error);
+        alert("Deposit saved, but email failed.");
+        window.location.href = "dashboard.html";
+      });
+    }
+
+    function logout() {
+      localStorage.removeItem("loggedInUser");
+      window.location.href = "login.html";
+    }
+  </script>
 </body>
 </html>
