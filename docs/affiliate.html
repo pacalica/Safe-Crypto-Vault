@@ -4,78 +4,108 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Affiliate Link – Safe Crypto Vault</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" href="icons/icon-192.png" />
   <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #000;
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-
-    .ref-container {
-      background: #111;
-      padding: 20px;
-      border: 1px solid cyan;
-      border-radius: 10px;
-      max-width: 90%;
+    .affiliate-container {
+      max-width: 500px;
+      margin: 60px auto 0 auto;
+      background: #111f;
+      padding: 35px 25px;
+      border-radius: 15px;
+      box-shadow: 0 0 24px #0ff9;
       text-align: center;
     }
-
-    h2 {
-      color: cyan;
-      margin-bottom: 15px;
-    }
-
-    input {
+    h2 { color: cyan; margin-bottom: 18px; }
+    input[type="text"] {
       width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      margin-top: 10px;
+      padding: 12px;
+      font-size: 17px;
+      margin-top: 8px;
       border: none;
-      border-radius: 5px;
-      background: #222;
+      border-radius: 6px;
+      background: #232334;
       color: #fff;
+      text-align: center;
+      margin-bottom: 14px;
+      letter-spacing: 0.03em;
     }
-
     button {
-      margin-top: 15px;
-      padding: 10px 20px;
-      font-size: 16px;
+      padding: 12px 26px;
+      font-size: 1em;
       border: none;
-      border-radius: 5px;
-      background: cyan;
-      color: #000;
+      border-radius: 6px;
+      background: linear-gradient(90deg, #0ff, #8f00ff);
+      color: #111;
       cursor: pointer;
+      margin-bottom: 10px;
     }
-
-    button:hover {
-      background: #00ffff;
+    button:hover { background: #0ff; }
+    .back-btn {
+      display: block;
+      margin: 25px auto 0 auto;
+      padding: 10px 22px;
+      border-radius: 7px;
+      background: #1818ff;
+      color: #fff;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 0 8px #0ff6;
+      transition: background .2s;
     }
+    .back-btn:hover { background: #00ffff; color: #181818;}
   </style>
 </head>
-<body>
-  <div class="ref-container">
+<body style="background:linear-gradient(120deg,#181836,#1e044f 65%,#14152e 100%);">
+  <div class="sidebar">
+    <h2>🛡️ Vault</h2>
+    <ul>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="open-deposit.html">Open deposit</a></li>
+      <li><a href="withdraw.html">Withdraw</a></li>
+      <li><a href="history.html">History</a></li>
+      <li><a href="team.html">My team</a></li>
+      <li><a href="affiliate.html" class="active">Affiliate Link</a></li>
+      <li><a href="settings.html">Settings</a></li>
+      <li><a href="security.html">Security</a></li>
+      <li id="adminLink" style="display:none;"><a href="admin.html">Admin</a></li>
+      <li><a href="#" onclick="logout()">Exit</a></li>
+    </ul>
+  </div>
+
+  <div class="affiliate-container">
     <h2>Your Referral Link</h2>
     <input type="text" id="refLink" readonly />
     <button onclick="copyRefLink()">Copy Link</button>
+    <div id="msg" style="color:lime;margin-top:7px;"></div>
+    <button class="back-btn" onclick="window.location.href='dashboard.html'">← Back to Dashboard</button>
   </div>
 
   <script>
-    const wallet = localStorage.getItem('wallet') || 'wallet';
-    const refLink = `https://pacalica.github.io/Safe-Crypto-Vault/?ref=${wallet}`;
+    // Admin vizibil doar dacă userul e admin
+    const user = JSON.parse(localStorage.getItem("loggedInUser") || "null");
+    if (!user) window.location.href = "login.html";
+    if (user.email === "policagabrielvictor@gmail.com") {
+      document.getElementById("adminLink").style.display = "block";
+    }
+
+    // Generează link referral personalizat
+    const refLink = `${window.location.origin}/login.html?ref=${user.wallet}`;
     document.getElementById('refLink').value = refLink;
 
     function copyRefLink() {
       const input = document.getElementById('refLink');
       input.select();
-      input.setSelectionRange(0, 99999); // Mobile support
+      input.setSelectionRange(0, 99999);
       document.execCommand('copy');
-      alert('Referral link copied to clipboard!');
+      document.getElementById('msg').innerText = 'Referral link copied to clipboard!';
+      setTimeout(()=>document.getElementById('msg').innerText='', 2500);
+    }
+
+    function logout() {
+      localStorage.removeItem("loggedInUser");
+      window.location.href = "login.html";
     }
   </script>
 </body>
