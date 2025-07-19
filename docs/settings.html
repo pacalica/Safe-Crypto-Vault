@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Settings – Safe Crypto Vault</title>
-  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/style.css" />
   <link rel="icon" href="icons/icon-192.png" />
 </head>
 <body class="main-body" style="background-image: url('images/robot-bg.jpg');">
@@ -19,51 +19,73 @@
       <li><a href="team.html">My team</a></li>
       <li><a href="settings.html" class="active">Settings</a></li>
       <li><a href="security.html">Security</a></li>
-      <li id="adminLink" style="display:none;"><a href="admin.html">Admin</a></li>
-      <li><a href="#" onclick="logout()">Exit</a></li>
+      <li><a href="admin.html">Admin</a></li>
+      <li><a href="login.html" onclick="logout()">Exit</a></li>
     </ul>
   </div>
 
   <div class="main-content">
-    <h1>Referral Link</h1>
+    <h1>Settings</h1>
+    <!-- REFERRAL link section ... -->
 
-    <div class="card">
-      <p>Your referral link:</p>
-      <input type="text" id="refLink" readonly />
-      <button onclick="copyReferral()">Copy Link</button>
-      <p id="copyMsg" style="color: lime;"></p>
+    <div class="card" id="withdrawAddresses">
+      <h3>Set Withdrawal Addresses (one time only!)</h3>
+      <form id="addressForm">
+        <label for="bep20Addr">BEP20 Address:</label>
+        <input type="text" id="bep20Addr" required placeholder="Paste BEP20 address" />
+
+        <label for="trc20Addr">TRC20 Address:</label>
+        <input type="text" id="trc20Addr" required placeholder="Paste TRC20 address" />
+
+        <button type="submit">Save Addresses</button>
+      </form>
+      <div id="withdrawAddrMsg" style="margin-top:8px;"></div>
     </div>
-
-    <button onclick="window.location.href='dashboard.html'" class="back-btn" style="margin-top:30px;">Back to Dashboard</button>
   </div>
 
   <script>
-    // Admin vizibil doar dacă userul e admin
-    const user = JSON.parse(localStorage.getItem("loggedInUser") || "null");
-    if (!user) window.location.href = "login.html";
-    if (user.email === "policagabrielvictor@gmail.com") {
-      document.getElementById("adminLink").style.display = "block";
-    }
-
     document.addEventListener("DOMContentLoaded", function () {
-      if (!user || !user.wallet) {
-        document.getElementById("refLink").value = "Please connect wallet first.";
-        return;
+      let user = JSON.parse(localStorage.getItem("loggedInUser") || "null");
+      if (!user) window.location.href = "login.html";
+
+      // ONE-TIME ADDRESS SETUP
+      const form = document.getElementById('addressForm');
+      const bep = document.getElementById('bep20Addr');
+      const trc = document.getElementById('trc20Addr');
+      const msg = document.getElementById('withdrawAddrMsg');
+
+      // Dacă există deja adrese salvate, arată-le readonly, altfel permite salvare
+      if (user.bep20 || user.trc20) {
+        form.style.display = "none";
+        let html = "";
+        if (user.bep20) html += `<b>BEP20:</b> <span style="color:#0ff">${user.bep20}</span><br>`;
+        if (user.trc20) html += `<b>TRC20:</b> <span style="color:#0ff">${user.trc20}</span>`;
+        msg.innerHTML = "Addresses set and locked.<br>" + html;
+      } else {
+        // Allow form
+        form.onsubmit = function(e) {
+          e.preventDefault();
+          if (bep.value.length < 10 || trc.value.length < 10) {
+            msg.innerHTML = "<span style='color:red'>Enter valid addresses for both networks!</span>";
+            return;
+          }
+          user.bep20 = bep.value.trim();
+          user.trc20 = trc.value.trim();
+          localStorage.setItem("loggedInUser", JSON.stringify(user));
+          // Actualizează și în users array
+          let users = JSON.parse(localStorage.getItem("users") || "[]");
+          let idx = users.findIndex(u => u.email === user.email && u.username === user.username);
+          if (idx !== -1) {
+            users[idx].bep20 = user.bep20;
+            users[idx].trc20 = user.trc20;
+            localStorage.setItem("users", JSON.stringify(users));
+          }
+          form.style.display = "none";
+          msg.innerHTML = "Addresses saved and locked.<br><b>BEP20:</b> <span style='color:#0ff'>" + user.bep20 +
+            "</span><br><b>TRC20:</b> <span style='color:#0ff'>" + user.trc20 + "</span>";
+        }
       }
-      // Exemplu: https://pacalica.github.io/Safe-Crypto-Vault/login.html?ref=wallet
-      const refLink = `${window.location.origin}/login.html?ref=${user.wallet}`;
-      document.getElementById("refLink").value = refLink;
     });
-
-    function copyReferral() {
-      const refInput = document.getElementById("refLink");
-      refInput.select();
-      refInput.setSelectionRange(0, 99999);
-      document.execCommand("copy");
-      document.getElementById("copyMsg").innerText = "Referral link copied!";
-      setTimeout(() => document.getElementById("copyMsg").innerText = "", 2000);
-    }
-
     function logout() {
       localStorage.removeItem("loggedInUser");
       window.location.href = "login.html";
