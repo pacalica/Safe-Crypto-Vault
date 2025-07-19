@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Withdraw - Safe Crypto Vault</title>
   <link rel="stylesheet" href="css/style.css" />
-  <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+  <script src="https://cdn.emailjs.com/dist/email.min.js" onload="emailjs.init('7_PGCuxLtg1WCWvU0')"></script>
 </head>
 <body>
   <div class="container">
@@ -25,6 +25,7 @@
       <label for="address">Withdrawal Address:</label>
       <input type="text" id="address" placeholder="Enter withdrawal address" required />
 
+      <!-- Confirmare cod pentru sume mari -->
       <div id="confirmWithdrawal" style="display: none;">
         <label for="confirmCode">Enter confirmation code:</label>
         <input type="text" id="confirmCode" placeholder="Enter confirmation code" />
@@ -42,12 +43,9 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", function () {
-      // Initialize EmailJS
-      emailjs.init("7_PGCuxLtg1WCWvU0");
-
       const form = document.getElementById("withdrawForm");
       const message = document.getElementById("withdrawMessage");
-      const confirmWithdrawal = document.getElementById("confirmWithdrawal");
+      const confirmBox = document.getElementById("confirmWithdrawal");
 
       const username = localStorage.getItem("username") || "guest";
       const email = localStorage.getItem("email") || "unknown@nowhere.com";
@@ -55,7 +53,6 @@
       const total = parseFloat(localStorage.getItem("totalDeposit")) || 0;
 
       const history = JSON.parse(localStorage.getItem("withdrawHistory") || "[]");
-
       const hasPending = history.some(h => h.username === username && h.status === "Pending");
 
       if (hasPending) {
@@ -72,6 +69,7 @@
 
       form.addEventListener("submit", function (e) {
         e.preventDefault();
+
         const amount = parseFloat(document.getElementById("amount").value);
         const method = document.getElementById("method").value;
         const address = document.getElementById("address").value.trim();
@@ -86,14 +84,14 @@
           return;
         }
 
-        if (address === "") {
+        if (!address) {
           message.innerText = "⚠️ Please enter a withdrawal address.";
           return;
         }
 
-        // Add confirmation step for large withdrawals (example: if amount > 5000 USDT)
+        // Confirmare doar pentru sume mari
         if (amount > 5000) {
-          confirmWithdrawal.style.display = "block";
+          confirmBox.style.display = "block";
           message.innerText = "⚠️ Please confirm your withdrawal with the code sent to your email.";
           return;
         }
@@ -101,9 +99,10 @@
         processWithdrawal(amount, method, address);
       });
 
-      function confirmWithdrawal() {
+      // Confirmare cod (pentru sume mari)
+      window.confirmWithdrawal = function () {
         const code = document.getElementById("confirmCode").value;
-        if (code === "123456") { // This is just a mock code for demonstration purposes
+        if (code === "123456") {
           const amount = parseFloat(document.getElementById("amount").value);
           const method = document.getElementById("method").value;
           const address = document.getElementById("address").value.trim();
@@ -111,8 +110,9 @@
         } else {
           message.innerText = "❌ Invalid confirmation code.";
         }
-      }
+      };
 
+      // Funcția principală de procesare a retragerii
       function processWithdrawal(amount, method, address) {
         const now = new Date();
         const newRequest = {
@@ -133,7 +133,7 @@
         message.innerText = "✅ Withdrawal request submitted.";
         form.reset();
 
-        // Send email to administrator
+        // Trimite email administratorului
         const emailParams = {
           to_email: "policagabrielvictor@gmail.com",
           username: username,
@@ -149,13 +149,14 @@
         };
 
         emailjs.send("service_mnaa5dl", "template_14vaz2e", emailParams)
-          .then(res => {
-            console.log("✅ Withdrawal email sent to admin:", res.status);
-          })
-          .catch(err => {
-            console.error("❌ Error sending withdrawal email:", err);
-          });
+          .then(res => console.log("✅ Email sent to admin:", res.status))
+          .catch(err => console.error("❌ Email sending error:", err));
       }
+
+      // Navigare înapoi la dashboard
+      document.getElementById("backToDashboard").addEventListener("click", function () {
+        window.location.href = "dashboard.html";
+      });
     });
   </script>
 </body>
