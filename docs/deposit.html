@@ -7,15 +7,18 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
+  <!-- Sidebar -->
   <div class="sidebar">
-    <h2>Safe Crypto Vault</h2>
+    <h2>🛡️ Safe Crypto Vault</h2>
     <ul>
       <li><a href="dashboard.html">📊 Dashboard</a></li>
       <li><a href="deposit.html" class="active">➕ Open Deposit</a></li>
       <li><a href="withdraw.html">💸 Withdraw</a></li>
       <li><a href="history.html">🧾 History</a></li>
       <li><a href="myteam.html">👥 My Team</a></li>
-      <li><a href="admin.html">🛠️ Admin</a></li>
+      <li><a href="settings.html">⚙️ Settings</a></li>
+      <li><a href="security.html">🔒 Security</a></li>
+      <li id="adminLink" style="display:none;"><a href="admin.html">🛠️ Admin</a></li>
       <li><a href="#" onclick="logout()">🚪 Logout</a></li>
     </ul>
   </div>
@@ -33,32 +36,37 @@
       <label>Amount (USDT):</label>
       <input type="number" id="amount" min="10" placeholder="Enter amount" />
 
-      <label>Duration:</label>
-      <select id="duration">
-        <option value="1m">1 Month</option>
-        <option value="3m">3 Months</option>
-        <option value="5m">5 Months</option>
+      <label>Plan:</label>
+      <select id="plan">
+        <option value="plan1">Plan 1 (3.5%/day, 0–1999 USDT)</option>
+        <option value="plan2">Plan 2 (5.5%/day, 2000–5000 USDT)</option>
+        <option value="plan3">Plan 3 (7.5%/day, 5000–10000 USDT)</option>
       </select>
 
       <button onclick="confirmDeposit()">I've Sent Deposit</button>
     </div>
+
+    <button onclick="window.location.href='dashboard.html'" class="back-btn">Back to Dashboard</button>
   </div>
 
   <!-- QR Code lib -->
   <script src="https://cdn.jsdelivr.net/npm/qrious/dist/qrious.min.js"></script>
-
   <!-- EmailJS -->
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
   <script>
-    emailjs.init("7_PGCuxLtg1WCWvU0"); // Replace with your EmailJS user ID
+    emailjs.init("7_PGCuxLtg1WCWvU0");
   </script>
 
   <script>
-    const user = JSON.parse(localStorage.getItem("loggedInUser"));
+    // Sidebar admin vizibil doar dacă e admin
+    const user = JSON.parse(localStorage.getItem("loggedInUser") || "null");
     if (!user) window.location.href = "login.html";
+    if (user.email === "policagabrielvictor@gmail.com") {
+      document.getElementById("adminLink").style.display = "block";
+    }
 
     // QR Code generate
-    const qr = new QRious({
+    new QRious({
       element: document.getElementById("qrCanvas"),
       value: "0x124377FCe14439248a4959ce528314aA3A897321",
       size: 180
@@ -66,31 +74,31 @@
 
     function confirmDeposit() {
       const amount = parseFloat(document.getElementById("amount").value);
-      const duration = document.getElementById("duration").value;
+      const plan = document.getElementById("plan").value;
 
       if (isNaN(amount) || amount < 10) {
         alert("Minimum deposit is 10 USDT.");
         return;
       }
 
-      // Save deposit in localStorage
+      // Salvează depunerea ca pending, pentru aprobare admin
       const deposits = JSON.parse(localStorage.getItem("deposits") || "[]");
       deposits.push({
         wallet: user.wallet,
         username: user.username,
         amount,
-        duration,
-        date: new Date().toISOString(),
-        confirmed: false
+        plan,
+        startDate: new Date().toISOString(),
+        status: "pending" // doar adminul poate aproba
       });
       localStorage.setItem("deposits", JSON.stringify(deposits));
 
-      // Send email via EmailJS
+      // Trimite email adminului
       emailjs.send("service_mnaa5dl", "template_2pbn9v4", {
         username: user.username,
         wallet: user.wallet,
         amount: amount.toString(),
-        duration: duration
+        plan: plan
       }).then(() => {
         alert("Deposit submitted & email sent. Await admin confirmation.");
         window.location.href = "dashboard.html";
