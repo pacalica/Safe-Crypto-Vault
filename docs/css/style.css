@@ -15,15 +15,21 @@ body {
   background-color: #1c1c1c;
   border-radius: 16px;
   box-shadow: 0 0 25px #0ff, 0 0 40px #8f00ff;
+  animation: fadeIn 1s ease-in-out;
 }
 
-/* Titlu */
+/* Animație la încărcare */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Titluri */
 h1, h2 {
   text-align: center;
   color: #0ff;
 }
 
-/* Titluri și subtitluri */
 h1 {
   font-size: 2rem;
 }
@@ -32,7 +38,7 @@ h2 {
   font-size: 1.6rem;
 }
 
-/* Inputuri generale */
+/* Inputuri și select */
 input[type="text"],
 input[type="email"],
 input[type="password"],
@@ -69,7 +75,7 @@ button:hover {
   transform: scale(1.04);
 }
 
-/* Linkuri mici */
+/* Linkuri */
 p {
   text-align: center;
   margin-top: 15px;
@@ -85,79 +91,86 @@ a:hover {
   text-decoration: underline;
 }
 
-/* Specific Styles for Open Deposit Page */
-#open-deposit-container {
+/* Secțiuni dedicate */
+
+#open-deposit-container,
+#withdraw-container,
+#dashboard-container,
+#history-container {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  padding: 20px;
 }
 
-#open-deposit-container form {
-  width: 100%;
-  max-width: 400px;
-}
-
-#open-deposit-container label {
-  font-size: 1rem;
-  color: #ffffff;
-}
-
-#open-deposit-container button {
-  width: 100%;
-  background-color: #1e88e5;
-}
-
-#open-deposit-container p {
-  font-size: 1rem;
-  color: #ffffff;
-}
-
-/* Specific Styles for Withdraw Page */
-#withdraw-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
+#open-deposit-container form,
 #withdraw-container form {
   width: 100%;
   max-width: 400px;
 }
 
-#withdraw-container label {
-  font-size: 1rem;
-  color: #ffffff;
-}
-
-#withdraw-container button {
-  width: 100%;
-  background-color: #ff5722;
-}
-
-#withdraw-container p {
-  font-size: 1rem;
-  color: #ffffff;
-}
-
-/* Specific Styles for Dashboard Page */
-#dashboard-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-#dashboard-container h2 {
+#dashboard-container h2,
+#history-container h2 {
   font-size: 1.8rem;
   margin-bottom: 1rem;
 }
 
-#dashboard-container a {
+#dashboard-container a,
+#history-container a {
   color: #0ff;
   text-decoration: none;
   font-size: 1rem;
   margin-top: 15px;
 }
 
-#dashboard-container a:hover {
+#dashboard-container a:hover,
+#history-container a:hover {
   text-decoration: underline;
+}
+
+/* Text general */
+label {
+  font-size: 1rem;
+  color: #ccc;
+  display: block;
+  margin-bottom: 6px;
+}
+
+/* Mesaj status */
+#withdrawMessage {
+  margin-top: 1rem;
+  font-weight: bold;
+  color: #0ff;
+  text-align: center;
+}
+
+/* Buton Back to Dashboard */
+#backToDashboard {
+  margin-top: 20px;
+  background: linear-gradient(to right, #0ff, #8f00ff);
+  color: #000;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+#backToDashboard:hover {
+  transform: scale(1.05);
+  background: linear-gradient(to left, #8f00ff, #0ff);
+}
+
+/* Responsive */
+@media screen and (max-width: 600px) {
+  .container {
+    margin: 40px 20px;
+    padding: 20px;
+  }
+
+  h1, h2 {
+    font-size: 1.4rem;
+  }
 }
