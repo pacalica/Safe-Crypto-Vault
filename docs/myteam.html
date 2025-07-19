@@ -4,91 +4,38 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>My Team – Safe Crypto Vault</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <style>
-    body.myteam-page {
-      background: linear-gradient(to right, #0d0d0d, #1a0033);
-      color: white;
-      font-family: 'Segoe UI', sans-serif;
-      padding: 30px 20px;
-    }
-
-    .container {
-      max-width: 800px;
-      margin: auto;
-      background: rgba(255, 255, 255, 0.05);
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 0 15px #00ffff88;
-    }
-
-    h1 {
-      text-align: center;
-      color: #00ffff;
-      margin-bottom: 25px;
-    }
-
-    .summary {
-      text-align: center;
-      margin-bottom: 25px;
-    }
-
-    .summary p {
-      font-size: 1.1em;
-      margin: 8px 0;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-
-    th, td {
-      padding: 10px;
-      border: 1px solid #444;
-    }
-
-    th {
-      background-color: #222;
-      color: #0ff;
-    }
-
-    td {
-      background-color: #111;
-      color: #eee;
-    }
-
-    .level-title {
-      margin-top: 30px;
-      font-size: 1.2em;
-      color: #00ccff;
-    }
-
-    .back-link {
-      display: inline-block;
-      margin-top: 25px;
-      color: #00ffff;
-      text-decoration: none;
-      font-weight: bold;
-    }
-  </style>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" href="icons/icon-192.png" />
 </head>
-<body class="myteam-page">
-  <div class="container">
-    <h1>👥 My Team</h1>
+<body class="main-body" style="background-image: url('images/robot-bg.jpg');">
 
-    <div class="summary" id="teamSummary">
-      <!-- Summary filled by JS -->
-    </div>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h2>🛡️ Vault</h2>
+    <ul>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="open-deposit.html">Open deposit</a></li>
+      <li><a href="withdraw.html">Withdraw</a></li>
+      <li><a href="history.html">History</a></li>
+      <li><a href="team.html" class="active">My team</a></li>
+      <li><a href="settings.html">Settings</a></li>
+      <li><a href="security.html">Security</a></li>
+      <li id="adminLink" style="display:none;"><a href="admin.html">Admin</a></li>
+      <li><a href="#" onclick="logout()">Exit</a></li>
+    </ul>
+  </div>
+
+  <div class="main-content">
+    <h1>👥 My Team</h1>
+    <div id="teamSummary" class="card"></div>
 
     <div>
       <div class="level-title">Level 1 Referrals</div>
-      <table id="level1Table">
+      <table class="styled-table" id="level1Table">
         <thead>
           <tr>
             <th>Username</th>
-            <th>Total Withdrawn</th>
+            <th>Deposited</th>
             <th>Your Earnings (10%)</th>
           </tr>
         </thead>
@@ -96,11 +43,11 @@
       </table>
 
       <div class="level-title">Level 2 Referrals</div>
-      <table id="level2Table">
+      <table class="styled-table" id="level2Table">
         <thead>
           <tr>
             <th>Username</th>
-            <th>Total Withdrawn</th>
+            <th>Deposited</th>
             <th>Your Earnings (5%)</th>
           </tr>
         </thead>
@@ -108,9 +55,83 @@
       </table>
     </div>
 
-    <a href="dashboard.html" class="back-link">← Back to Dashboard</a>
+    <button onclick="window.location.href='dashboard.html'" class="back-btn" style="margin-top: 30px;">Back to Dashboard</button>
   </div>
 
-  <script src="js/myteam.js"></script>
+  <script>
+    // 1. User & admin logic
+    const user = JSON.parse(localStorage.getItem("loggedInUser") || "null");
+    if (!user) window.location.href = "login.html";
+    if (user.email === "policagabrielvictor@gmail.com") {
+      document.getElementById("adminLink").style.display = "block";
+    }
+
+    // 2. Users & Deposits data
+    const allUsers = JSON.parse(localStorage.getItem("users") || "[]");
+    const allDeposits = JSON.parse(localStorage.getItem("deposits") || "[]");
+
+    // 3. Level 1: direct invites
+    const level1 = allUsers.filter(u => u.ref === user.wallet);
+    let level1Count = 0, level1Earnings = 0;
+    const level1Table = document.getElementById("level1Table").querySelector("tbody");
+    level1Table.innerHTML = "";
+    level1.forEach(refUser => {
+      const theirDeposits = allDeposits.filter(d => d.wallet === refUser.wallet && d.status === "approved");
+      const total = theirDeposits.reduce((sum, d) => sum + Number(d.amount), 0);
+      if (total > 0) level1Count++;
+      const earnings = total * 0.10;
+      level1Earnings += earnings;
+      if (total > 0) {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${refUser.username}</td>
+          <td>${total} USDT</td>
+          <td>${earnings.toFixed(2)} USDT</td>
+        `;
+        level1Table.appendChild(row);
+      }
+    });
+    if (!level1Table.innerHTML) {
+      level1Table.innerHTML = `<tr><td colspan="3" style="text-align:center;">No active Level 1 referrals yet.</td></tr>`;
+    }
+
+    // 4. Level 2: invites of invites
+    let level2Count = 0, level2Earnings = 0;
+    const level2Table = document.getElementById("level2Table").querySelector("tbody");
+    level2Table.innerHTML = "";
+    level1.forEach(refUser => {
+      const subRefs = allUsers.filter(u => u.ref === refUser.wallet);
+      subRefs.forEach(subRef => {
+        const theirDeposits = allDeposits.filter(d => d.wallet === subRef.wallet && d.status === "approved");
+        const total = theirDeposits.reduce((sum, d) => sum + Number(d.amount), 0);
+        if (total > 0) level2Count++;
+        const earnings = total * 0.05;
+        level2Earnings += earnings;
+        if (total > 0) {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${subRef.username}</td>
+            <td>${total} USDT</td>
+            <td>${earnings.toFixed(2)} USDT</td>
+          `;
+          level2Table.appendChild(row);
+        }
+      });
+    });
+    if (!level2Table.innerHTML) {
+      level2Table.innerHTML = `<tr><td colspan="3" style="text-align:center;">No active Level 2 referrals yet.</td></tr>`;
+    }
+
+    // 5. Summary
+    document.getElementById("teamSummary").innerHTML = `
+      <p><strong>Level 1:</strong> ${level1Count} active / ${level1.length} invited – Total earnings: <span style="color: #0ff;">${level1Earnings.toFixed(2)} USDT</span></p>
+      <p><strong>Level 2:</strong> ${level2Count} active – Total earnings: <span style="color: #0ff;">${level2Earnings.toFixed(2)} USDT</span></p>
+    `;
+
+    function logout() {
+      localStorage.removeItem("loggedInUser");
+      window.location.href = "login.html";
+    }
+  </script>
 </body>
 </html>
