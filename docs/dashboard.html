@@ -1,4 +1,3 @@
-<!-- dashboard.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,22 +7,25 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
+  <!-- Sidebar -->
   <div class="sidebar">
-    <h2>Safe Crypto Vault</h2>
+    <h2>🛡️ Safe Crypto Vault</h2>
     <ul>
-      <li><a href="dashboard.html">📊 Dashboard</a></li>
+      <li><a href="dashboard.html" class="active">📊 Dashboard</a></li>
       <li><a href="deposit.html">➕ Open Deposit</a></li>
       <li><a href="withdraw.html">💸 Withdraw</a></li>
       <li><a href="history.html">🧾 History</a></li>
       <li><a href="myteam.html">👥 My Team</a></li>
-      <li><a href="admin.html">🛠️ Admin</a></li>
+      <li><a href="settings.html">⚙️ Settings</a></li>
+      <li><a href="security.html">🔒 Security</a></li>
+      <li id="adminLink" style="display:none;"><a href="admin.html">🛠️ Admin</a></li>
       <li><a href="#" onclick="logout()">🚪 Logout</a></li>
     </ul>
   </div>
 
+  <!-- Main Content -->
   <div class="main">
     <h1>Welcome, <span id="userName"></span></h1>
-
     <div class="card-grid">
       <div class="card">
         <h3>Total Deposited</h3>
@@ -43,55 +45,89 @@
       <h2>Your Referral Link</h2>
       <input type="text" id="refLink" readonly />
       <button onclick="copyReferral()">Copy Link</button>
+      <span id="copyMsg" style="color: #0ff; margin-left:10px"></span>
     </div>
+
+    <!-- Buton Back to Dashboard -->
+    <button onclick="window.location.href='dashboard.html'" class="back-btn">Back to Dashboard</button>
   </div>
 
   <script>
-    const user = JSON.parse(localStorage.getItem("loggedInUser"));
-    const allUsers = JSON.parse(localStorage.getItem("users") || "[]");
-
+    // --- User & admin logic
+    const user = JSON.parse(localStorage.getItem("loggedInUser") || "null");
     if (!user) {
       window.location.href = "login.html";
     }
+    document.getElementById("userName").textContent = user.username || "";
 
-    document.getElementById("userName").textContent = user.username;
+    // Show Admin link only if admin
+    if (user.email === "policagabrielvictor@gmail.com") {
+      document.getElementById("adminLink").style.display = "block";
+    }
 
+    // --- Referral link
     document.getElementById("refLink").value =
       window.location.origin + "/login.html?ref=" + user.wallet;
 
-    // Simulate deposits with interest
+    // --- Deposits and Interest
     const deposits = JSON.parse(localStorage.getItem("deposits") || "[]")
-      .filter(d => d.wallet === user.wallet);
+      .filter(d => d.wallet === user.wallet && d.status === "approved");
 
     const totalDeposited = deposits.reduce((sum, d) => sum + Number(d.amount), 0);
-    const totalInterest = deposits.reduce((sum, d) => sum + calculateInterest(d.amount, d.duration), 0);
 
+    // Dobânda cumulativă (toate depozitele aprobate)
+    let totalInterest = 0;
+    deposits.forEach(d => {
+      totalInterest += calculateCompoundEarnings(d.amount, d.plan, d.startDate);
+    });
     document.getElementById("totalDeposited").textContent = totalDeposited + " USDT";
     document.getElementById("totalInterest").textContent = totalInterest.toFixed(2) + " USDT";
 
-    // Referral earnings: 10% din câștigul net (dobândă) al invitaților direcți
-    const directRefs = allUsers.filter(u => u.ref === user.wallet);
+    // --- Referral earnings (First + Second level)
     let referralEarnings = 0;
-
+    const allUsers = JSON.parse(localStorage.getItem("users") || "[]");
     const allDeposits = JSON.parse(localStorage.getItem("deposits") || "[]");
 
+    // First level (direct) - 10%
+    const directRefs = allUsers.filter(u => u.ref === user.wallet);
     directRefs.forEach(ref => {
-      const theirDeposits = allDeposits.filter(d => d.wallet === ref.wallet);
-      const theirInterest = theirDeposits.reduce((sum, d) => sum + calculateInterest(d.amount, d.duration), 0);
-      referralEarnings += theirInterest * 0.10;
+      const activeDeposit = allDeposits.find(d => d.wallet === ref.wallet && d.status === "approved");
+      if (activeDeposit) {
+        referralEarnings += Number(activeDeposit.amount) * 0.10;
+      }
+    });
+
+    // Second level (indirect) - 5%
+    directRefs.forEach(ref => {
+      const secondRefs = allUsers.filter(u => u.ref === ref.wallet);
+      secondRefs.forEach(secondRef => {
+        const activeDeposit2 = allDeposits.find(d => d.wallet === secondRef.wallet && d.status === "approved");
+        if (activeDeposit2) {
+          referralEarnings += Number(activeDeposit2.amount) * 0.05;
+        }
+      });
     });
 
     document.getElementById("referralEarnings").textContent = referralEarnings.toFixed(2) + " USDT";
 
-    function calculateInterest(amount, duration) {
+    // --- Helper: calculate compound interest by plan and days elapsed
+    function calculateCompoundEarnings(amount, plan, startDate) {
+      // Plan 1: 3.5%/zi, Plan 2: 5.5%/zi, Plan 3: 7.5%/zi
       let rate = 0;
-      if (amount <= 1999) rate = 0.035;
-      else if (amount <= 5000) rate = 0.055;
-      else rate = 0.075;
+      if (plan === "plan1") rate = 0.035;
+      else if (plan === "plan2") rate = 0.055;
+      else if (plan === "plan3") rate = 0.075;
+      else rate = 0;
 
-      if (duration === "3m") rate *= 3;
-      if (duration === "5m") rate *= 5;
-      return amount * rate;
+      // Număr zile de la start
+      let days = 0;
+      if (startDate) {
+        const now = new Date();
+        const start = new Date(startDate);
+        days = Math.floor((now - start) / (1000 * 60 * 60 * 24)) + 1; // inclusiv ziua curentă
+        if (days < 0) days = 0;
+      }
+      return amount * rate * days;
     }
 
     function copyReferral() {
@@ -99,7 +135,8 @@
       ref.select();
       ref.setSelectionRange(0, 99999);
       document.execCommand("copy");
-      alert("Referral link copied!");
+      document.getElementById("copyMsg").textContent = "Copied!";
+      setTimeout(() => { document.getElementById("copyMsg").textContent = ""; }, 1500);
     }
 
     function logout() {
