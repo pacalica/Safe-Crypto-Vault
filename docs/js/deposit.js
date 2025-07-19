@@ -24,16 +24,25 @@ document.getElementById("confirmDeposit").addEventListener("click", () => {
   const depositDate = new Date();
   const depositTimestamp = depositDate.getTime();
 
+  // --- Păstrează și wallet și adresa de retragere dacă există! ---
+  const userWallet = user.wallet || ""; // dacă ai wallet la user
+  const userWithdrawalAddress = user.withdrawalAddress || ""; // dacă ai adăugat logică de salvare retragere la user
+  const userRef = user.ref || (localStorage.getItem("refWallet") || "");
+
   const deposit = {
     email: user.email,
     username: user.username,
+    wallet: userWallet,
     amount,
     plan,
     interest,
     depositDate: depositDate.toLocaleDateString(),
     depositTime: depositDate.toLocaleTimeString(),
     timestamp: depositTimestamp,
-    status: "pending"
+    status: "pending",
+    withdrawalAddress: userWithdrawalAddress,  // pentru a ști unde poate fi plătit și la confirmare
+    ref: userRef
+    // adminNote și approvedAmount vor fi completate de admin la aprobare!
   };
 
   // Salvează în istoric
@@ -41,7 +50,7 @@ document.getElementById("confirmDeposit").addEventListener("click", () => {
   deposits.push(deposit);
   localStorage.setItem("deposits", JSON.stringify(deposits));
 
-  // Salvează și în earnings
+  // Salvează și în earnings (poți extinde după nevoie)
   const earnings = JSON.parse(localStorage.getItem("earnings") || "[]");
   earnings.push({
     email: user.email,
@@ -54,19 +63,18 @@ document.getElementById("confirmDeposit").addEventListener("click", () => {
   localStorage.setItem("earnings", JSON.stringify(earnings));
 
   // Referral
-  const refWallet = localStorage.getItem("refWallet");
-  if (refWallet && refWallet !== user.wallet) {
+  if (userRef && userRef !== user.wallet) {
     const referrals = JSON.parse(localStorage.getItem("referrals") || "[]");
     referrals.push({
       from: user.wallet,
-      to: refWallet,
+      to: userRef,
       level: 1,
       amount: amount * 0.02
     });
     localStorage.setItem("referrals", JSON.stringify(referrals));
   }
 
-  // Trimite email
+  // Trimite email la admin (poate include și adresa retragere, ref etc)
   fetch("https://formspree.io/f/xyyrddrw", {
     method: "POST",
     headers: { 'Content-Type': 'application/json' },
@@ -74,10 +82,13 @@ document.getElementById("confirmDeposit").addEventListener("click", () => {
       email: "safecryptovault@gmail.com",
       subject: "💰 New Deposit Confirmed",
       message: `
-        User: ${user.username} (${user.email})\n
-        Amount: ${amount} USDT\n
-        Plan: ${plan} (${interest}% interest)\n
+        User: ${user.username} (${user.email})
+        Wallet: ${userWallet}
+        Amount: ${amount} USDT
+        Plan: ${plan} (${interest}% interest)
         Date: ${depositDate.toLocaleDateString()} - ${depositDate.toLocaleTimeString()}
+        Withdrawal address: ${userWithdrawalAddress}
+        Referrer: ${userRef}
       `
     })
   });
