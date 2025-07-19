@@ -4,8 +4,98 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Security – Safe Crypto Vault</title>
-  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/style.css" />
   <link rel="icon" href="icons/icon-192.png" />
+  <style>
+    body.main-body {
+      min-height: 100vh;
+      background: linear-gradient(120deg, #0f0c29 0%, #302b63 45%, #8f00ff 100%);
+      animation: fadeIn 1s;
+    }
+    .main-content {
+      max-width: 520px;
+      margin: 50px auto 0 auto;
+      padding: 30px 30px 10px 30px;
+      background: rgba(20,20,40,0.85);
+      border-radius: 18px;
+      box-shadow: 0 0 40px #0ff7, 0 0 80px #8f00ff44;
+      color: #fff;
+      animation: fadeIn 0.8s;
+    }
+    .main-content h1 {
+      text-align: center;
+      color: #0ff;
+      font-size: 2rem;
+      letter-spacing: 2px;
+      margin-bottom: 32px;
+      text-shadow: 0 0 8px #0ff7;
+    }
+    .card {
+      background: rgba(12,12,28,0.86);
+      border-radius: 14px;
+      padding: 22px 18px;
+      box-shadow: 0 0 18px #0ff7, 0 0 36px #8f00ff33;
+      margin-bottom: 24px;
+      animation: fadeIn 1.2s;
+    }
+    label {
+      color: #0ff;
+      margin-bottom: 6px;
+      display: block;
+      font-size: 1.03em;
+    }
+    input[type="password"], input[type="email"] {
+      width: 100%;
+      padding: 11px 14px;
+      margin-bottom: 18px;
+      border: none;
+      border-radius: 9px;
+      background: #1c1e29;
+      color: #fff;
+      font-size: 16px;
+      box-shadow: 0 0 8px #0ff3 inset;
+      transition: box-shadow 0.2s;
+    }
+    input[type="password"]:focus, input[type="email"]:focus {
+      box-shadow: 0 0 18px #8f00ffcc, 0 0 7px #0ff6 inset;
+      outline: none;
+    }
+    button, .back-btn {
+      background: linear-gradient(to right, #0ff, #8f00ff);
+      border: none;
+      border-radius: 9px;
+      padding: 13px 0;
+      font-size: 1.07em;
+      font-weight: bold;
+      color: #000;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.18s;
+      width: 100%;
+      margin-top: 9px;
+      margin-bottom: 5px;
+      box-shadow: 0 0 8px #0ff5;
+    }
+    button:hover, .back-btn:hover {
+      background: linear-gradient(to left, #8f00ff, #0ff);
+      transform: scale(1.04);
+      color: #fff;
+    }
+    #passMessage, #emailMessage {
+      text-align: center;
+      font-weight: bold;
+      font-size: 1em;
+      margin-top: 8px;
+      min-height: 20px;
+    }
+    @media screen and (max-width:600px) {
+      .main-content {
+        margin: 16px;
+        padding: 14px 6px 0 6px;
+      }
+      .sidebar { font-size: 1em; }
+      h1 { font-size: 1.3rem;}
+    }
+  </style>
 </head>
 <body class="main-body" style="background-image: url('images/robot-bg.jpg');">
 
@@ -29,7 +119,7 @@
     <h1>🔒 Security Settings</h1>
 
     <div class="card">
-      <h3>Change Password</h3>
+      <h3 style="color:#0ff;">Change Password</h3>
       <form id="changePasswordForm" autocomplete="off">
         <label for="currentPass">Current Password:</label>
         <input type="password" id="currentPass" placeholder="Current password" required />
@@ -42,11 +132,11 @@
 
         <button type="submit">Change Password</button>
       </form>
-      <div id="passMessage" style="margin-top:10px;"></div>
+      <div id="passMessage"></div>
     </div>
 
-    <div class="card" style="margin-top: 40px;">
-      <h3>Change Email <span style="font-size:0.85em; color:#999;">(optional)</span></h3>
+    <div class="card" style="margin-top: 32px;">
+      <h3 style="color:#0ff;">Change Email <span style="font-size:0.85em; color:#aaa;">(optional)</span></h3>
       <form id="changeEmailForm" autocomplete="off">
         <label for="newEmail">New Email:</label>
         <input type="email" id="newEmail" placeholder="Enter new email" required />
@@ -56,10 +146,10 @@
 
         <button type="submit">Change Email</button>
       </form>
-      <div id="emailMessage" style="margin-top:10px;"></div>
+      <div id="emailMessage"></div>
     </div>
 
-    <button onclick="window.location.href='dashboard.html'" class="back-btn" style="margin-top:40px;">Back to Dashboard</button>
+    <button onclick="window.location.href='dashboard.html'" class="back-btn" id="backToDashboard" style="margin-top:30px;">Back to Dashboard</button>
   </div>
 
   <script>
@@ -148,4 +238,3 @@
   </script>
 </body>
 </html>
- 
