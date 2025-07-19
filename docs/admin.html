@@ -69,7 +69,7 @@
     .admin-btns {
       position: absolute;
       right: 14px;
-      top: 20px;
+      top: 30px;
     }
     .admin-btns button {
       margin-left: 7px;
@@ -94,6 +94,19 @@
       text-decoration: none;
       font-size: 1.1em;
       font-weight: bold;
+    }
+    .admin-note {
+      margin-top: 8px;
+      width: 90%;
+      border: 1px solid #444;
+      background: #161635;
+      color: #fff;
+      border-radius: 7px;
+      padding: 5px 10px;
+    }
+    .admin-amount {
+      width: 90px;
+      margin-right: 8px;
     }
   </style>
 </head>
@@ -131,60 +144,54 @@
       }
       depositsList.innerHTML = "";
 
-      deposits.slice().reverse().forEach((dep, idx) => {
+      deposits.slice().reverse().forEach((dep, revIdx) => {
+        const idx = deposits.length - 1 - revIdx;
         const div = document.createElement("div");
         div.className = "entry";
         div.innerHTML = `
           <span><strong>User:</strong> ${dep.username}</span>
-          <span><strong>Wallet:</strong> ${dep.wallet}</span>
-          <span><strong>Amount:</strong> ${dep.amount} USDT</span>
-          <span><strong>Duration:</strong> ${dep.duration}</span>
-          <span><strong>Date:</strong> ${dep.date ? new Date(dep.date).toLocaleString() : "n/a"}</span>
-          <span><strong>Status:</strong> <span class="status ${dep.status || (dep.confirmed ? 'Approved' : 'Pending')}">${dep.status || (dep.confirmed ? 'Approved' : 'Pending')}</span></span>
+          <span><strong>Wallet:</strong> ${dep.wallet || ""}</span>
+          <span>
+            <strong>Amount:</strong>
+            <input type="number" class="admin-amount" id="amount-${idx}" value="${dep.amount}" min="0.01" step="0.01"/> USDT
+          </span>
+          <span><strong>Duration:</strong> ${dep.plan || dep.duration || "-"}</span>
+          <span><strong>Date:</strong> ${dep.depositDate || dep.date ? (dep.depositDate || dep.date) : "n/a"} ${dep.depositTime || ""}</span>
+          <span><strong>Status:</strong> <span class="status ${dep.status || 'pending'}">${dep.status || 'pending'}</span></span>
+          <input class="admin-note" id="note-${idx}" placeholder="Admin message (optional)" maxlength="80" />
           <div class="admin-btns">
-            <button onclick="approveDeposit(${deposits.length-1-idx})">Success</button>
-            <button onclick="markDeposit(${deposits.length-1-idx},'Rejected')">Failed</button>
+            <button onclick="markDeposit(${idx},'Approved')">Success</button>
+            <button onclick="markDeposit(${idx},'Rejected')">Failed</button>
           </div>
         `;
         depositsList.appendChild(div);
       });
     }
 
-    // Prompt pentru sumă la aprobare și actualizează sold user
-    window.approveDeposit = function(idx) {
-      const deposits = JSON.parse(localStorage.getItem("deposits") || "[]");
-      if (!deposits[idx]) return;
-      const initialAmount = Number(deposits[idx].amount);
-
-      let bonus = prompt(`Introduceți suma pe care doriți să o creditați (default: ${initialAmount}):`, initialAmount);
-      if (bonus === null) return; // Anulat
-      bonus = Number(bonus);
-      if (isNaN(bonus) || bonus <= 0) {
-        alert("Introduceți o sumă validă!");
-        return;
-      }
-      deposits[idx].status = "Approved";
-      deposits[idx].confirmed = true;
-      deposits[idx].approvedAmount = bonus;
-      localStorage.setItem("deposits", JSON.stringify(deposits));
-
-      // Actualizează sold user cu suma dată de admin
-      const users = JSON.parse(localStorage.getItem("users") || "[]");
-      const userIdx = users.findIndex(u => u.wallet === deposits[idx].wallet);
-      if (userIdx !== -1) {
-        users[userIdx].balance = (users[userIdx].balance || 0) + bonus;
-        localStorage.setItem("users", JSON.stringify(users));
-      }
-      loadDeposits();
-    };
-
-    // Refuz depozit
     window.markDeposit = function(idx, status) {
       const deposits = JSON.parse(localStorage.getItem("deposits") || "[]");
       if (!deposits[idx]) return;
+
+      // Preia suma și mesajul
+      const newAmount = parseFloat(document.getElementById(`amount-${idx}`).value) || deposits[idx].amount;
+      const adminNote = document.getElementById(`note-${idx}`).value;
+
       deposits[idx].status = status;
       deposits[idx].confirmed = (status === "Approved");
+      deposits[idx].approvedAmount = newAmount;
+      deposits[idx].adminNote = adminNote;
+
       localStorage.setItem("deposits", JSON.stringify(deposits));
+
+      // Dacă aprobăm, actualizăm soldul userului CU suma aleasă
+      if (status === "Approved") {
+        const users = JSON.parse(localStorage.getItem("users") || "[]");
+        const userIdx = users.findIndex(u => u.wallet === deposits[idx].wallet);
+        if (userIdx !== -1) {
+          users[userIdx].balance = (users[userIdx].balance || 0) + newAmount;
+          localStorage.setItem("users", JSON.stringify(users));
+        }
+      }
       loadDeposits();
     };
 
@@ -198,20 +205,21 @@
         return;
       }
       withdrawalList.innerHTML = "";
-      withdrawals.slice().reverse().forEach((req, idx) => {
+      withdrawals.slice().reverse().forEach((req, revIdx) => {
+        const idx = withdrawals.length - 1 - revIdx;
         const div = document.createElement("div");
         div.className = "entry";
         div.innerHTML = `
           <span><strong>User:</strong> ${req.username}</span>
-          <span><strong>Wallet:</strong> ${req.wallet}</span>
+          <span><strong>Wallet:</strong> ${req.wallet || ""}</span>
           <span><strong>Amount:</strong> ${req.amount} USDT</span>
           <span><strong>Method:</strong> ${req.method || ""}</span>
           <span><strong>Status:</strong> <span class="status ${req.status}">${req.status}</span></span>
           <span><strong>Date:</strong> ${req.date ? req.date : ""}</span>
           <span><strong>Time:</strong> ${req.time ? req.time : ""}</span>
           <div class="admin-btns">
-            <button onclick="markWithdraw(${withdrawals.length-1-idx},'Approved')">Success</button>
-            <button onclick="markWithdraw(${withdrawals.length-1-idx},'Rejected')">Failed</button>
+            <button onclick="markWithdraw(${idx},'Approved')">Success</button>
+            <button onclick="markWithdraw(${idx},'Rejected')">Failed</button>
           </div>
         `;
         withdrawalList.appendChild(div);
