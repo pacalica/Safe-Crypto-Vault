@@ -1,28 +1,29 @@
-// Setează datele utilizatorului în pagina Dashboard
+// Setează datele utilizatorului în pagina Dashboard (dacă există elementele)
 document.addEventListener("DOMContentLoaded", function () {
-  // Obține datele din localStorage
   const username = localStorage.getItem("username") || "-";
   const email = localStorage.getItem("email") || "-";
   const wallet = localStorage.getItem("wallet") || "wallet";
   const totalDeposit = localStorage.getItem("totalDeposit") || "0";
 
-  // Verifică dacă datele sunt valide, altfel redirecționează utilizatorul
-  if (!username || !email || !wallet || totalDeposit === "0") {
-    window.location.href = "index.html"; // Redirecționează utilizatorul către login dacă nu sunt date valide
-    return; // Oprește execuția ulterioară
-  }
-
-  // Selectează elementele HTML pentru a le popula cu datele utilizatorului
+  // Populează dashboard-ul dacă elementele există
   const userElem = document.getElementById("username");
   const emailElem = document.getElementById("email");
   const totalElem = document.getElementById("total");
   const referralElem = document.getElementById("referral");
 
-  // Populează elementele HTML cu datele utilizatorului
   if (userElem) userElem.innerText = username;
   if (emailElem) emailElem.innerText = email;
   if (totalElem) totalElem.innerText = totalDeposit;
   if (referralElem) referralElem.innerText = `https://pacalica.github.io/Safe-Crypto-Vault/?ref=${wallet}`;
+
+  // Populează pagina principală dacă există aceste elemente
+  const welcomeElem = document.getElementById('user-welcome');
+  const depositElem = document.getElementById('user-deposit');
+  const referralLinkElem = document.getElementById('referralLink');
+
+  if (welcomeElem) welcomeElem.innerText = `Welcome, ${username}`;
+  if (depositElem) depositElem.innerText = `Your current deposit: ${totalDeposit} USDT`;
+  if (referralLinkElem) referralLinkElem.innerText = `https://pacalica.github.io/Safe-Crypto-Vault/?ref=${wallet}`;
 });
 
 // Navigare între pagini
@@ -30,116 +31,107 @@ function goTo(page) {
   window.location.href = page;
 }
 
-// Logout: șterge toate datele din localStorage și redirecționează către login
+// Logout
 function logout() {
-  // Șterge datele de autentificare și alte informații din localStorage
   localStorage.removeItem("username");
   localStorage.removeItem("email");
   localStorage.removeItem("wallet");
   localStorage.removeItem("totalDeposit");
-
-  // Redirecționează utilizatorul la pagina de login
-  window.location.href = "index.html"; 
+  window.location.href = "index.html";
 }
 
-// Verifică dacă utilizatorul este autentificat înainte de a accesa paginile protejate
-window.addEventListener('DOMContentLoaded', () => {
-  const email = localStorage.getItem('email');
-  const username = localStorage.getItem('username');
-  
-  // Dacă nu există datele de autentificare, redirecționează utilizatorul la login
+// Verificare login pentru paginile protejate
+window.addEventListener("DOMContentLoaded", () => {
+  const email = localStorage.getItem("email");
+  const username = localStorage.getItem("username");
+
+  // Dacă utilizatorul nu este logat, redirecționează către login
   if (!email || !username) {
-    window.location.href = 'index.html';  // Redirecționează la login
+    if (!window.location.href.includes("index.html")) {
+      window.location.href = "index.html";
+    }
   }
-  
-  // Dacă există datele de autentificare, populatează elementele cu informațiile utilizatorului
-  document.getElementById('user-welcome').innerText = `Welcome, ${username}`;
-  document.getElementById('user-deposit').innerText = `Your current deposit: 5000 USDT`;
-  const referralLink = `https://safecryptovault.com?ref=${username}`;
-  document.getElementById('referralLink').innerText = referralLink;
 });
 
-// Funcția pentru retragerea fondurilor
-document.getElementById('withdrawForm').addEventListener('submit', function (e) {
-  e.preventDefault();
-  
-  const amount = parseFloat(document.getElementById('amount').value);
-  const method = document.getElementById('method').value;
-  const address = document.getElementById('address').value.trim();
-  const totalDeposit = 5000;  // Depozitul total este simulat
+// ===============================
+// Retragere fonduri (Withdraw)
+// ===============================
+const withdrawForm = document.getElementById('withdrawForm');
+if (withdrawForm) {
+  withdrawForm.addEventListener('submit', function (e) {
+    e.preventDefault();
 
-  const message = document.getElementById('withdrawMessage');
-  
-  // Debugging: Afișează informațiile introduse pentru retragere
-  console.log('Amount:', amount);
-  console.log('Method:', method);
-  console.log('Address:', address);
-  
-  if (isNaN(amount) || amount <= 0) {
-    message.innerText = "⚠️ Enter a valid withdrawal amount.";
-    return;
-  }
+    const amount = parseFloat(document.getElementById('amount').value);
+    const method = document.getElementById('method').value;
+    const address = document.getElementById('address').value.trim();
+    const totalDeposit = parseFloat(localStorage.getItem("totalDeposit")) || 0;
+    const message = document.getElementById('withdrawMessage');
 
-  if (amount > totalDeposit) {
-    message.innerText = `❌ You can't withdraw more than your balance (${totalDeposit} USDT).`;
-    return;
-  }
+    if (isNaN(amount) || amount <= 0) {
+      message.innerText = "⚠️ Enter a valid withdrawal amount.";
+      return;
+    }
 
-  if (address === "") {
-    message.innerText = "⚠️ Please enter a withdrawal address.";
-    return;
-  }
+    if (amount > totalDeposit) {
+      message.innerText = `❌ You can't withdraw more than your balance (${totalDeposit} USDT).`;
+      return;
+    }
 
-  // Adăugăm retragerea la istoricul retragerilor
-  const history = JSON.parse(localStorage.getItem("withdrawHistory") || "[]");
-  const now = new Date();
-  const newRequest = {
-    id: "wd_" + Math.random().toString(36).substring(2, 10),
-    username: localStorage.getItem('username'),
-    email: localStorage.getItem('email'),
-    wallet: localStorage.getItem('wallet'),
-    amount,
-    method,
-    address,
-    status: "Pending",
-    date: now.toLocaleDateString(),
-    time: now.toLocaleTimeString()
-  };
+    if (!address) {
+      message.innerText = "⚠️ Please enter a withdrawal address.";
+      return;
+    }
 
-  // Salvează cererea de retragere
-  history.push(newRequest);
-  localStorage.setItem("withdrawHistory", JSON.stringify(history));
+    const now = new Date();
+    const newRequest = {
+      id: "wd_" + Math.random().toString(36).substring(2, 10),
+      username: localStorage.getItem('username'),
+      email: localStorage.getItem('email'),
+      wallet: localStorage.getItem('wallet'),
+      amount,
+      method,
+      address,
+      status: "Pending",
+      date: now.toLocaleDateString(),
+      time: now.toLocaleTimeString()
+    };
 
-  // Afișează mesaj de succes
-  message.innerText = "✅ Withdrawal request submitted.";
-  
-  // Resetează formularul
-  document.getElementById('withdrawForm').reset();
+    const history = JSON.parse(localStorage.getItem("withdrawHistory") || "[]");
+    history.push(newRequest);
+    localStorage.setItem("withdrawHistory", JSON.stringify(history));
+    message.innerText = "✅ Withdrawal request submitted.";
+    withdrawForm.reset();
 
-  // Trimite email administratorului
-  const emailParams = {
-    to_email: "policagabrielvictor@gmail.com",
-    username: newRequest.username,
-    email: newRequest.email,
-    wallet: newRequest.wallet,
-    amount: amount + " USDT",
-    method: method,
-    address: address,
-    date: newRequest.date,
-    time: newRequest.time,
-    request_id: newRequest.id
-  };
+    // Email administrator
+    const emailParams = {
+      to_email: "policagabrielvictor@gmail.com",
+      username: newRequest.username,
+      email: newRequest.email,
+      wallet: newRequest.wallet,
+      amount: amount + " USDT",
+      method: method,
+      address: address,
+      date: newRequest.date,
+      time: newRequest.time,
+      request_id: newRequest.id
+    };
 
-  emailjs.send("service_mnaa5dl", "template_14vaz2e", emailParams)
-    .then(res => {
-      console.log("✅ Withdrawal email sent to admin:", res.status);
-    })
-    .catch(err => {
-      console.error("❌ Error sending withdrawal email:", err);
-    });
-});
+    emailjs.send("service_mnaa5dl", "template_14vaz2e", emailParams)
+      .then(res => {
+        console.log("✅ Email sent to admin:", res.status);
+      })
+      .catch(err => {
+        console.error("❌ Email error:", err);
+      });
+  });
+}
 
-// Adăugarea butonului "Back to Dashboard"
-document.getElementById("backToDashboard").addEventListener("click", function() {
-  goTo('dashboard.html'); // Navighează la dashboard
-});
+// ===============================
+// Buton "Back to Dashboard"
+// ===============================
+const backBtn = document.getElementById("backToDashboard");
+if (backBtn) {
+  backBtn.addEventListener("click", function () {
+    goTo("dashboard.html");
+  });
+}
