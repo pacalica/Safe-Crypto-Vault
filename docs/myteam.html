@@ -6,6 +6,98 @@
   <title>My Team – Safe Crypto Vault</title>
   <link rel="stylesheet" href="css/styles.css" />
   <link rel="icon" href="icons/icon-192.png" />
+  <style>
+    body.main-body {
+      background: linear-gradient(120deg, #0f0c29 0%, #302b63 50%, #8f00ff 100%) !important;
+      min-height: 100vh;
+      animation: fadeIn 1s;
+    }
+    .main-content {
+      max-width: 700px;
+      margin: 45px auto 0 auto;
+      padding: 36px 22px 20px 22px;
+      background: rgba(18,20,34,0.93);
+      border-radius: 18px;
+      box-shadow: 0 0 44px #0ff5, 0 0 90px #8f00ff33;
+      color: #fff;
+      animation: fadeIn 1s;
+    }
+    .main-content h1 {
+      text-align: center;
+      color: #0ff;
+      font-size: 2.1rem;
+      margin-bottom: 25px;
+      text-shadow: 0 0 12px #0ff;
+    }
+    .card {
+      background: rgba(10,15,30,0.92);
+      border-radius: 15px;
+      padding: 20px 14px;
+      margin-bottom: 36px;
+      box-shadow: 0 0 18px #0ff7, 0 0 44px #8f00ff44;
+    }
+    .level-title {
+      font-size: 1.15em;
+      color: #0ff;
+      margin-top: 24px;
+      text-shadow: 0 0 7px #0ff7;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+    .styled-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 16px;
+      box-shadow: 0 0 18px #0ff7, 0 0 8px #8f00ff44;
+      background: rgba(22,24,35,0.94);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .styled-table th, .styled-table td {
+      padding: 12px 8px;
+      border-bottom: 1px solid #232b36;
+      text-align: center;
+      font-size: 1em;
+    }
+    .styled-table th {
+      background: linear-gradient(90deg, #232b36 0, #0ff2 100%);
+      color: #0ff;
+      text-shadow: 0 0 6px #0ff6;
+    }
+    .styled-table tr:last-child td {
+      border-bottom: none;
+    }
+    .styled-table tr:hover {
+      background: #212143;
+      transition: background 0.22s;
+      color: #fff;
+      box-shadow: 0 0 10px #0ff4 inset;
+    }
+    .back-btn {
+      margin-top: 30px;
+      width: 100%;
+      background: linear-gradient(to right, #0ff, #8f00ff);
+      border: none;
+      border-radius: 10px;
+      padding: 14px 0;
+      font-size: 1.08em;
+      font-weight: bold;
+      color: #000;
+      cursor: pointer;
+      transition: background 0.32s, transform 0.18s;
+      box-shadow: 0 0 9px #0ff6;
+    }
+    .back-btn:hover {
+      background: linear-gradient(to left, #8f00ff, #0ff);
+      color: #fff;
+      transform: scale(1.03);
+    }
+    @media screen and (max-width: 700px) {
+      .main-content { margin: 20px 6px; padding: 8px 2px 10px 2px;}
+      h1 { font-size: 1.2rem;}
+      .styled-table th, .styled-table td { padding: 8px 2px; font-size: 0.96em;}
+    }
+  </style>
 </head>
 <body class="main-body" style="background-image: url('images/robot-bg.jpg');">
 
@@ -55,7 +147,7 @@
       </table>
     </div>
 
-    <button onclick="window.location.href='dashboard.html'" class="back-btn" style="margin-top: 30px;">Back to Dashboard</button>
+    <button onclick="window.location.href='dashboard.html'" class="back-btn">Back to Dashboard</button>
   </div>
 
   <script>
@@ -86,7 +178,7 @@
         row.innerHTML = `
           <td>${refUser.username}</td>
           <td>${total} USDT</td>
-          <td>${earnings.toFixed(2)} USDT</td>
+          <td style="color:#0ff;font-weight:bold;">${earnings.toFixed(2)} USDT</td>
         `;
         level1Table.appendChild(row);
       }
@@ -112,7 +204,7 @@
           row.innerHTML = `
             <td>${subRef.username}</td>
             <td>${total} USDT</td>
-            <td>${earnings.toFixed(2)} USDT</td>
+            <td style="color:#0ff;font-weight:bold;">${earnings.toFixed(2)} USDT</td>
           `;
           level2Table.appendChild(row);
         }
@@ -124,8 +216,8 @@
 
     // 5. Summary
     document.getElementById("teamSummary").innerHTML = `
-      <p><strong>Level 1:</strong> ${level1Count} active / ${level1.length} invited – Total earnings: <span style="color: #0ff;">${level1Earnings.toFixed(2)} USDT</span></p>
-      <p><strong>Level 2:</strong> ${level2Count} active – Total earnings: <span style="color: #0ff;">${level2Earnings.toFixed(2)} USDT</span></p>
+      <p style="margin:0 0 5px 0;"><strong>Level 1:</strong> ${level1Count} active / ${level1.length} invited – Total earnings: <span style="color: #0ff;">${level1Earnings.toFixed(2)} USDT</span></p>
+      <p style="margin:0;"><strong>Level 2:</strong> ${level2Count} active – Total earnings: <span style="color: #0ff;">${level2Earnings.toFixed(2)} USDT</span></p>
     `;
 
     function logout() {
