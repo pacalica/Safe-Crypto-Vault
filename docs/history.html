@@ -3,13 +3,47 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Withdrawal History - Safe Crypto Vault</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <title>History – Safe Crypto Vault</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" href="icons/icon-192.png" />
 </head>
-<body>
-  <div class="container">
-    <h2>Withdrawal History</h2>
-    <table id="historyTable">
+<body class="main-body" style="background-image: url('images/robot-bg.jpg');">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h2>🛡️ Vault</h2>
+    <ul>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="open-deposit.html">Open deposit</a></li>
+      <li><a href="withdraw.html">Withdraw</a></li>
+      <li><a href="history.html" class="active">History</a></li>
+      <li><a href="team.html">My team</a></li>
+      <li><a href="settings.html">Settings</a></li>
+      <li><a href="security.html">Security</a></li>
+      <li id="adminLink" style="display:none;"><a href="admin.html">Admin</a></li>
+      <li><a href="#" onclick="logout()">Exit</a></li>
+    </ul>
+  </div>
+
+  <div class="main-content">
+    <h1>History</h1>
+
+    <h2>Deposits</h2>
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Amount</th>
+          <th>Plan</th>
+          <th>Status</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody id="depositsBody"></tbody>
+    </table>
+
+    <h2 style="margin-top: 40px;">Withdrawals</h2>
+    <table class="styled-table">
       <thead>
         <tr>
           <th>ID</th>
@@ -17,48 +51,76 @@
           <th>Method</th>
           <th>Status</th>
           <th>Date</th>
-          <th>Time</th>
         </tr>
       </thead>
-      <tbody id="historyBody">
-        <!-- Va fi completat din JavaScript -->
-      </tbody>
+      <tbody id="withdrawalsBody"></tbody>
     </table>
-
     <p id="noHistory" style="text-align: center; margin-top: 1rem; font-style: italic;"></p>
+
+    <button onclick="window.location.href='dashboard.html'" class="back-btn" style="margin-top: 40px;">Back to Dashboard</button>
   </div>
 
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const username = localStorage.getItem("username") || "guest";
-      const history = JSON.parse(localStorage.getItem("withdrawHistory") || "[]");
-      const tbody = document.getElementById("historyBody");
-      const noHistory = document.getElementById("noHistory");
+    // Admin vizibil doar dacă userul e admin
+    const user = JSON.parse(localStorage.getItem("loggedInUser") || "null");
+    if (!user) window.location.href = "login.html";
+    if (user.email === "policagabrielvictor@gmail.com") {
+      document.getElementById("adminLink").style.display = "block";
+    }
 
-      const userHistory = history.filter(h => h.username === username);
+    // Deposits
+    const deposits = JSON.parse(localStorage.getItem("deposits") || "[]")
+      .filter(d => d.wallet === user.wallet);
+    const depositsBody = document.getElementById("depositsBody");
 
-      if (userHistory.length === 0) {
-        noHistory.innerText = "❌ No withdrawal history found.";
-        return;
-      }
-
-      userHistory.reverse().forEach(entry => {
+    if (deposits.length === 0) {
+      depositsBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">No deposits found.</td></tr>`;
+    } else {
+      deposits.slice().reverse().forEach((d, i) => {
+        const statusColor =
+          d.status === "pending" ? "orange"
+          : d.status === "approved" ? "limegreen"
+          : "crimson";
         const row = document.createElement("tr");
-
         row.innerHTML = `
-          <td>${entry.id}</td>
-          <td>${entry.amount} USDT</td>
-          <td>${entry.method}</td>
-          <td style="color: ${entry.status === "Pending" ? "orange" : entry.status === "Approved" ? "green" : "red"};">
-            ${entry.status}
-          </td>
-          <td>${entry.date}</td>
-          <td>${entry.time}</td>
+          <td>DEP${i+1}</td>
+          <td>${d.amount} USDT</td>
+          <td>${d.plan ? d.plan.toUpperCase() : "-"}</td>
+          <td style="color: ${statusColor}; font-weight:bold;">${d.status.charAt(0).toUpperCase() + d.status.slice(1)}</td>
+          <td>${d.startDate ? new Date(d.startDate).toLocaleString() : "-"}</td>
         `;
-
-        tbody.appendChild(row);
+        depositsBody.appendChild(row);
       });
-    });
+    }
+
+    // Withdrawals
+    const withdrawals = JSON.parse(localStorage.getItem("withdrawals") || "[]")
+      .filter(w => w.wallet === user.wallet);
+    const withdrawalsBody = document.getElementById("withdrawalsBody");
+    if (withdrawals.length === 0) {
+      withdrawalsBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">No withdrawals found.</td></tr>`;
+    } else {
+      withdrawals.slice().reverse().forEach((w, i) => {
+        const statusColor =
+          w.status === "pending" ? "orange"
+          : w.status === "approved" ? "limegreen"
+          : "crimson";
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>WD${i+1}</td>
+          <td>${w.amount} USDT</td>
+          <td>${w.method || "-"}</td>
+          <td style="color: ${statusColor}; font-weight:bold;">${w.status.charAt(0).toUpperCase() + w.status.slice(1)}</td>
+          <td>${w.date ? new Date(w.date).toLocaleString() : "-"}</td>
+        `;
+        withdrawalsBody.appendChild(row);
+      });
+    }
+
+    function logout() {
+      localStorage.removeItem("loggedInUser");
+      window.location.href = "login.html";
+    }
   </script>
 </body>
 </html>
