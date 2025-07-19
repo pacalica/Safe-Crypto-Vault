@@ -3,161 +3,161 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Withdraw - Safe Crypto Vault</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <script src="https://cdn.emailjs.com/dist/email.min.js" onload="emailjs.init('7_PGCuxLtg1WCWvU0')"></script>
+  <title>Withdraw – Safe Crypto Vault</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
 </head>
-<body>
-  <div class="container">
-    <h2>Withdraw Funds</h2>
+<body class="main-body" style="background-image: url('images/robot-bg.jpg');">
 
-    <form id="withdrawForm">
-      <label for="amount">Amount (USDT):</label>
-      <input type="number" id="amount" placeholder="Enter amount" required />
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h2>🛡️ Vault</h2>
+    <ul>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="open-deposit.html">Open deposit</a></li>
+      <li><a href="withdraw.html" class="active">Withdraw</a></li>
+      <li><a href="history.html">History</a></li>
+      <li><a href="team.html">My team</a></li>
+      <li><a href="settings.html">Settings</a></li>
+      <li><a href="security.html">Security</a></li>
+      <li id="adminLink" style="display:none;"><a href="admin.html">Admin</a></li>
+      <li><a href="#" onclick="logout()">Exit</a></li>
+    </ul>
+  </div>
 
-      <label for="method">Withdrawal Method:</label>
-      <select id="method">
-        <option value="BEP20">BEP20</option>
-        <option value="TRC20">TRC20</option>
-      </select>
+  <div class="main-content">
+    <h1>Withdraw Funds</h1>
+    <div class="card">
+      <form id="withdrawForm" autocomplete="off">
+        <label for="withdrawAmount">Amount (USDT):</label>
+        <input type="number" id="withdrawAmount" min="10" placeholder="Enter amount" required />
 
-      <!-- Căsuța pentru adresa de retragere -->
-      <label for="address">Withdrawal Address:</label>
-      <input type="text" id="address" placeholder="Enter withdrawal address" required />
+        <label for="withdrawMethod">Withdrawal Method:</label>
+        <select id="withdrawMethod">
+          <option value="BEP20">BEP20</option>
+          <option value="TRC20">TRC20</option>
+        </select>
 
-      <!-- Confirmare cod pentru sume mari -->
-      <div id="confirmWithdrawal" style="display: none;">
-        <label for="confirmCode">Enter confirmation code:</label>
-        <input type="text" id="confirmCode" placeholder="Enter confirmation code" />
-        <button type="button" onclick="confirmWithdrawal()">Confirm Withdrawal</button>
-      </div>
+        <label for="withdrawAddress">Withdrawal Address:</label>
+        <input type="text" id="withdrawAddress" placeholder="Enter withdrawal address" required />
 
-      <button type="submit">Submit Withdrawal</button>
-    </form>
+        <label for="withdrawPassword">Confirm Password:</label>
+        <input type="password" id="withdrawPassword" placeholder="Enter your password" required />
 
-    <p id="withdrawMessage" style="margin-top: 1rem; font-weight: bold;"></p>
-
-    <!-- Buton pentru a reveni la Dashboard -->
-    <button id="backToDashboard" style="margin-top: 20px;">Back to Dashboard</button>
+        <button type="submit">Submit Withdrawal</button>
+      </form>
+      <div id="withdrawMessage" style="margin-top:15px; font-weight:bold;"></div>
+      <div id="withdrawCountdown" style="margin-top:10px; color:#ffb300;"></div>
+    </div>
+    <button onclick="window.location.href='dashboard.html'" class="back-btn">Back to Dashboard</button>
   </div>
 
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const form = document.getElementById("withdrawForm");
-      const message = document.getElementById("withdrawMessage");
-      const confirmBox = document.getElementById("confirmWithdrawal");
+    emailjs.init('7_PGCuxLtg1WCWvU0');
 
-      const username = localStorage.getItem("username") || "guest";
-      const email = localStorage.getItem("email") || "unknown@nowhere.com";
-      const wallet = localStorage.getItem("wallet") || "not connected";
-      const total = parseFloat(localStorage.getItem("totalDeposit")) || 0;
+    // Sidebar admin vizibil doar dacă userul este admin
+    const user = JSON.parse(localStorage.getItem("loggedInUser") || "null");
+    if (!user) window.location.href = "login.html";
+    if (user.email === "policagabrielvictor@gmail.com") {
+      document.getElementById("adminLink").style.display = "block";
+    }
 
-      const history = JSON.parse(localStorage.getItem("withdrawHistory") || "[]");
-      const hasPending = history.some(h => h.username === username && h.status === "Pending");
+    // Verificare retragere permisă (1 pe săptămână)
+    const withdrawHistory = JSON.parse(localStorage.getItem("withdrawals") || "[]")
+      .filter(w => w.wallet === user.wallet);
+    const lastApproved = withdrawHistory
+      .filter(w => w.status === "approved")
+      .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
 
-      if (hasPending) {
-        message.innerText = "❌ Denied. You have a withdrawal request in pending.";
-        form.style.display = "none";
+    let canWithdraw = true;
+    let countdown = "";
+    if (lastApproved) {
+      const now = new Date();
+      const lastDate = new Date(lastApproved.date);
+      const msLeft = 604800000 - (now - lastDate);
+      if (msLeft > 0) {
+        canWithdraw = false;
+        const days = Math.floor(msLeft / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((msLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const mins = Math.floor((msLeft % (1000 * 60 * 60)) / (1000 * 60));
+        countdown = `Next withdrawal possible in ${days}d ${hours}h ${mins}m`;
+      }
+    }
+
+    if (!canWithdraw) {
+      document.getElementById("withdrawForm").style.display = "none";
+      document.getElementById("withdrawCountdown").textContent = countdown;
+    }
+
+    document.getElementById("withdrawForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const amount = parseFloat(document.getElementById("withdrawAmount").value);
+      const method = document.getElementById("withdrawMethod").value;
+      const address = document.getElementById("withdrawAddress").value.trim();
+      const password = document.getElementById("withdrawPassword").value;
+
+      // Verifică soldul aprobat (total depozite approved - total withdrawals approved)
+      const deposits = JSON.parse(localStorage.getItem("deposits") || "[]")
+        .filter(d => d.wallet === user.wallet && d.status === "approved");
+      const totalDeposit = deposits.reduce((sum, d) => sum + Number(d.amount), 0);
+      const totalWithdrawn = withdrawHistory
+        .filter(w => w.status === "approved")
+        .reduce((sum, w) => sum + Number(w.amount), 0);
+      const available = totalDeposit - totalWithdrawn;
+
+      if (isNaN(amount) || amount < 10) {
+        document.getElementById("withdrawMessage").textContent = "Minimum withdrawal is 10 USDT.";
+        return;
+      }
+      if (amount > available) {
+        document.getElementById("withdrawMessage").textContent = `Insufficient balance. You can withdraw up to ${available} USDT.`;
+        return;
+      }
+      if (!/^0x[a-fA-F0-9]{40}$/.test(address)) {
+        document.getElementById("withdrawMessage").textContent = "Invalid BEP20 address.";
+        return;
+      }
+      if (password !== user.password) {
+        document.getElementById("withdrawMessage").textContent = "Incorrect password!";
+        return;
+      }
+      if (withdrawHistory.some(w => w.status === "pending")) {
+        document.getElementById("withdrawMessage").textContent = "You already have a pending withdrawal.";
         return;
       }
 
-      if (total <= 0) {
-        message.innerText = "❌ You must deposit before you can withdraw.";
-        form.style.display = "none";
-        return;
-      }
-
-      form.addEventListener("submit", function (e) {
-        e.preventDefault();
-
-        const amount = parseFloat(document.getElementById("amount").value);
-        const method = document.getElementById("method").value;
-        const address = document.getElementById("address").value.trim();
-
-        if (isNaN(amount) || amount <= 0) {
-          message.innerText = "⚠️ Enter a valid withdrawal amount.";
-          return;
-        }
-
-        if (amount > total) {
-          message.innerText = `❌ You can't withdraw more than your balance (${total} USDT).`;
-          return;
-        }
-
-        if (!address) {
-          message.innerText = "⚠️ Please enter a withdrawal address.";
-          return;
-        }
-
-        // Confirmare doar pentru sume mari
-        if (amount > 5000) {
-          confirmBox.style.display = "block";
-          message.innerText = "⚠️ Please confirm your withdrawal with the code sent to your email.";
-          return;
-        }
-
-        processWithdrawal(amount, method, address);
-      });
-
-      // Confirmare cod (pentru sume mari)
-      window.confirmWithdrawal = function () {
-        const code = document.getElementById("confirmCode").value;
-        if (code === "123456") {
-          const amount = parseFloat(document.getElementById("amount").value);
-          const method = document.getElementById("method").value;
-          const address = document.getElementById("address").value.trim();
-          processWithdrawal(amount, method, address);
-        } else {
-          message.innerText = "❌ Invalid confirmation code.";
-        }
+      // Salvează retragerea ca pending
+      const withdrawals = JSON.parse(localStorage.getItem("withdrawals") || "[]");
+      const request = {
+        wallet: user.wallet,
+        username: user.username,
+        amount,
+        method,
+        address,
+        status: "pending",
+        date: new Date().toISOString()
       };
+      withdrawals.push(request);
+      localStorage.setItem("withdrawals", JSON.stringify(withdrawals));
 
-      // Funcția principală de procesare a retragerii
-      function processWithdrawal(amount, method, address) {
-        const now = new Date();
-        const newRequest = {
-          id: "wd_" + Math.random().toString(36).substring(2, 10),
-          username,
-          email,
-          wallet,
-          amount,
-          method,
-          address,
-          status: "Pending",
-          date: now.toLocaleDateString(),
-          time: now.toLocaleTimeString()
-        };
+      document.getElementById("withdrawMessage").textContent = "Withdrawal submitted for approval!";
+      document.getElementById("withdrawForm").reset();
 
-        history.push(newRequest);
-        localStorage.setItem("withdrawHistory", JSON.stringify(history));
-        message.innerText = "✅ Withdrawal request submitted.";
-        form.reset();
-
-        // Trimite email administratorului
-        const emailParams = {
-          to_email: "policagabrielvictor@gmail.com",
-          username: username,
-          email: email,
-          wallet: wallet,
-          amount: amount + " USDT",
-          method: method,
-          address: address,
-          date: newRequest.date,
-          time: newRequest.time,
-          deposit_total: total + " USDT",
-          request_id: newRequest.id
-        };
-
-        emailjs.send("service_mnaa5dl", "template_14vaz2e", emailParams)
-          .then(res => console.log("✅ Email sent to admin:", res.status))
-          .catch(err => console.error("❌ Email sending error:", err));
-      }
-
-      // Navigare înapoi la dashboard
-      document.getElementById("backToDashboard").addEventListener("click", function () {
-        window.location.href = "dashboard.html";
+      // Trimite email adminului
+      emailjs.send("service_mnaa5dl", "template_14vaz2e", {
+        username: user.username,
+        wallet: user.wallet,
+        amount: amount.toString(),
+        address: address,
+        method: method
       });
     });
+
+    function logout() {
+      localStorage.removeItem("loggedInUser");
+      window.location.href = "login.html";
+    }
   </script>
 </body>
 </html>
