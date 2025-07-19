@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>History – Safe Crypto Vault</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/styles.css" />
   <link rel="icon" href="icons/icon-192.png" />
 </head>
 <body class="main-body" style="background-image: url('images/robot-bg.jpg');">
@@ -25,43 +25,41 @@
     </ul>
   </div>
 
-  <div class="main-content container">
-    <h1 style="margin-bottom:16px;">🧾 History</h1>
+  <div class="main-content">
+    <h1>History</h1>
 
-    <div class="card">
-      <h2 style="color:#0ff;">Deposits</h2>
-      <table class="styled-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Amount</th>
-            <th>Plan</th>
-            <th>Status</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody id="depositsBody"></tbody>
-      </table>
-    </div>
+    <h2>Deposits</h2>
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Amount</th>
+          <th>Approved</th>
+          <th>Plan</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th>Admin Note</th>
+        </tr>
+      </thead>
+      <tbody id="depositsBody"></tbody>
+    </table>
 
-    <div class="card" style="margin-top:38px;">
-      <h2 style="color:#0ff;">Withdrawals</h2>
-      <table class="styled-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Amount</th>
-            <th>Method</th>
-            <th>Status</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody id="withdrawalsBody"></tbody>
-      </table>
-    </div>
+    <h2 style="margin-top: 40px;">Withdrawals</h2>
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Amount</th>
+          <th>Method</th>
+          <th>Status</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody id="withdrawalsBody"></tbody>
+    </table>
+    <p id="noHistory" style="text-align: center; margin-top: 1rem; font-style: italic;"></p>
 
-    <p id="noHistory" style="text-align: center; margin-top: 1rem; font-style: italic; color:#ff77aa;"></p>
-    <button onclick="window.location.href='dashboard.html'" class="back-btn" id="backToDashboard" style="margin-top: 40px;">Back to Dashboard</button>
+    <button onclick="window.location.href='dashboard.html'" class="back-btn" style="margin-top: 40px;">Back to Dashboard</button>
   </div>
 
   <script>
@@ -74,23 +72,28 @@
 
     // Deposits
     const deposits = JSON.parse(localStorage.getItem("deposits") || "[]")
-      .filter(d => d.wallet === user.wallet);
+      .filter(d => d.email === user.email || d.wallet === user.wallet);
     const depositsBody = document.getElementById("depositsBody");
 
     if (deposits.length === 0) {
-      depositsBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#aaa;">No deposits found.</td></tr>`;
+      depositsBody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No deposits found.</td></tr>`;
     } else {
       deposits.slice().reverse().forEach((d, i) => {
         const statusColor =
-          d.status === "pending" ? "#ffa500"
-          : d.status === "approved" ? "lime" : "crimson";
+          d.status === "pending" ? "orange"
+          : d.status === "Approved" ? "limegreen"
+          : "crimson";
+        const note = d.adminNote ? `<span style="color:#0ff;font-size:0.95em;">${d.adminNote}</span>` : "-";
+        const approved = d.approvedAmount !== undefined ? d.approvedAmount : d.amount;
         const row = document.createElement("tr");
         row.innerHTML = `
-          <td style="color:#0ff;">DEP${i+1}</td>
+          <td>DEP${i+1}</td>
           <td>${d.amount} USDT</td>
-          <td>${d.plan ? d.plan.toUpperCase() : "-"}</td>
-          <td style="color: ${statusColor}; font-weight:bold;">${d.status ? d.status.charAt(0).toUpperCase() + d.status.slice(1) : "Pending"}</td>
-          <td>${d.startDate ? new Date(d.startDate).toLocaleString() : "-"}</td>
+          <td>${approved} USDT</td>
+          <td>${d.plan ? d.plan.toUpperCase() : d.duration ? d.duration : "-"}</td>
+          <td style="color: ${statusColor}; font-weight:bold;">${(d.status || "pending").charAt(0).toUpperCase() + (d.status || "pending").slice(1)}</td>
+          <td>${d.depositDate || d.date ? (d.depositDate || d.date) : "-"}</td>
+          <td>${note}</td>
         `;
         depositsBody.appendChild(row);
       });
@@ -98,29 +101,26 @@
 
     // Withdrawals
     const withdrawals = JSON.parse(localStorage.getItem("withdrawals") || "[]")
-      .filter(w => w.wallet === user.wallet);
+      .filter(w => w.email === user.email || w.wallet === user.wallet);
     const withdrawalsBody = document.getElementById("withdrawalsBody");
     if (withdrawals.length === 0) {
-      withdrawalsBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#aaa;">No withdrawals found.</td></tr>`;
+      withdrawalsBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">No withdrawals found.</td></tr>`;
     } else {
       withdrawals.slice().reverse().forEach((w, i) => {
         const statusColor =
-          w.status === "pending" ? "#ffa500"
-          : w.status === "approved" ? "lime" : "crimson";
+          w.status === "pending" ? "orange"
+          : w.status === "Approved" ? "limegreen"
+          : "crimson";
         const row = document.createElement("tr");
         row.innerHTML = `
-          <td style="color:#f0f;">WD${i+1}</td>
+          <td>WD${i+1}</td>
           <td>${w.amount} USDT</td>
           <td>${w.method || "-"}</td>
-          <td style="color: ${statusColor}; font-weight:bold;">${w.status ? w.status.charAt(0).toUpperCase() + w.status.slice(1) : "Pending"}</td>
-          <td>${w.date ? new Date(w.date).toLocaleString() : "-"}</td>
+          <td style="color: ${statusColor}; font-weight:bold;">${(w.status || "pending").charAt(0).toUpperCase() + (w.status || "pending").slice(1)}</td>
+          <td>${w.date ? w.date : "-"}</td>
         `;
         withdrawalsBody.appendChild(row);
       });
-    }
-
-    if (deposits.length === 0 && withdrawals.length === 0) {
-      document.getElementById("noHistory").textContent = "No deposit or withdrawal history found.";
     }
 
     function logout() {
