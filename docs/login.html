@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login – Safe Crypto Vault</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="css/style.css" />
   <style>
     body {
       background: linear-gradient(135deg, #0ff, #8000ff);
@@ -15,7 +15,6 @@
       align-items: center;
       height: 100vh;
     }
-
     .login-box {
       background-color: rgba(0,0,0,0.8);
       padding: 30px;
@@ -24,13 +23,11 @@
       max-width: 400px;
       box-shadow: 0 0 20px #00ffff88;
     }
-
     .login-box h2 {
       text-align: center;
       margin-bottom: 25px;
       color: #00ffff;
     }
-
     .login-box input[type="text"],
     .login-box input[type="email"],
     .login-box input[type="password"] {
@@ -42,11 +39,7 @@
       background-color: #222;
       color: #fff;
     }
-
-    .password-wrapper {
-      position: relative;
-    }
-
+    .password-wrapper { position: relative; }
     .toggle-eye {
       position: absolute;
       top: 50%;
@@ -55,14 +48,12 @@
       cursor: pointer;
       color: #aaa;
     }
-
     .login-box label {
       display: flex;
       align-items: center;
       margin: 10px 0;
       font-size: 14px;
     }
-
     .login-box button {
       width: 100%;
       padding: 12px;
@@ -74,24 +65,20 @@
       cursor: pointer;
       margin-top: 15px;
     }
-
     .login-box .error {
       color: #ff6666;
       font-size: 14px;
       margin-top: 10px;
       text-align: center;
     }
-
     .register-link {
       text-align: center;
       margin-top: 15px;
     }
-
     .register-link a {
       color: #00ffff;
       text-decoration: none;
     }
-
     .register-link a:hover {
       text-decoration: underline;
     }
@@ -120,9 +107,13 @@
   </div>
 
   <script>
-    // Auto-fill if remembered
-    window.onload = () => {
-      const remembered = JSON.parse(localStorage.getItem("rememberedUser"));
+    // Dacă userul e deja logat, du-l direct în dashboard
+    window.onload = function() {
+      const user = localStorage.getItem("loggedInUser");
+      if (user) window.location.href = "dashboard.html";
+
+      // Auto-fill dacă are remember
+      const remembered = JSON.parse(localStorage.getItem("rememberedUser") || "null");
       if (remembered) {
         document.getElementById("email").value = remembered.email;
         document.getElementById("username").value = remembered.username;
@@ -137,7 +128,7 @@
     }
 
     function login() {
-      const email = document.getElementById("email").value.trim();
+      const email = document.getElementById("email").value.trim().toLowerCase();
       const username = document.getElementById("username").value.trim();
       const password = document.getElementById("password").value.trim();
       const remember = document.getElementById("rememberMe").checked;
@@ -156,13 +147,16 @@
         return;
       }
 
-      // Save to localStorage session
+      // Salvează userul logat ca sesiune
       localStorage.setItem("loggedInUser", JSON.stringify(user));
+      // Dacă bifat, salvează pentru auto-login data viitoare
       if (remember) {
         localStorage.setItem("rememberedUser", JSON.stringify(user));
       } else {
         localStorage.removeItem("rememberedUser");
       }
+      // Orice referral pending trebuie șters (e user nou logat!)
+      localStorage.removeItem("ref_pending");
 
       window.location.href = "dashboard.html";
     }
