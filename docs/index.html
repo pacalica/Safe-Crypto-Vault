@@ -8,7 +8,6 @@
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" href="icons/icon-192.png" />
   <link rel="stylesheet" href="css/style.css" />
-
   <style>
     body {
       margin: 0;
@@ -21,7 +20,6 @@
       height: 100vh;
       overflow: hidden;
     }
-
     .login-box {
       background: rgba(0, 0, 0, 0.8);
       border: 1px solid #00ffff;
@@ -32,13 +30,11 @@
       width: 90%;
       max-width: 400px;
     }
-
     .login-box h1 {
       margin-bottom: 1rem;
       font-size: 1.8rem;
       color: #ffffff;
     }
-
     .login-box input {
       width: 100%;
       padding: 10px;
@@ -49,7 +45,6 @@
       color: #00ffff;
       font-size: 1rem;
     }
-
     .login-box button {
       background-color: #00ffff;
       color: #000;
@@ -61,23 +56,19 @@
       cursor: pointer;
       transition: background 0.3s;
     }
-
     .login-box button:hover {
       background-color: #00cccc;
     }
-
     .tagline {
       color: #888;
       margin-bottom: 2rem;
       font-size: 0.9rem;
     }
-
     .password-container {
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-
     #toggle-password {
       background: none;
       border: none;
@@ -85,68 +76,111 @@
       cursor: pointer;
       font-size: 18px;
     }
+    .register-link {
+      color: #0ff;
+      margin-top: 15px;
+      font-size: 1em;
+      display: block;
+      text-align: right;
+      cursor: pointer;
+    }
+    .register-link:hover {
+      text-decoration: underline;
+    }
+    #loginMsg {
+      color: crimson;
+      min-height: 1.6em;
+      margin: 8px 0 0 0;
+      font-size: 0.95em;
+    }
   </style>
 </head>
 <body>
   <div class="login-box">
     <h1>Safe Crypto Vault</h1>
     <div class="tagline">Earn securely with crypto deposits.</div>
-    
     <input type="email" id="email" placeholder="Email" required />
     <input type="text" id="username" placeholder="Username" required />
-
     <div class="password-container">
       <input type="password" id="password" placeholder="Password" required />
       <button type="button" id="toggle-password">👁️</button>
     </div>
-    
     <div>
       <label for="remember-password">
         <input type="checkbox" id="remember-password" /> Remember me
       </label>
     </div>
-
     <button onclick="login()">Login</button>
+    <div id="loginMsg"></div>
+    <span class="register-link" onclick="window.location.href='register.html'">Create account</span>
+    <span class="register-link" style="color:#ff8c0a;" onclick="window.location.href='reset.html'">Forgot password?</span>
   </div>
-
   <script>
-    // Auto-login
-    window.addEventListener('DOMContentLoaded', () => {
-      const email = localStorage.getItem('email');
-      const username = localStorage.getItem('username');
-      const password = localStorage.getItem('password');
-      
-      if (email && username && password) {
-        window.location.href = 'dashboard.html';
-      }
-    });
+    // Redirect dacă ești deja logat
+    const currUser = JSON.parse(localStorage.getItem("loggedInUser") || "null");
+    if (currUser) window.location.href = "dashboard.html";
 
-    function login() {
-      const email = document.getElementById('email').value.trim();
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value.trim();
+    // Preia ref din URL dacă e
+    let ref = '';
+    try {
+      const params = new URLSearchParams(window.location.search);
+      ref = params.get('ref') || '';
+      if (ref) localStorage.setItem("ref_pending", ref);
+    } catch(e){}
 
-      if (!email || !username || !password) {
-        alert('Please enter email, username, and password.');
-        return;
-      }
-
-      // Store credentials in localStorage if "Remember me" is checked
-      if (document.getElementById('remember-password').checked) {
-        localStorage.setItem('email', email);
-        localStorage.setItem('username', username);
-        localStorage.setItem('password', password);
-      }
-
-      window.location.href = 'dashboard.html';
-    }
-
-    // Toggle password visibility
+    // Toggle password
     document.getElementById('toggle-password').addEventListener('click', function() {
       const passwordField = document.getElementById('password');
       const type = passwordField.type === 'password' ? 'text' : 'password';
       passwordField.type = type;
       this.textContent = type === 'password' ? '👁️' : '🙈';
+    });
+
+    function login() {
+      const email = document.getElementById('email').value.trim().toLowerCase();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const remember = document.getElementById('remember-password').checked;
+      const msg = document.getElementById('loginMsg');
+
+      if (!email || !username || !password) {
+        msg.textContent = 'Please enter email, username, and password.';
+        return;
+      }
+
+      // Găsește user-ul în localStorage
+      let users = JSON.parse(localStorage.getItem("users") || "[]");
+      const user = users.find(u => u.email === email && u.username === username);
+
+      if (!user) {
+        msg.textContent = "No such user. Please register!";
+        return;
+      }
+
+      if (user.password !== password) {
+        msg.textContent = "Incorrect password.";
+        return;
+      }
+
+      // Setează user-ul ca logat
+      localStorage.setItem("loggedInUser", JSON.stringify(user));
+      if (remember) {
+        localStorage.setItem("rememberedEmail", email);
+        localStorage.setItem("rememberedUsername", username);
+      } else {
+        localStorage.removeItem("rememberedEmail");
+        localStorage.removeItem("rememberedUsername");
+      }
+
+      window.location.href = "dashboard.html";
+    }
+
+    // Autofill dacă ai dat remember me
+    window.addEventListener('DOMContentLoaded', () => {
+      const rememberedEmail = localStorage.getItem('rememberedEmail') || '';
+      const rememberedUsername = localStorage.getItem('rememberedUsername') || '';
+      if (rememberedEmail) document.getElementById('email').value = rememberedEmail;
+      if (rememberedUsername) document.getElementById('username').value = rememberedUsername;
     });
 
     // Service Worker registration
