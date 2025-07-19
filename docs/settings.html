@@ -19,8 +19,8 @@
       <li><a href="team.html">My team</a></li>
       <li><a href="settings.html" class="active">Settings</a></li>
       <li><a href="security.html">Security</a></li>
-      <li><a href="admin.html">Admin</a></li>
-      <li><a href="login.html" onclick="logout()">Exit</a></li>
+      <li id="adminLink" style="display:none;"><a href="admin.html">Admin</a></li>
+      <li><a href="#" onclick="logout()">Exit</a></li>
     </ul>
   </div>
 
@@ -33,16 +33,25 @@
       <button onclick="copyReferral()">Copy Link</button>
       <p id="copyMsg" style="color: lime;"></p>
     </div>
+
+    <button onclick="window.location.href='dashboard.html'" class="back-btn" style="margin-top:30px;">Back to Dashboard</button>
   </div>
 
   <script>
+    // Admin vizibil doar dacă userul e admin
+    const user = JSON.parse(localStorage.getItem("loggedInUser") || "null");
+    if (!user) window.location.href = "login.html";
+    if (user.email === "policagabrielvictor@gmail.com") {
+      document.getElementById("adminLink").style.display = "block";
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
-      const user = JSON.parse(localStorage.getItem("vault_user"));
       if (!user || !user.wallet) {
         document.getElementById("refLink").value = "Please connect wallet first.";
         return;
       }
-      const refLink = `${window.location.origin}/?ref=${user.wallet}`;
+      // Exemplu: https://pacalica.github.io/Safe-Crypto-Vault/login.html?ref=wallet
+      const refLink = `${window.location.origin}/login.html?ref=${user.wallet}`;
       document.getElementById("refLink").value = refLink;
     });
 
@@ -52,10 +61,12 @@
       refInput.setSelectionRange(0, 99999);
       document.execCommand("copy");
       document.getElementById("copyMsg").innerText = "Referral link copied!";
+      setTimeout(() => document.getElementById("copyMsg").innerText = "", 2000);
     }
 
     function logout() {
-      localStorage.clear();
+      localStorage.removeItem("loggedInUser");
+      window.location.href = "login.html";
     }
   </script>
 </body>
