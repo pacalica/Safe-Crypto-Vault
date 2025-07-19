@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Register – Safe Crypto Vault</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="style.css" />
   <style>
     body {
       background: linear-gradient(135deg, #0ff, #8000ff);
@@ -76,23 +76,26 @@
     <button onclick="register()">Register</button>
     <div class="error" id="errorMsg"></div>
     <div class="login-link">
-      Already have an account? <a href="index.html">Login here</a>
+      Already have an account? <a href="login.html">Login here</a>
     </div>
   </div>
 
+  <!-- Referral universal: salvează orice ref din URL -->
   <script>
-    // Generate random wallet (poți înlocui cu sistem real dacă ai)
-    function generateWallet() {
-      return '0x' + Array.from(crypto.getRandomValues(new Uint8Array(20)))
-        .map(b => b.toString(16).padStart(2, '0')).join('');
-    }
+    (function () {
+      if (!localStorage.getItem("loggedInUser")) {
+        const params = new URLSearchParams(window.location.search);
+        const ref = params.get("ref");
+        if (ref && ref.length >= 10) {
+          localStorage.setItem("ref_pending", ref);
+        }
+      }
+    })();
+  </script>
 
-    // Ia referal pending dacă e
-    let ref = localStorage.getItem('ref_pending') || '';
-    // Poți adăuga validări ca să nu fie tot userul referal la el însuși
-
+  <script>
     function register() {
-      const email = document.getElementById("email").value.trim().toLowerCase();
+      const email = document.getElementById("email").value.trim();
       const username = document.getElementById("username").value.trim();
       const password = document.getElementById("password").value.trim();
       const errorMsg = document.getElementById("errorMsg");
@@ -115,14 +118,24 @@
         return;
       }
 
-      const wallet = generateWallet();
-      const newUser = { email, username, password, wallet, ref };
+      // REFERRAL LOGIC!
+      let ref = localStorage.getItem("ref_pending");
+      const wallet = "wallet_" + Math.random().toString(36).slice(2, 10); // fake wallet (sau implementează tu logică reală)
+      const newUser = { email, username, password, wallet };
+
+      if (ref) {
+        newUser.ref = ref; // Cine te-a invitat
+        localStorage.removeItem("ref_pending");
+      }
 
       users.push(newUser);
       localStorage.setItem("users", JSON.stringify(users));
       localStorage.setItem("loggedInUser", JSON.stringify(newUser));
-      // Șterge referralul pending pentru viitoare înregistrări
-      localStorage.removeItem("ref_pending");
+      localStorage.setItem("wallet", wallet);
+      localStorage.setItem("email", email);
+      localStorage.setItem("username", username);
+      localStorage.setItem("password", password);
+
       window.location.href = "dashboard.html";
     }
   </script>
