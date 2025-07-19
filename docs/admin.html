@@ -142,7 +142,7 @@
           <span><strong>Date:</strong> ${dep.date ? new Date(dep.date).toLocaleString() : "n/a"}</span>
           <span><strong>Status:</strong> <span class="status ${dep.status || (dep.confirmed ? 'Approved' : 'Pending')}">${dep.status || (dep.confirmed ? 'Approved' : 'Pending')}</span></span>
           <div class="admin-btns">
-            <button onclick="markDeposit(${deposits.length-1-idx},'Approved')">Success</button>
+            <button onclick="approveDeposit(${deposits.length-1-idx})">Success</button>
             <button onclick="markDeposit(${deposits.length-1-idx},'Rejected')">Failed</button>
           </div>
         `;
@@ -150,22 +150,41 @@
       });
     }
 
+    // Prompt pentru sumă la aprobare și actualizează sold user
+    window.approveDeposit = function(idx) {
+      const deposits = JSON.parse(localStorage.getItem("deposits") || "[]");
+      if (!deposits[idx]) return;
+      const initialAmount = Number(deposits[idx].amount);
+
+      let bonus = prompt(`Introduceți suma pe care doriți să o creditați (default: ${initialAmount}):`, initialAmount);
+      if (bonus === null) return; // Anulat
+      bonus = Number(bonus);
+      if (isNaN(bonus) || bonus <= 0) {
+        alert("Introduceți o sumă validă!");
+        return;
+      }
+      deposits[idx].status = "Approved";
+      deposits[idx].confirmed = true;
+      deposits[idx].approvedAmount = bonus;
+      localStorage.setItem("deposits", JSON.stringify(deposits));
+
+      // Actualizează sold user cu suma dată de admin
+      const users = JSON.parse(localStorage.getItem("users") || "[]");
+      const userIdx = users.findIndex(u => u.wallet === deposits[idx].wallet);
+      if (userIdx !== -1) {
+        users[userIdx].balance = (users[userIdx].balance || 0) + bonus;
+        localStorage.setItem("users", JSON.stringify(users));
+      }
+      loadDeposits();
+    };
+
+    // Refuz depozit
     window.markDeposit = function(idx, status) {
       const deposits = JSON.parse(localStorage.getItem("deposits") || "[]");
       if (!deposits[idx]) return;
       deposits[idx].status = status;
       deposits[idx].confirmed = (status === "Approved");
       localStorage.setItem("deposits", JSON.stringify(deposits));
-
-      // Dacă aprobăm, actualizăm și soldul userului
-      if (status === "Approved") {
-        const users = JSON.parse(localStorage.getItem("users") || "[]");
-        const userIdx = users.findIndex(u => u.wallet === deposits[idx].wallet);
-        if (userIdx !== -1) {
-          users[userIdx].balance = (users[userIdx].balance || 0) + Number(deposits[idx].amount);
-          localStorage.setItem("users", JSON.stringify(users));
-        }
-      }
       loadDeposits();
     };
 
