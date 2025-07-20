@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Profile – Safe Crypto Vault</title>
+  <link rel="stylesheet" href="css/styles.css"/>
+  <link rel="icon" href="icons/icon-192.png"/>
+</head>
+<body class="main-body" style="background-image: url('images/robot-bg.jpg');">
+
+  <div class="sidebar">
+    <!-- ... meniul ca la celelalte pagini ... -->
+  </div>
+
+  <div class="main-content">
+    <h1 style="color: #0ff; margin-bottom: 20px;">👤 Profilul Meu</h1>
+
+    <div class="card" style="max-width: 550px; margin: auto;">
+      <p><b>Nume utilizator:</b> <span id="profileUsername"></span></p>
+      <p><b>ID utilizator (cod invitație):</b> <span id="profileCode"></span></p>
+      <p><b>Plan activ:</b> <span id="profilePlan"></span></p>
+      <p><b>Invitați activi:</b> <span id="activeInvites"></span></p>
+      <hr>
+      <p><b>Total sumă depusă:</b> <span id="totalDeposited"></span> USDT</p>
+      <p><b>Venit total (dobândă + invitați):</b> <span id="totalEarnings"></span> USDT</p>
+      <p style="margin-left:20px;">• Dobândă plan: <span id="interestEarnings"></span> USDT</p>
+      <p style="margin-left:20px;">• 10% invitați: <span id="refEarnings"></span> USDT</p>
+      <hr>
+      <p>
+        <b>Poți retrage în:</b>
+        <span id="withdrawCountdown"></span>
+        <button id="withdrawBtn" class="back-btn" style="margin-left:10px;">Retrage venit</button>
+      </p>
+      <hr>
+      <p><b>Total sumă retrasă:</b> <span id="totalWithdrawn"></span> USDT</p>
+    </div>
+
+    <div style="max-width: 750px; margin: 40px auto;">
+      <h3 style="color:#0ff; text-align:center;">Invitații tăi activi</h3>
+      <table class="styled-table">
+        <thead>
+          <tr>
+            <th>Cod Invitat</th>
+            <th>Nume</th>
+            <th>Sumă depusă</th>
+            <th>Câștig zilnic din invitat (10%)</th>
+            <th>Venit total de la invitat</th>
+          </tr>
+        </thead>
+        <tbody id="inviteesTable"></tbody>
+      </table>
+    </div>
+
+    <button onclick="window.location.href='dashboard.html'" class="back-btn" style="margin:30px auto;display:block;">Back to Dashboard</button>
+  </div>
+
+  <script src="js/profile.js"></script>
+</body>
+</html>
